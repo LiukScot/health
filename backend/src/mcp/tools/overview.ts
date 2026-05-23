@@ -48,7 +48,7 @@ export function registerOverviewTools(server: McpServer, ctx: McpToolContext): v
       };
 
       type CountsRow = { diary: number; pain: number; cbt: number; dbt: number };
-      const countsParams: [number, ...string[]] = cutoff ? [userId, cutoff, userId, cutoff, userId, cutoff, userId, cutoff] : [userId, userId, userId, userId];
+      const countsParams: (number | string)[] = cutoff ? [userId, cutoff, userId, cutoff, userId, cutoff, userId, cutoff] : [userId, userId, userId, userId];
       const countsSql = cutoff
         ? `SELECT
              (SELECT COUNT(*) FROM diary_entries WHERE user_id=? AND entry_date>=?) AS diary,
