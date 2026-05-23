@@ -131,8 +131,6 @@ export function useSettings(enabled: boolean) {
   return {
     prefsValue: prefsQuery.data ?? defaultPrefsValue,
     prefsMutation,
-    onSavePrefs: (value: { model: string; chatRange: string; lastRange: string; graphSelection: Record<string, unknown>; birthday: string | null }) =>
-      prefsMutation.mutate(value),
     onSaveBirthday: (birthday: string | null) => savePrefsPatch({ birthday }),
     purgeConfirmArmed,
     purgePending: purgeMutation.isPending,
