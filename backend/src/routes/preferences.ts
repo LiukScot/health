@@ -4,7 +4,7 @@ import type { DrizzleDB } from "../db/index.ts";
 import { userPreferences } from "../db/index.ts";
 import type { SQLiteDB } from "../db.ts";
 import { parseJson } from "../helpers.ts";
-import { prefsSchema } from "../schemas.ts";
+import { prefsSchema, DEFAULT_MODEL } from "../schemas.ts";
 import { requireAuth } from "../middleware/auth.ts";
 
 type Env = { Variables: { db: DrizzleDB; rawDb: SQLiteDB; userId: number; userEmail: string; sessionSid: string } };
@@ -33,7 +33,7 @@ preferences.get("/", (c) => {
   if (!row) {
     return c.json({
       data: {
-        model: "mistral-small-latest",
+        model: DEFAULT_MODEL,
         chatRange: "all",
         lastRange: "all",
         graphSelection: {},

@@ -21,7 +21,7 @@ export default defineConfig({
   webServer: externalBaseURL
     ? undefined
     : {
-        command: `rm -f ${quoteShell(smokeDbPath)} ${quoteShell(`${smokeDbPath}-shm`)} ${quoteShell(`${smokeDbPath}-wal`)} && DB_JOURNAL_MODE=DELETE DB_PATH=${quoteShell(smokeDbPath)} npm run smoke:seed && PORT=${smokePort} DB_JOURNAL_MODE=DELETE DB_PATH=${quoteShell(smokeDbPath)} npm run smoke:serve`,
+        command: `rm -f ${quoteShell(smokeDbPath)} ${quoteShell(`${smokeDbPath}-shm`)} ${quoteShell(`${smokeDbPath}-wal`)} && DB_JOURNAL_MODE=DELETE DB_PATH=${quoteShell(smokeDbPath)} npm run smoke:seed && PORT=${smokePort} DB_JOURNAL_MODE=DELETE DB_PATH=${quoteShell(smokeDbPath)} COOKIE_SECURE=false npm run smoke:serve`,
         port: smokePort,
         reuseExistingServer: false,
         timeout: 180_000

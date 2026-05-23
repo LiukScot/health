@@ -13,11 +13,17 @@ const dbt = new Hono<Env>();
 
 dbt.use(requireAuth);
 
+const DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
+
 dbt.get("/", (c) => {
   const db = c.get("db");
   const userId = c.get("userId");
   const from = c.req.query("from");
   const to = c.req.query("to");
+
+  if ((from && !DATE_RE.test(from)) || (to && !DATE_RE.test(to))) {
+    return c.json({ error: { code: "INVALID_DATE", message: "from/to must be YYYY-MM-DD" } }, 400);
+  }
 
   const conditions = [eq(dbtEntries.userId, userId)];
   if (from && to) {

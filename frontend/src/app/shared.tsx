@@ -250,25 +250,17 @@ export function MultiSelectField({ label, fieldKey, value, options, onChange, do
               >
                 <span className="multi-option-label">{option}</span>
                 {editOptionsMode ? (
-                  <span
-                    role="button"
-                    tabIndex={0}
+                  <button
+                    type="button"
                     className="multi-option-remove"
                     aria-label={`Remove ${option} from suggestions`}
                     onClick={(e) => {
                       e.stopPropagation();
                       setPendingRemovalKey(optionKey);
                     }}
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter" || e.key === " ") {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        setPendingRemovalKey(optionKey);
-                      }
-                    }}
                   >
                     ×
-                  </span>
+                  </button>
                 ) : null}
               </button>
             </div>
