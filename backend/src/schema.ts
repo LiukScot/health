@@ -190,6 +190,7 @@ export const migrationStatements: string[] = [
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
   )`,
   `CREATE INDEX IF NOT EXISTS idx_sessions_expires ON sessions(expires_at)`,
+  `CREATE INDEX IF NOT EXISTS idx_sessions_user ON sessions(user_id)`,
   `CREATE TABLE IF NOT EXISTS cbt_entries (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     user_id INTEGER NOT NULL,

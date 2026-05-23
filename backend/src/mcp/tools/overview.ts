@@ -47,10 +47,24 @@ export function registerOverviewTools(server: McpServer, ctx: McpToolContext): v
         return and(...conds);
       };
 
-      const diaryCount = db.select({ c: sql<number>`COUNT(*)` }).from(diaryEntries).where(dateFilter(diaryEntries)).get()?.c ?? 0;
-      const painCount = db.select({ c: sql<number>`COUNT(*)` }).from(painEntries).where(dateFilter(painEntries)).get()?.c ?? 0;
-      const cbtCount = db.select({ c: sql<number>`COUNT(*)` }).from(cbtEntries).where(dateFilter(cbtEntries)).get()?.c ?? 0;
-      const dbtCount = db.select({ c: sql<number>`COUNT(*)` }).from(dbtEntries).where(dateFilter(dbtEntries)).get()?.c ?? 0;
+      type CountsRow = { diary: number; pain: number; cbt: number; dbt: number };
+      const countsParams: (number | string)[] = cutoff ? [userId, cutoff, userId, cutoff, userId, cutoff, userId, cutoff] : [userId, userId, userId, userId];
+      const countsSql = cutoff
+        ? `SELECT
+             (SELECT COUNT(*) FROM diary_entries WHERE user_id=? AND entry_date>=?) AS diary,
+             (SELECT COUNT(*) FROM pain_entries  WHERE user_id=? AND entry_date>=?) AS pain,
+             (SELECT COUNT(*) FROM cbt_entries   WHERE user_id=? AND entry_date>=?) AS cbt,
+             (SELECT COUNT(*) FROM dbt_entries   WHERE user_id=? AND entry_date>=?) AS dbt`
+        : `SELECT
+             (SELECT COUNT(*) FROM diary_entries WHERE user_id=?) AS diary,
+             (SELECT COUNT(*) FROM pain_entries  WHERE user_id=?) AS pain,
+             (SELECT COUNT(*) FROM cbt_entries   WHERE user_id=?) AS cbt,
+             (SELECT COUNT(*) FROM dbt_entries   WHERE user_id=?) AS dbt`;
+      const counts = (rawDb.query<CountsRow, typeof countsParams>(countsSql).get(...countsParams)) ?? { diary: 0, pain: 0, cbt: 0, dbt: 0 };
+      const diaryCount = counts.diary;
+      const painCount = counts.pain;
+      const cbtCount = counts.cbt;
+      const dbtCount = counts.dbt;
 
       const latestDiary = db.select({
         entryDate: diaryEntries.entryDate,
