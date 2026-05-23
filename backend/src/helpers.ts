@@ -14,19 +14,6 @@ export type MoodMultiField = MoodTagField;
 export type MoodTagMap = Record<MoodMultiField, string[]>;
 export type PainTagMap = Record<PainMultiField, string[]>;
 
-export function makeError(
-  code: string,
-  message: string,
-  status = 400,
-  fields?: Record<string, string>
-): Response {
-  return Response.json({ error: { code, message, fields } }, { status });
-}
-
-export function makeData(data: unknown, status = 200): Response {
-  return Response.json({ data }, { status });
-}
-
 export async function parseJson<T>(c: Context, schema: z.ZodType<T>): Promise<T> {
   const raw = await c.req.json().catch(() => null);
   const parsed = schema.safeParse(raw);
@@ -38,7 +25,7 @@ export async function parseJson<T>(c: Context, schema: z.ZodType<T>): Promise<T>
 
 export function parseIdParam(c: Context, paramName = "id"): { id: number } | Response {
   const id = Number(c.req.param(paramName));
-  if (!Number.isFinite(id)) {
+  if (!Number.isFinite(id) || id <= 0) {
     return c.json({ error: { code: "INVALID_ID", message: "Invalid id" } }, 400);
   }
   return { id };

@@ -42,15 +42,25 @@ type DashboardDay = {
 type NumericDashboardKey = "mood" | "depression" | "anxiety" | "pain" | "fatigue" | "coffee";
 
 function buildDashboardDays(diaryEntries: DiaryEntry[], painEntries: PainEntry[]): DashboardDay[] {
-  const dates = new Set<string>();
-  diaryEntries.forEach((entry) => dates.add(entry.entryDate));
-  painEntries.forEach((entry) => dates.add(entry.entryDate));
+  const diaryByDate = new Map<string, DiaryEntry[]>();
+  const painByDate = new Map<string, PainEntry[]>();
+  for (const entry of diaryEntries) {
+    const list = diaryByDate.get(entry.entryDate);
+    if (list) list.push(entry);
+    else diaryByDate.set(entry.entryDate, [entry]);
+  }
+  for (const entry of painEntries) {
+    const list = painByDate.get(entry.entryDate);
+    if (list) list.push(entry);
+    else painByDate.set(entry.entryDate, [entry]);
+  }
 
+  const dates = new Set([...diaryByDate.keys(), ...painByDate.keys()]);
   return Array.from(dates)
     .sort()
     .map((date) => {
-      const diaryForDate = diaryEntries.filter((entry) => entry.entryDate === date);
-      const painForDate = painEntries.filter((entry) => entry.entryDate === date);
+      const diaryForDate = diaryByDate.get(date) ?? [];
+      const painForDate = painByDate.get(date) ?? [];
       return {
         date,
         diaryCount: diaryForDate.length,
