@@ -1,7 +1,7 @@
 FROM oven/bun:1 AS frontend-deps
 WORKDIR /app/frontend
-COPY frontend/package.json ./
-RUN bun install
+COPY frontend/package.json frontend/bun.lock* ./
+RUN bun install --frozen-lockfile
 
 FROM frontend-deps AS frontend-build
 COPY frontend/ ./
@@ -25,4 +25,5 @@ ENV HOST=0.0.0.0 \
     DB_PATH=/app/data/health.sqlite
 
 EXPOSE 5555
+USER bun
 CMD ["bun", "--cwd", "backend", "src/server.ts"]

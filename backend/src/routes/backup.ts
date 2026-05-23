@@ -13,7 +13,7 @@ import {
   rowPainField,
   mergeOptions,
 } from "../helpers.ts";
-import { backupImportSchema, prefsSchema } from "../schemas.ts";
+import { backupImportSchema, prefsSchema, DEFAULT_MODEL } from "../schemas.ts";
 import { requireAuth } from "../middleware/auth.ts";
 import { loadPainOptionsForUser } from "./pain.ts";
 import { loadMoodOptionsForUser } from "./mood.ts";
@@ -111,7 +111,7 @@ backup.get("/json", (c) => {
       diary: { ...result.diary, moodOptions: loadMoodOptionsForUser(db, userId) },
       pain: { ...result.pain, options: { options: loadPainOptionsForUser(db, userId), removed: removedMap } },
       prefs: {
-        model: prefs?.model ?? "mistral-small-latest",
+        model: prefs?.model ?? DEFAULT_MODEL,
         chatRange: prefs?.chatRange ?? "all",
         lastRange: prefs?.lastRange ?? "all",
         graphSelection: prefs?.graphSelectionJson ? JSON.parse(prefs.graphSelectionJson) : {},
@@ -126,6 +126,9 @@ backup.post("/json/import", async (c) => {
   const rawDb = c.get("rawDb");
   const userId = c.get("userId");
   const body = await parseJson(c, backupImportSchema);
+
+  // Parse prefs before entering the transaction so a ZodError returns 400 not 500.
+  const parsedPrefs = body.prefs ? prefsSchema.parse(body.prefs) : null;
 
   const tx = rawDb.transaction(() => {
     rawDb.query(`DELETE FROM pain_entries WHERE user_id = ?`).run(userId);
@@ -197,8 +200,8 @@ backup.post("/json/import", async (c) => {
       }
     }
 
-    if (body.prefs) {
-      const pref = prefsSchema.parse(body.prefs);
+    if (parsedPrefs) {
+      const pref = parsedPrefs;
       rawDb.query(
         `INSERT INTO user_preferences (user_id, model, chat_range, last_range, graph_selection_json, birthday, updated_at)
          VALUES (?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)

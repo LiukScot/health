@@ -1,5 +1,14 @@
 import { z } from "zod";
 
+export const DEFAULT_MODEL = "mistral-small-latest";
+
+function isoDateRefine(val: string): boolean {
+  const parsed = new Date(val);
+  if (isNaN(parsed.getTime())) return false;
+  const [year, month, day] = val.split("-").map(Number);
+  return parsed.getFullYear() === year && parsed.getMonth() + 1 === month && parsed.getDate() === day;
+}
+
 export const loginSchema = z.object({
   email: z.string().email().max(254),
   password: z.string().min(1).max(72)
@@ -11,8 +20,8 @@ export const changePasswordSchema = z.object({
 });
 
 export const diarySchema = z.object({
-  entryDate: z.string().min(1),
-  entryTime: z.string().min(1),
+  entryDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+  entryTime: z.string().regex(/^\d{2}:\d{2}$/),
   moodLevel: z.number().min(1).max(9).nullable().optional(),
   depressionLevel: z.number().min(1).max(9).nullable().optional(),
   anxietyLevel: z.number().min(1).max(9).nullable().optional(),
@@ -27,8 +36,8 @@ export const diarySchema = z.object({
 export const painValueSchema = z.union([z.string(), z.array(z.string())]).optional();
 
 export const painSchema = z.object({
-  entryDate: z.string().min(1),
-  entryTime: z.string().min(1),
+  entryDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+  entryTime: z.string().regex(/^\d{2}:\d{2}$/),
   painLevel: z.number().int().min(1).max(9).nullable().optional(),
   fatigueLevel: z.number().int().min(1).max(9).nullable().optional(),
   coffeeCount: z.number().int().min(0).max(50).nullable().optional(),
@@ -53,8 +62,8 @@ export const painSchema = z.object({
 });
 
 export const cbtSchema = z.object({
-  entryDate: z.string().min(1),
-  entryTime: z.string().min(1),
+  entryDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+  entryTime: z.string().regex(/^\d{2}:\d{2}$/),
   situation: z.string().optional().default(""),
   thoughts: z.string().optional().default(""),
   helpfulReasoning: z.string().optional().default(""),
@@ -68,8 +77,8 @@ export const cbtSchema = z.object({
 });
 
 export const dbtSchema = z.object({
-  entryDate: z.string().min(1),
-  entryTime: z.string().min(1),
+  entryDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+  entryTime: z.string().regex(/^\d{2}:\d{2}$/),
   emotionName: z.string().optional().default(""),
   allowAffirmation: z.string().optional().default(""),
   watchEmotion: z.string().optional().default(""),
@@ -80,27 +89,21 @@ export const dbtSchema = z.object({
 });
 
 export const prefsSchema = z.object({
-  model: z.string().default("mistral-small-latest"),
+  model: z.string().max(200).default(DEFAULT_MODEL),
   chatRange: z.string().default("all"),
   lastRange: z.string().default("all"),
   graphSelection: z.record(z.string(), z.any()).default({}),
-  birthday: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).refine((val) => {
-    const parsed = new Date(val);
-    if (isNaN(parsed.getTime())) return false;
-    const [year, month, day] = val.split('-').map(Number);
-    return parsed.getFullYear() === year && parsed.getMonth() + 1 === month && parsed.getDate() === day;
-  }, { message: "Invalid birthday: must be a valid calendar date in YYYY-MM-DD format" }).nullable().optional().default(null),
+  birthday: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).refine(isoDateRefine, {
+    message: "Invalid birthday: must be a valid calendar date in YYYY-MM-DD format"
+  }).nullable().optional().default(null),
 });
 
 export const memorableRepeatModeSchema = z.enum(["one-time", "monthly", "yearly"]);
 
 export const memorableDaySchema = z.object({
-  date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).refine((val) => {
-    const parsed = new Date(val);
-    if (isNaN(parsed.getTime())) return false;
-    const [year, month, day] = val.split('-').map(Number);
-    return parsed.getFullYear() === year && parsed.getMonth() + 1 === month && parsed.getDate() === day;
-  }, { message: "Invalid date: must be a valid calendar date in YYYY-MM-DD format" }),
+  date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).refine(isoDateRefine, {
+    message: "Invalid date: must be a valid calendar date in YYYY-MM-DD format"
+  }),
   title: z.string().trim().min(1).max(120),
   emoji: z.string().trim().max(16).optional().default(""),
   description: z.string().max(1000).optional().default(""),
@@ -112,16 +115,24 @@ export const mcpTokenCreateSchema = z.object({
   // expiresAt is either an ISO timestamp string or null (= never expires).
   // Frontend computes the absolute timestamp client-side from the chosen
   // duration ("30d", "90d", "1y", "never") so the server stays simple.
-  expiresAt: z.string().datetime().nullable().optional().default(null),
+  expiresAt: z.string().datetime().nullable().optional().default(null).refine(
+    (val) => {
+      if (!val) return true;
+      const max = new Date();
+      max.setFullYear(max.getFullYear() + 1);
+      return new Date(val) <= max;
+    },
+    { message: "Expiry must be within 1 year from now" }
+  ),
 });
 
 export const backupImportSchema = z.object({
   diary: z
-    .object({ rows: z.array(z.record(z.string(), z.any())).default([]) })
+    .object({ rows: z.array(z.record(z.string(), z.any())).max(50_000).default([]) })
     .optional(),
   pain: z
     .object({
-      rows: z.array(z.record(z.string(), z.any())).default([]),
+      rows: z.array(z.record(z.string(), z.any())).max(50_000).default([]),
       options: z
         .object({
           options: z.record(z.string(), z.array(z.string())).optional(),
