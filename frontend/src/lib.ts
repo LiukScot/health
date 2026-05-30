@@ -18,7 +18,7 @@ export async function apiFetch<T>(
   });
 
   const text = await res.text();
-  let json: unknown = {};
+  let json: unknown;
   try {
     json = text ? JSON.parse(text) : {};
   } catch {
@@ -26,7 +26,16 @@ export async function apiFetch<T>(
   }
 
   if (!res.ok) {
-    const message = json?.error?.message || `HTTP ${res.status}`;
+    const message =
+      typeof json === "object" &&
+      json !== null &&
+      "error" in json &&
+      typeof json.error === "object" &&
+      json.error !== null &&
+      "message" in json.error &&
+      typeof json.error.message === "string"
+        ? json.error.message
+        : `HTTP ${res.status}`;
     throw new Error(message);
   }
 

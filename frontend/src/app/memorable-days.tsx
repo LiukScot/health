@@ -179,7 +179,7 @@ export function MemorableDaysSection({ memorable }: Props) {
       ? emojiPickerRecent.map((emoji) => emojiByValue.get(emoji)).filter((record): record is EmojiRecord => Boolean(record))
       : emojiRecordsByCategory[emojiPickerActiveCategory];
     return baseRecords;
-  }, [emojiByValue, emojiPickerActiveCategory, emojiPickerRecent, emojiPickerSearch, emojiRecordsByCategory]);
+  }, [emojiPickerActiveCategory, emojiPickerRecent, emojiPickerSearch]);
 
   useEffect(() => {
     if (!draft) return;
