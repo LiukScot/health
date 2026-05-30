@@ -150,14 +150,14 @@ describe("PUT /memorable-days/:id", () => {
     expect(res.status).toBe(200);
   });
 
-  test("returns 404 for non-numeric id (NaN guard regression)", async () => {
+  test("returns 400 for invalid id", async () => {
     const { app, cookie } = await setup();
     const res = await app.request("/memorable-days/abc", {
       method: "PUT",
       headers: { "Content-Type": "application/json", cookie },
       body: JSON.stringify(validBody),
     });
-    expect(res.status).toBe(404);
+    expect(res.status).toBe(400);
   });
 
   test("cannot update another user's entry (IDOR)", async () => {
@@ -198,9 +198,9 @@ describe("DELETE /memorable-days/:id", () => {
     expect(res.status).toBe(200);
   });
 
-  test("returns 404 for non-numeric id (NaN guard regression)", async () => {
+  test("returns 400 for invalid id", async () => {
     const { app, cookie } = await setup();
     const res = await app.request("/memorable-days/abc", { method: "DELETE", headers: { cookie } });
-    expect(res.status).toBe(404);
+    expect(res.status).toBe(400);
   });
 });

@@ -18,10 +18,24 @@ export async function apiFetch<T>(
   });
 
   const text = await res.text();
-  const json = text ? JSON.parse(text) : {};
+  let json: unknown;
+  try {
+    json = text ? JSON.parse(text) : {};
+  } catch {
+    throw new Error(`Server returned non-JSON response (HTTP ${res.status}): ${text.slice(0, 200)}`);
+  }
 
   if (!res.ok) {
-    const message = json?.error?.message || `HTTP ${res.status}`;
+    const message =
+      typeof json === "object" &&
+      json !== null &&
+      "error" in json &&
+      typeof json.error === "object" &&
+      json.error !== null &&
+      "message" in json.error &&
+      typeof json.error.message === "string"
+        ? json.error.message
+        : `HTTP ${res.status}`;
     throw new Error(message);
   }
 

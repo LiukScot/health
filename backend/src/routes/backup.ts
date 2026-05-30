@@ -114,7 +114,10 @@ backup.get("/json", (c) => {
         model: prefs?.model ?? DEFAULT_MODEL,
         chatRange: prefs?.chatRange ?? "all",
         lastRange: prefs?.lastRange ?? "all",
-        graphSelection: prefs?.graphSelectionJson ? JSON.parse(prefs.graphSelectionJson) : {},
+        graphSelection: (() => {
+          try { return prefs?.graphSelectionJson ? JSON.parse(prefs.graphSelectionJson) : {}; }
+          catch (err) { console.error("Failed to parse graphSelectionJson:", err); return {}; }
+        })(),
         birthday: prefs?.birthday ?? null,
       }
     }

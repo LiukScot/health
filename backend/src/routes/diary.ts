@@ -4,7 +4,7 @@ import type { DrizzleDB } from "../db/index.ts";
 import { diaryEntries } from "../db/index.ts";
 import { toNullableNumber } from "../db.ts";
 import type { SQLiteDB } from "../db.ts";
-import { parseJson, parseIdParam } from "../helpers.ts";
+import { parseJson, parseIdParam, DATE_RE } from "../helpers.ts";
 import { diarySchema } from "../schemas.ts";
 import { requireAuth } from "../middleware/auth.ts";
 
@@ -13,8 +13,6 @@ type Env = { Variables: { db: DrizzleDB; rawDb: SQLiteDB; userId: number; userEm
 const diary = new Hono<Env>();
 
 diary.use(requireAuth);
-
-const DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
 
 diary.get("/", (c) => {
   const db = c.get("db");

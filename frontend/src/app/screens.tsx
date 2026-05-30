@@ -1787,8 +1787,8 @@ export function DbtSection({
           {dbtGroups.map((g) => (
             <div key={g.title} className="ds-section">
               <SectionHead title={g.title} />
-              {g.callouts?.map((c, i) => (
-                <p key={i} className="hint therapy-callout">{c}</p>
+              {g.callouts?.map((c) => (
+                <p key={c} className="hint therapy-callout">{c}</p>
               ))}
               {g.fields.map((f) => (
                 <label key={f.key} className="field field-line">
@@ -1915,10 +1915,8 @@ export function DbtSection({
 export function SettingsSection({
   auth,
   birthday,
-  weekStart,
   birthdayPending,
   onSaveBirthday,
-  onSaveWeekStart,
   purgeConfirmArmed,
   purgePending,
   purgeError,
@@ -1933,10 +1931,8 @@ export function SettingsSection({
 }: {
   auth: ReturnType<typeof useAuth>;
   birthday: string | null;
-  weekStart?: "sunday" | "monday";
   birthdayPending: boolean;
   onSaveBirthday: (birthday: string | null) => void;
-  onSaveWeekStart?: (weekStart: "sunday" | "monday") => void;
   purgeConfirmArmed: boolean;
   purgePending: boolean;
   purgeError: InlineMessage | null;
@@ -1952,10 +1948,8 @@ export function SettingsSection({
   const variantProps = {
     auth,
     birthday,
-    weekStart,
     birthdayPending,
     onSaveBirthday,
-    onSaveWeekStart,
     purgeConfirmArmed,
     purgePending,
     purgeError,

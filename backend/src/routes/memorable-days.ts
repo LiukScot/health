@@ -3,7 +3,7 @@ import { and, desc, eq, sql } from "drizzle-orm";
 import type { DrizzleDB } from "../db/index.ts";
 import { memorableDays, userPreferences } from "../db/index.ts";
 import type { SQLiteDB } from "../db.ts";
-import { parseJson } from "../helpers.ts";
+import { parseJson, parseIdParam, DATE_RE } from "../helpers.ts";
 import { deriveBirthdayMemorableDay, toMemorableDayView } from "../helpers/memorable-days.ts";
 import { memorableDaySchema } from "../schemas.ts";
 import { requireAuth } from "../middleware/auth.ts";
@@ -21,7 +21,11 @@ function todayIso() {
 memorableDaysRoute.get("/", (c) => {
   const db = c.get("db");
   const userId = c.get("userId");
-  const today = c.req.query("today") || todayIso();
+  const todayParam = c.req.query("today");
+  if (todayParam && !DATE_RE.test(todayParam)) {
+    return c.json({ error: { code: "INVALID_DATE", message: "today must be YYYY-MM-DD" } }, 400);
+  }
+  const today = todayParam || todayIso();
 
   const rows = db
     .select()
@@ -80,10 +84,9 @@ memorableDaysRoute.post("/", async (c) => {
 memorableDaysRoute.put("/:id", async (c) => {
   const db = c.get("db");
   const userId = c.get("userId");
-  const id = Number(c.req.param("id"));
-  if (!Number.isFinite(id) || id <= 0) {
-    return c.json({ error: { code: "NOT_FOUND", message: "Memorable day not found" } }, 404);
-  }
+  const parsed = parseIdParam(c);
+  if (parsed instanceof Response) return parsed;
+  const { id } = parsed;
   const body = await parseJson(c, memorableDaySchema);
   const updated = db
     .update(memorableDays)
@@ -108,10 +111,9 @@ memorableDaysRoute.put("/:id", async (c) => {
 memorableDaysRoute.delete("/:id", (c) => {
   const db = c.get("db");
   const userId = c.get("userId");
-  const id = Number(c.req.param("id"));
-  if (!Number.isFinite(id) || id <= 0) {
-    return c.json({ error: { code: "NOT_FOUND", message: "Memorable day not found" } }, 404);
-  }
+  const parsed = parseIdParam(c);
+  if (parsed instanceof Response) return parsed;
+  const { id } = parsed;
   const deleted = db
     .delete(memorableDays)
     .where(and(eq(memorableDays.id, id), eq(memorableDays.userId, userId)))
