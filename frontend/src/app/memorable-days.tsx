@@ -116,6 +116,24 @@ function buildMemorableLookups(items: MemorableDay[]): MemorableLookups {
   return { oneTimeByDate, monthlyByDay, yearlyByMonthDay };
 }
 
+const emojiByValue = new Map(emojiCatalog.map((record) => [record.emoji, record]));
+const emojiRecordsByCategory = (() => {
+  const grouped = {
+    smileys: [] as EmojiRecord[],
+    people: [] as EmojiRecord[],
+    nature: [] as EmojiRecord[],
+    food: [] as EmojiRecord[],
+    travel: [] as EmojiRecord[],
+    objects: [] as EmojiRecord[],
+    symbols: [] as EmojiRecord[],
+    flags: [] as EmojiRecord[],
+  };
+  for (const record of emojiCatalog) {
+    grouped[record.category].push(record);
+  }
+  return grouped;
+})();
+
 export function MemorableDaysSection({ memorable }: Props) {
   const [draft, setDraft] = useState<DraftState | null>(null);
   const [feedback, setFeedback] = useState<InlineMessage | null>(null);
@@ -132,23 +150,6 @@ export function MemorableDaysSection({ memorable }: Props) {
     : ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
   const days = useMemo(() => buildCalendarDays(memorable.visibleMonth, memorable.weekStart), [memorable.visibleMonth, memorable.weekStart]);
   const lookups = useMemo(() => buildMemorableLookups(memorable.memorableDays), [memorable.memorableDays]);
-  const emojiByValue = useMemo(() => new Map(emojiCatalog.map((record) => [record.emoji, record])), []);
-  const emojiRecordsByCategory = useMemo(() => {
-    const grouped = {
-      smileys: [] as EmojiRecord[],
-      people: [] as EmojiRecord[],
-      nature: [] as EmojiRecord[],
-      food: [] as EmojiRecord[],
-      travel: [] as EmojiRecord[],
-      objects: [] as EmojiRecord[],
-      symbols: [] as EmojiRecord[],
-      flags: [] as EmojiRecord[],
-    };
-    for (const record of emojiCatalog) {
-      grouped[record.category].push(record);
-    }
-    return grouped;
-  }, []);
   const {
     open: emojiPickerOpen,
     activeCategory: emojiPickerActiveCategory,
@@ -460,9 +461,7 @@ export function MemorableDaysSection({ memorable }: Props) {
             </div>
           ) : (
             <div className="memorable-list">
-              {[...memorable.memorableDays]
-                .sort((a, b) => b.date.localeCompare(a.date))
-                .map((item) => (
+              {memorable.memorableDays.map((item) => (
                 <button
                   type="button"
                   key={`${item.source}-${item.id}-${item.date}`}

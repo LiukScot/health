@@ -8,6 +8,8 @@ import { TAG_TYPES, type TagType, MOOD_TAG_FIELDS, type MoodTagField } from "./s
 export const PAIN_MULTI_FIELDS = TAG_TYPES;
 export type PainMultiField = TagType;
 
+export const DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
+
 export const MOOD_MULTI_FIELDS = MOOD_TAG_FIELDS;
 export type MoodMultiField = MoodTagField;
 
@@ -15,7 +17,7 @@ export type MoodTagMap = Record<MoodMultiField, string[]>;
 export type PainTagMap = Record<PainMultiField, string[]>;
 
 export async function parseJson<T>(c: Context, schema: z.ZodType<T>): Promise<T> {
-  const raw = await c.req.json().catch(() => null);
+  const raw = await c.req.json().catch((err) => { console.error("Failed to parse request JSON:", err); return null; });
   const parsed = schema.safeParse(raw);
   if (!parsed.success) {
     throw new HTTPException(400, { message: "Invalid request body" });
@@ -25,7 +27,7 @@ export async function parseJson<T>(c: Context, schema: z.ZodType<T>): Promise<T>
 
 export function parseIdParam(c: Context, paramName = "id"): { id: number } | Response {
   const id = Number(c.req.param(paramName));
-  if (!Number.isFinite(id) || id <= 0) {
+  if (!Number.isInteger(id) || id <= 0) {
     return c.json({ error: { code: "INVALID_ID", message: "Invalid id" } }, 400);
   }
   return { id };
@@ -44,7 +46,7 @@ export function buildSessionCookie(sid: string): string {
     sameSite: "lax",
     path: "/",
     maxAge: env.SESSION_TTL_SECONDS,
-    secure: env.COOKIE_SECURE.toLowerCase() === "true"
+    secure: env.COOKIE_SECURE
   });
 }
 
@@ -54,7 +56,7 @@ export function clearSessionCookie(): string {
     sameSite: "lax",
     path: "/",
     maxAge: 0,
-    secure: env.COOKIE_SECURE.toLowerCase() === "true"
+    secure: env.COOKIE_SECURE
   });
 }
 

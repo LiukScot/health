@@ -173,18 +173,6 @@ export const moodOptions = sqliteTable("mood_options", {
   value: text("value").notNull(),
 });
 
-export const moodRemovedOptions = sqliteTable(
-  "mood_removed_options",
-  {
-    userId: integer("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
-    field: text("field").notNull(),
-    value: text("value").notNull(),
-  },
-  (table) => [
-    primaryKey({ columns: [table.userId, table.field, table.value] }),
-  ]
-);
-
 export const mcpTokens = sqliteTable(
   "mcp_tokens",
   {
