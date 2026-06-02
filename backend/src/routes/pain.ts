@@ -15,7 +15,7 @@ import {
   emptyPainTags,
   painRowToApi
 } from "../helpers.ts";
-import { painSchema, optionFieldSchema } from "../schemas.ts";
+import { painSchema, optionFieldSchema, optionPreselectSchema } from "../schemas.ts";
 import { requireAuth } from "../middleware/auth.ts";
 
 type Env = { Variables: { db: DrizzleDB; rawDb: SQLiteDB; userId: number; userEmail: string; sessionSid: string } };
@@ -47,6 +47,16 @@ function loadPainOptionsForUser(db: DrizzleDB, userId: number): PainTagMap {
   return out;
 }
 
+function loadPreselectedMedicines(db: DrizzleDB, userId: number): string[] {
+  return db
+    .select({ value: painOptions.value })
+    .from(painOptions)
+    .where(and(eq(painOptions.userId, userId), eq(painOptions.field, "medicines"), eq(painOptions.preselected, 1)))
+    .orderBy(painOptions.id)
+    .all()
+    .map((row) => row.value);
+}
+
 const pain = new Hono<Env>();
 
 pain.use(requireAuth);
@@ -54,7 +64,30 @@ pain.use(requireAuth);
 pain.get("/options", (c) => {
   const db = c.get("db");
   const userId = c.get("userId");
-  return c.json({ data: loadPainOptionsForUser(db, userId) });
+  return c.json({
+    data: {
+      ...loadPainOptionsForUser(db, userId),
+      preselectedMedicines: loadPreselectedMedicines(db, userId),
+    },
+  });
+});
+
+pain.post("/options/preselect", async (c) => {
+  const db = c.get("db");
+  const userId = c.get("userId");
+  const body = await parseJson(c, optionPreselectSchema);
+  if (!PAIN_MULTI_FIELDS.includes(body.field as PainMultiField)) {
+    return c.json({ error: { code: "INVALID_FIELD", message: "Unknown pain field" } }, 400);
+  }
+  const normalizedValue = body.value.trim();
+  if (!normalizedValue) {
+    return c.json({ error: { code: "INVALID_VALUE", message: "Value must not be empty" } }, 400);
+  }
+  db.update(painOptions)
+    .set({ preselected: body.preselected ? 1 : 0 })
+    .where(and(eq(painOptions.userId, userId), eq(painOptions.field, body.field), eq(painOptions.value, normalizedValue)))
+    .run();
+  return c.json({ data: { ok: true } });
 });
 
 pain.post("/options/remove", async (c) => {
@@ -177,5 +210,5 @@ pain.delete("/:id", (c) => {
   return c.json({ data: { ok: true } });
 });
 
-export { loadPainOptionsForUser };
+export { loadPainOptionsForUser, loadPreselectedMedicines };
 export default pain;

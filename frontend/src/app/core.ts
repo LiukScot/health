@@ -166,6 +166,7 @@ export const painOptionsSchema = apiEnvelopeSchema(
     medicines: z.array(z.string()),
     habits: z.array(z.string()),
     other: z.array(z.string()),
+    preselectedMedicines: z.array(z.string()),
   }),
 );
 

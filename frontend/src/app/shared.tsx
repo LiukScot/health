@@ -232,37 +232,28 @@ export function MultiSelectField({ label, fieldKey, value, options, onChange, do
 
           return (
             <div key={option} className="multi-option-item">
-              <button
-                type="button"
-                className={isSelected ? "multi-option-chip active" : "multi-option-chip"}
-                tabIndex={editOptionsMode ? -1 : undefined}
-                onClick={() => {
-                  if (editOptionsMode) return;
-                  toggleOption(option);
-                }}
-                onKeyDown={(e) => {
-                  if (!editOptionsMode) return;
-                  if (e.key === " " || e.key === "Enter") {
-                    e.preventDefault();
-                  }
-                }}
-                aria-pressed={isSelected}
-              >
-                <span className="multi-option-label">{option}</span>
-                {editOptionsMode ? (
+              {editOptionsMode ? (
+                <div className={isSelected ? "multi-option-chip active" : "multi-option-chip"}>
+                  <span className="multi-option-label">{option}</span>
                   <button
                     type="button"
                     className="multi-option-remove"
                     aria-label={`Remove ${option} from suggestions`}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setPendingRemovalKey(optionKey);
-                    }}
+                    onClick={() => setPendingRemovalKey(optionKey)}
                   >
                     ×
                   </button>
-                ) : null}
-              </button>
+                </div>
+              ) : (
+                <button
+                  type="button"
+                  className={isSelected ? "multi-option-chip active" : "multi-option-chip"}
+                  onClick={() => toggleOption(option)}
+                  aria-pressed={isSelected}
+                >
+                  <span className="multi-option-label">{option}</span>
+                </button>
+              )}
             </div>
           );
         })}
@@ -335,11 +326,13 @@ export function MultiSelectField({ label, fieldKey, value, options, onChange, do
   );
 }
 
-/** Small titled divider used to group sub-sections across pages. */
-export function SectionHead({ title, aside }: { title: string; aside?: ReactNode }) {
+/** Small titled divider used to group sub-sections across pages. When `ruled`,
+ * a hairline fills the space after the title. */
+export function SectionHead({ title, aside, ruled = false }: { title: string; aside?: ReactNode; ruled?: boolean }) {
   return (
-    <div className="section-head">
+    <div className={ruled ? "section-head section-head--ruled" : "section-head"}>
       <span className="section-title">{title}</span>
+      {ruled ? <span className="section-head-rule" aria-hidden="true" /> : null}
       {aside != null ? <span className="section-aside">{aside}</span> : null}
     </div>
   );
