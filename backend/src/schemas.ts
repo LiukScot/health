@@ -136,7 +136,8 @@ export const backupImportSchema = z.object({
       options: z
         .object({
           options: z.record(z.string(), z.array(z.string())).optional(),
-          removed: z.record(z.string(), z.array(z.string())).optional()
+          removed: z.record(z.string(), z.array(z.string())).optional(),
+          preselectedMedicines: z.array(z.string()).optional()
         })
         .optional()
     })
@@ -147,4 +148,10 @@ export const backupImportSchema = z.object({
 export const optionFieldSchema = z.object({
   field: z.string(),
   value: z.string().min(1)
+});
+
+export const optionPreselectSchema = z.object({
+  field: z.string(),
+  value: z.string().min(1),
+  preselected: z.boolean()
 });

@@ -15,7 +15,7 @@ import {
 } from "../helpers.ts";
 import { backupImportSchema, prefsSchema, DEFAULT_MODEL } from "../schemas.ts";
 import { requireAuth } from "../middleware/auth.ts";
-import { loadPainOptionsForUser } from "./pain.ts";
+import { loadPainOptionsForUser, loadPreselectedMedicines } from "./pain.ts";
 import { loadMoodOptionsForUser } from "./mood.ts";
 
 type Env = { Variables: { db: DrizzleDB; rawDb: SQLiteDB; userId: number; userEmail: string; sessionSid: string } };
@@ -109,7 +109,14 @@ backup.get("/json", (c) => {
   return c.json({
     data: {
       diary: { ...result.diary, moodOptions: loadMoodOptionsForUser(db, userId) },
-      pain: { ...result.pain, options: { options: loadPainOptionsForUser(db, userId), removed: removedMap } },
+      pain: {
+        ...result.pain,
+        options: {
+          options: loadPainOptionsForUser(db, userId),
+          removed: removedMap,
+          preselectedMedicines: loadPreselectedMedicines(db, userId),
+        },
+      },
       prefs: {
         model: prefs?.model ?? DEFAULT_MODEL,
         chatRange: prefs?.chatRange ?? "all",
@@ -199,6 +206,34 @@ backup.post("/json/import", async (c) => {
           const normalized = String(raw).trim();
           if (!normalized) continue;
           insertRemoved.run(userId, field, normalized);
+        }
+      }
+    }
+
+    // Restore the pain options list and medicine preselection. Guarded on the
+    // options block being present so legacy backups (which omit it) leave the
+    // user's existing options untouched. When preselectedMedicines is absent
+    // (pre-feature backups), medicines default to preselected (column default).
+    const importedOptions = body.pain?.options?.options;
+    if (importedOptions && typeof importedOptions === "object") {
+      rawDb.query(`DELETE FROM pain_options WHERE user_id = ?`).run(userId);
+      const rawPreselected = body.pain?.options?.preselectedMedicines;
+      const preselectedSet = Array.isArray(rawPreselected)
+        ? new Set(rawPreselected.map((v) => String(v).trim()))
+        : null;
+      const insertOption = rawDb.query(
+        `INSERT INTO pain_options (user_id, field, value, preselected)
+         VALUES (?, ?, ?, ?)
+         ON CONFLICT(user_id, field, value) DO NOTHING`
+      );
+      for (const field of PAIN_MULTI_FIELDS) {
+        const values = (importedOptions as any)[field];
+        if (!Array.isArray(values)) continue;
+        for (const raw of values) {
+          const normalized = String(raw).trim();
+          if (!normalized) continue;
+          const preselected = field === "medicines" && preselectedSet ? (preselectedSet.has(normalized) ? 1 : 0) : 1;
+          insertOption.run(userId, field, normalized, preselected);
         }
       }
     }

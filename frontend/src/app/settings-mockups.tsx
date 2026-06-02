@@ -2,8 +2,9 @@ import { useEffect, useState } from "react";
 import type { InlineMessage } from "./core";
 import type { useAuth } from "../hooks/use-auth";
 import { getErrorMessage } from "../lib";
-import { InlineFeedback } from "./shared";
+import { InlineFeedback, SectionHead } from "./shared";
 import { McpAccessSection } from "./McpAccessSection";
+import { MedicinePreselectionSection } from "./MedicinePreselectionSection";
 
 type SettingsSectionProps = {
   auth: ReturnType<typeof useAuth>;
@@ -33,25 +34,19 @@ function BirthdayBlock({
   // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => { setValue(birthday ?? ""); }, [birthday]);
 
+  const handleChange = (next: string) => {
+    setValue(next);
+    onSaveBirthday(next || null);
+  };
+
   return (
-    <form
-      className="stack"
-      onSubmit={(event) => {
-        event.preventDefault();
-        onSaveBirthday(value || null);
-      }}
-    >
+    <div className="stack">
+      <SectionHead title="Birthday" ruled />
       <label className="field field-line">
-        <span className="field-line-label">Birthday</span>
-        <input type="date" aria-label="Birthday" value={value} onChange={(event) => setValue(event.target.value)} />
+        <input type="date" aria-label="Birthday" value={value} onChange={(event) => handleChange(event.target.value)} />
       </label>
-      <p className="hint">Why: this becomes locked birthday item in Giorni memorabili.</p>
-      <div className="save-section">
-        <button type="submit" className="btn btn-primary" disabled={birthdayPending}>
-          {birthdayPending ? "Saving..." : "Save birthday"}
-        </button>
-      </div>
-    </form>
+      <p className="hint">Why: this becomes a locked birthday item in Memorable days.{birthdayPending ? " Saving…" : ""}</p>
+    </div>
   );
 }
 
@@ -213,10 +208,10 @@ function AccountIdentity({ auth }: Pick<SettingsSectionProps, "auth">) {
 }
 
 /* ── Variant B — Sub-tabs ── */
-type SettingsTab = "account" | "birthday" | "backup" | "mcp" | "danger";
+type SettingsTab = "account" | "preferences" | "backup" | "mcp" | "danger";
 const settingsTabs: { id: SettingsTab; label: string; danger?: boolean }[] = [
   { id: "account", label: "Account" },
-  { id: "birthday", label: "Birthday" },
+  { id: "preferences", label: "Preferences" },
   { id: "backup", label: "Backup" },
   { id: "mcp", label: "MCP access" },
   { id: "danger", label: "Danger zone", danger: true },
@@ -241,12 +236,15 @@ export function SettingsVariantB(props: SettingsSectionProps) {
       </nav>
       <div className="settings-mock-panel">
         {tab === "account" ? <AccountBlock auth={props.auth} /> : null}
-        {tab === "birthday" ? (
-          <BirthdayBlock
-            birthday={props.birthday}
-            birthdayPending={props.birthdayPending}
-            onSaveBirthday={props.onSaveBirthday}
-          />
+        {tab === "preferences" ? (
+          <div className="stack">
+            <BirthdayBlock
+              birthday={props.birthday}
+              birthdayPending={props.birthdayPending}
+              onSaveBirthday={props.onSaveBirthday}
+            />
+            <MedicinePreselectionSection enabled />
+          </div>
         ) : null}
         {tab === "backup" ? (
           <BackupBlock

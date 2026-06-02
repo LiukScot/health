@@ -18,6 +18,7 @@ const EMPTY_PAIN_OPTIONS = {
   medicines: [] as string[],
   habits: [] as string[],
   other: [] as string[],
+  preselectedMedicines: [] as string[],
 };
 
 export function usePain(enabled: boolean) {
@@ -48,12 +49,12 @@ export function usePain(enabled: boolean) {
       area: "",
       symptoms: "",
       activities: "",
-      medicines: listToCsv(painFieldOptions.medicines),
+      medicines: listToCsv(painFieldOptions.preselectedMedicines),
       habits: "",
       other: "",
       note: "",
     }),
-    [painFieldOptions.medicines],
+    [painFieldOptions.preselectedMedicines],
   );
 
   const painForm = useForm<PainFormValues>({

@@ -1299,7 +1299,6 @@ tbody tr:hover {
 }
 .multi-option-chip.active {
   color: var(--accent);
-  border-color: color-mix(in srgb, var(--accent) 55%, transparent);
   background: color-mix(in srgb, var(--accent) 10%, transparent);
   box-shadow: none;
 }
@@ -3036,6 +3035,15 @@ section.panel > .entry-row + .entry-row { margin-top: var(--layout-tight); }
 /* First section-head after title should breathe less aggressively above. */
 .panel-title + .section-head,
 .panel-title + .dashboard-filters + .section-head { margin-top: var(--layout-inline); }
+
+/* Ruled section head: a hairline (--border token, role: Dividers) fills the
+   space after the title, grouping a sub-section without a full-width line. */
+.section-head--ruled { align-items: center; }
+.section-head-rule {
+  flex: 1;
+  height: 1px;
+  background: var(--border);
+}
 
 /* ──────────────────────────────────────────────────────────────────────
    MCP Access — design-system-aligned styles for McpAccessSection.

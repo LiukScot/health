@@ -164,6 +164,7 @@ export const painOptions = sqliteTable("pain_options", {
   userId: integer("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
   field: text("field").notNull(),
   value: text("value").notNull(),
+  preselected: integer("preselected").notNull().default(1),
 });
 
 export const moodOptions = sqliteTable("mood_options", {

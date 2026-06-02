@@ -145,6 +145,69 @@ describe("POST /backup/json/import", () => {
   });
 });
 
+describe("backup medicine preselection round-trip", () => {
+  async function restoreMedicine(app: Awaited<ReturnType<typeof setup>>["app"], cookie: string, value: string) {
+    await app.request("/pain/options/restore", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", cookie },
+      body: JSON.stringify({ field: "medicines", value }),
+    });
+  }
+
+  test("export includes preselectedMedicines reflecting current state", async () => {
+    const { app, cookie } = await setup();
+    await restoreMedicine(app, cookie, "200mg celebrex");
+    await restoreMedicine(app, cookie, "4mg sirdalud");
+    // Turn one off so the export must distinguish preselected from the full list.
+    await app.request("/pain/options/preselect", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", cookie },
+      body: JSON.stringify({ field: "medicines", value: "4mg sirdalud", preselected: false }),
+    });
+
+    const body = await (await app.request("/backup/json", { headers: { cookie } })).json();
+    expect(body.data.pain.options.options.medicines).toEqual(["200mg celebrex", "4mg sirdalud"]);
+    expect(body.data.pain.options.preselectedMedicines).toEqual(["200mg celebrex"]);
+  });
+
+  test("import restores options list and preselection", async () => {
+    const { app, cookie } = await setup();
+    const res = await app.request("/backup/json/import", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", cookie },
+      body: JSON.stringify({
+        pain: {
+          rows: [],
+          options: {
+            options: { medicines: ["aspirin", "ibuprofen", "paracetamol"] },
+            preselectedMedicines: ["ibuprofen"],
+          },
+        },
+      }),
+    });
+    expect(res.status).toBe(200);
+
+    const opts = await (await app.request("/pain/options", { headers: { cookie } })).json();
+    expect(opts.data.medicines).toEqual(["aspirin", "ibuprofen", "paracetamol"]);
+    expect(opts.data.preselectedMedicines).toEqual(["ibuprofen"]);
+  });
+
+  test("legacy import without preselectedMedicines defaults medicines to preselected", async () => {
+    const { app, cookie } = await setup();
+    const res = await app.request("/backup/json/import", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", cookie },
+      body: JSON.stringify({
+        pain: { rows: [], options: { options: { medicines: ["aspirin", "ibuprofen"] } } },
+      }),
+    });
+    expect(res.status).toBe(200);
+
+    const opts = await (await app.request("/pain/options", { headers: { cookie } })).json();
+    expect(opts.data.preselectedMedicines).toEqual(["aspirin", "ibuprofen"]);
+  });
+});
+
 describe("POST /backup/xlsx/import", () => {
   test("rejects multipart without 'file' field with 400", async () => {
     const { app, cookie } = await setup();

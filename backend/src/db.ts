@@ -20,7 +20,7 @@ function tableExists(db: SQLiteDB, tableName: string): boolean {
   return Boolean(row?.name);
 }
 
-const ALLOWED_TABLE_NAMES = new Set(["diary_entries", "pain_entries", "user_preferences"]);
+const ALLOWED_TABLE_NAMES = new Set(["diary_entries", "pain_entries", "user_preferences", "pain_options"]);
 
 function columnExists(db: SQLiteDB, tableName: string, columnName: string): boolean {
   if (!ALLOWED_TABLE_NAMES.has(tableName)) {
@@ -51,6 +51,12 @@ function ensurePainColumns(db: SQLiteDB): void {
 function ensureUserPreferenceColumns(db: SQLiteDB): void {
   if (!columnExists(db, "user_preferences", "birthday")) {
     db.exec(`ALTER TABLE user_preferences ADD COLUMN birthday TEXT`);
+  }
+}
+
+function ensurePainOptionColumns(db: SQLiteDB): void {
+  if (!columnExists(db, "pain_options", "preselected")) {
+    db.exec(`ALTER TABLE pain_options ADD COLUMN preselected INTEGER NOT NULL DEFAULT 1`);
   }
 }
 
@@ -151,6 +157,7 @@ export function runMigrations(db: SQLiteDB): void {
     ensurePainColumns(db);
     ensureMoodColumns(db);
     ensureUserPreferenceColumns(db);
+    ensurePainOptionColumns(db);
     backfillPainColumnsFromLegacyTags(db);
     dropLegacyPainTables(db);
     backfillFtsTables(db);

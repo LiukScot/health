@@ -1,4 +1,4 @@
-export const SCHEMA_VERSION = 9;
+export const SCHEMA_VERSION = 10;
 
 export const migrationStatements: string[] = [
   `CREATE TABLE IF NOT EXISTS users (
@@ -89,9 +89,12 @@ export const migrationStatements: string[] = [
     user_id INTEGER NOT NULL,
     field TEXT NOT NULL,
     value TEXT NOT NULL,
+    preselected INTEGER NOT NULL DEFAULT 1,
     UNIQUE(user_id, field, value),
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
   )`,
+  // schema-v10: preselected column added to pain_options. ALTER TABLE for
+  // existing databases is handled separately in db.ts via columnExists guard.
   `CREATE TABLE IF NOT EXISTS mood_options (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     user_id INTEGER NOT NULL,

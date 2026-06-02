@@ -270,6 +270,7 @@ describe("pain options routes", () => {
       medicines: [],
       habits: [],
       other: [],
+      preselectedMedicines: [],
     });
   });
 
@@ -316,5 +317,69 @@ describe("pain options routes", () => {
     expect(res.status).toBe(400);
     const body = await res.json();
     expect(body.error.code).toBe("INVALID_VALUE");
+  });
+
+  test("restored medicine is preselected by default", async () => {
+    const { app, cookie } = await setup();
+    await app.request("/pain/options/restore", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", cookie },
+      body: JSON.stringify({ field: "medicines", value: "200mg celebrex" }),
+    });
+    const opts = await (await app.request("/pain/options", { headers: { cookie } })).json();
+    expect(opts.data.medicines).toEqual(["200mg celebrex"]);
+    expect(opts.data.preselectedMedicines).toEqual(["200mg celebrex"]);
+  });
+
+  test("POST /options/preselect toggles preselection, GET reflects", async () => {
+    const { app, cookie } = await setup();
+    await app.request("/pain/options/restore", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", cookie },
+      body: JSON.stringify({ field: "medicines", value: "4mg sirdalud" }),
+    });
+
+    const off = await app.request("/pain/options/preselect", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", cookie },
+      body: JSON.stringify({ field: "medicines", value: "4mg sirdalud", preselected: false }),
+    });
+    expect(off.status).toBe(200);
+    let opts = await (await app.request("/pain/options", { headers: { cookie } })).json();
+    expect(opts.data.medicines).toEqual(["4mg sirdalud"]);
+    expect(opts.data.preselectedMedicines).toEqual([]);
+
+    const on = await app.request("/pain/options/preselect", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", cookie },
+      body: JSON.stringify({ field: "medicines", value: "4mg sirdalud", preselected: true }),
+    });
+    expect(on.status).toBe(200);
+    opts = await (await app.request("/pain/options", { headers: { cookie } })).json();
+    expect(opts.data.preselectedMedicines).toEqual(["4mg sirdalud"]);
+  });
+
+  test("POST /options/preselect rejects unknown field 400", async () => {
+    const { app, cookie } = await setup();
+    const res = await app.request("/pain/options/preselect", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", cookie },
+      body: JSON.stringify({ field: "not_a_field", value: "x", preselected: true }),
+    });
+    expect(res.status).toBe(400);
+    const body = await res.json();
+    expect(body.error.code).toBe("INVALID_FIELD");
+  });
+
+  test("POST /options/preselect rejects non-medicines field 400", async () => {
+    const { app, cookie } = await setup();
+    const res = await app.request("/pain/options/preselect", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", cookie },
+      body: JSON.stringify({ field: "area", value: "back", preselected: true }),
+    });
+    expect(res.status).toBe(400);
+    const body = await res.json();
+    expect(body.error.code).toBe("INVALID_FIELD");
   });
 });
