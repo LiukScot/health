@@ -275,6 +275,18 @@ export function formatMonthLabel(value: Date) {
   return new Intl.DateTimeFormat(undefined, { month: "long", year: "numeric" }).format(value);
 }
 
+export const THEME_STORAGE_KEY = "health-theme";
+export const themeIds = ["dark", "grey", "oled"] as const;
+export type ThemeId = (typeof themeIds)[number];
+export const DEFAULT_THEME: ThemeId = "dark";
+// `bg` previews each theme as a swatch without mounting it; the value mirrors
+// the theme's --bg token in styles.css and is guarded by a test.
+export const THEMES: { id: ThemeId; label: string; bg: string }[] = [
+  { id: "oled", label: "OLED", bg: "#000000" },
+  { id: "dark", label: "Dark", bg: "#121214" },
+  { id: "grey", label: "Grey", bg: "#1f1f23" },
+];
+
 export function toDateKey(value: Date) {
   return new Date(value.getTime() - value.getTimezoneOffset() * 60_000).toISOString().slice(0, 10);
 }

@@ -1,10 +1,10 @@
 @import "tailwindcss";
 
 :root {
-  --bg: #1f1f23;
-  --card: #1f1f23;
-  --card-strong: #26262b;
-  --card-soft: #2a2a30;
+  --bg: #121214;
+  --card: #161619;
+  --card-strong: #1a1a1d;
+  --card-soft: #1e1e22;
   --text: #f5f5f7;
   --muted: #a1a1ad;
   --muted-soft: #6d6d78;
@@ -31,6 +31,47 @@
   --layout-page: 30px; /* major column / section gutters */
   --layout-split: 48px; /* wide two-pane split */
   --layout-tight: 4px; /* dense UI below inline (icon–text, chips); halve for 2px via calc(var(--layout-tight) / 2) */
+}
+
+/* Theme variants — base :root above is the default "dark" theme. */
+:root[data-theme="grey"] {
+  --bg: #1f1f23;
+  --card: #1f1f23;
+  --card-strong: #26262b;
+  --card-soft: #2a2a30;
+}
+
+:root[data-theme="oled"] {
+  --bg: #000000;
+  --card: #0c0c0e;
+  --card-strong: #131316;
+  --card-soft: #1a1a1d;
+  --text: #c9c9ce;
+}
+
+/* OLED: lift field/button surfaces off pure black so they stay visible
+   (their base color-mix against --bg/transparent collapses to ~black). */
+:root[data-theme="oled"] .field-line input,
+:root[data-theme="oled"] .field-line textarea,
+:root[data-theme="oled"] .field-line select {
+  background: var(--card-soft);
+}
+:root[data-theme="oled"] .field-line input:hover,
+:root[data-theme="oled"] .field-line textarea:hover,
+:root[data-theme="oled"] .field-line select:hover,
+:root[data-theme="oled"] .field-line input:focus,
+:root[data-theme="oled"] .field-line textarea:focus,
+:root[data-theme="oled"] .field-line select:focus,
+:root[data-theme="oled"] .field-line input:focus-visible,
+:root[data-theme="oled"] .field-line textarea:focus-visible,
+:root[data-theme="oled"] .field-line select:focus-visible {
+  background: color-mix(in srgb, white 6%, var(--card-soft));
+}
+:root[data-theme="oled"] .dashboard-quick-ranges button:not(.active) {
+  background: var(--card-soft);
+}
+:root[data-theme="oled"] .dashboard-quick-ranges button:not(.active):hover {
+  background: color-mix(in srgb, white 8%, var(--card-soft));
 }
 
 html { overflow-x: hidden; }
@@ -68,7 +109,7 @@ body {
   height: 100vh;
   display: flex;
   flex-direction: column;
-  background: var(--card);
+  background: var(--bg);
   border-right: 1px solid var(--border);
   padding: var(--layout-stack) var(--layout-inline);
   gap: var(--layout-inline);
@@ -3140,6 +3181,44 @@ section.panel > .entry-row + .entry-row { margin-top: var(--layout-tight); }
   line-height: 1.5;
   overflow-x: auto;
   white-space: pre;
+}
+
+/* Theme picker swatches */
+.theme-swatches {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--layout-block);
+}
+.theme-swatch {
+  display: flex;
+  padding: 0;
+  min-height: 0;
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+  cursor: pointer;
+}
+.theme-swatch-dot {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-sm);
+  display: grid;
+  place-items: center;
+  transition: box-shadow 0.15s ease;
+}
+.theme-swatch:hover .theme-swatch-dot {
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent) 40%, transparent);
+}
+.theme-swatch.is-selected .theme-swatch-dot {
+  box-shadow: 0 0 0 2px var(--accent);
+}
+.theme-swatch-check {
+  color: var(--text);
+  width: 18px;
+  height: 18px;
 }
 
 /* ──────────────────────────────────────────────────────────────────────
