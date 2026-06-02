@@ -43,6 +43,16 @@ test("changes password and restores the original password", async ({ page }) => 
   await loginUi(page);
 });
 
+test("switches theme and persists it across reload", async ({ page }) => {
+  await page.getByRole("button", { name: "Preferences" }).click();
+
+  await page.getByRole("button", { name: "Grey" }).click();
+  await expect(page.locator("html")).toHaveAttribute("data-theme", "grey");
+
+  await page.reload();
+  await expect(page.locator("html")).toHaveAttribute("data-theme", "grey");
+});
+
 test("saves birthday in settings", async ({ page }) => {
   await page.getByRole("button", { name: "Preferences" }).click();
 

@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import type { InlineMessage } from "./core";
+import { THEMES } from "./core";
 import type { useAuth } from "../hooks/use-auth";
+import { useTheme } from "../hooks/use-theme";
 import { getErrorMessage } from "../lib";
 import { InlineFeedback, SectionHead } from "./shared";
 import { McpAccessSection } from "./McpAccessSection";
@@ -46,6 +48,48 @@ function BirthdayBlock({
         <input type="date" aria-label="Birthday" value={value} onChange={(event) => handleChange(event.target.value)} />
       </label>
       <p className="hint">Why: this becomes a locked birthday item in Memorable days.{birthdayPending ? " Saving…" : ""}</p>
+    </div>
+  );
+}
+
+function ThemeBlock() {
+  const { theme, setTheme } = useTheme();
+  return (
+    <div className="stack">
+      <SectionHead title="Theme" ruled />
+      <div className="theme-swatches" role="group" aria-label="Theme">
+        {THEMES.map((t) => {
+          const selected = t.id === theme;
+          return (
+            <button
+              key={t.id}
+              type="button"
+              className={`theme-swatch${selected ? " is-selected" : ""}`}
+              aria-pressed={selected}
+              aria-label={t.label}
+              title={t.label}
+              onClick={() => setTheme(t.id)}
+            >
+              <span className="theme-swatch-dot" style={{ background: t.bg }}>
+                {selected ? (
+                  <svg
+                    className="theme-swatch-check"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2.5"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    aria-hidden="true"
+                  >
+                    <polyline points="20 6 9 17 4 12" />
+                  </svg>
+                ) : null}
+              </span>
+            </button>
+          );
+        })}
+      </div>
     </div>
   );
 }
@@ -238,6 +282,7 @@ export function SettingsVariantB(props: SettingsSectionProps) {
         {tab === "account" ? <AccountBlock auth={props.auth} /> : null}
         {tab === "preferences" ? (
           <div className="stack">
+            <ThemeBlock />
             <BirthdayBlock
               birthday={props.birthday}
               birthdayPending={props.birthdayPending}
