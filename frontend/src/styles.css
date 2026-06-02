@@ -1299,7 +1299,6 @@ tbody tr:hover {
 }
 .multi-option-chip.active {
   color: var(--accent);
-  border-color: color-mix(in srgb, var(--accent) 55%, transparent);
   background: color-mix(in srgb, var(--accent) 10%, transparent);
   box-shadow: none;
 }
