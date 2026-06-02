@@ -88,7 +88,7 @@ test("renders dashboard data and supports chart toggles", async ({ page }) => {
   await expect(page.locator(".dashboard-insight-list")).toBeVisible();
   await expect(statsGrid.locator("article").first()).toHaveCSS("border-top-width", "0px");
   await expect(statsGrid.locator("article").first()).toHaveCSS("box-shadow", "none");
-  await expect(statsGrid.locator("article").first()).toHaveCSS("background-color", "rgb(42, 42, 48)");
+  await expect(statsGrid.locator("article").first()).toHaveCSS("background-color", "rgb(30, 30, 34)");
   await expect(page.locator(".series-toggle").first()).toHaveCSS("border-top-width", "0px");
   await expect(page.locator(".dashboard-filters input[type='date']").first()).toHaveCSS("font-size", "13px");
   await expect(page.locator(".dashboard-filters input[type='date']").first()).toHaveCSS("font-weight", "500");
