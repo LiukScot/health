@@ -44,18 +44,18 @@ test("changes password and restores the original password", async ({ page }) => 
 });
 
 test("saves birthday in settings", async ({ page }) => {
-  await page.getByRole("button", { name: "Birthday" }).click();
-  await page.getByLabel("Birthday").fill("1995-06-12");
+  await page.getByRole("button", { name: "Preferences" }).click();
 
-  // Wait for the PUT request to complete
+  // Birthday autosaves on change: register the response listener before the
+  // fill that triggers the PUT, otherwise the response can land first.
   const responsePromise = page.waitForResponse(response =>
     response.url().includes('/api/v1/preferences') && response.request().method() === 'PUT'
   );
-  await page.getByRole("button", { name: "Save birthday" }).click();
+  await page.getByLabel("Birthday").fill("1995-06-12");
   await responsePromise;
 
   await page.reload();
   await page.getByRole("button", { name: "settings" }).click();
-  await page.getByRole("button", { name: "Birthday" }).click();
+  await page.getByRole("button", { name: "Preferences" }).click();
   await expect(page.getByLabel("Birthday")).toHaveValue("1995-06-12");
 });
