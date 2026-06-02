@@ -76,8 +76,8 @@ pain.post("/options/preselect", async (c) => {
   const db = c.get("db");
   const userId = c.get("userId");
   const body = await parseJson(c, optionPreselectSchema);
-  if (!PAIN_MULTI_FIELDS.includes(body.field as PainMultiField)) {
-    return c.json({ error: { code: "INVALID_FIELD", message: "Unknown pain field" } }, 400);
+  if (body.field !== "medicines") {
+    return c.json({ error: { code: "INVALID_FIELD", message: "Preselection is only supported for medicines" } }, 400);
   }
   const normalizedValue = body.value.trim();
   if (!normalizedValue) {

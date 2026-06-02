@@ -370,4 +370,16 @@ describe("pain options routes", () => {
     const body = await res.json();
     expect(body.error.code).toBe("INVALID_FIELD");
   });
+
+  test("POST /options/preselect rejects non-medicines field 400", async () => {
+    const { app, cookie } = await setup();
+    const res = await app.request("/pain/options/preselect", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", cookie },
+      body: JSON.stringify({ field: "area", value: "back", preselected: true }),
+    });
+    expect(res.status).toBe(400);
+    const body = await res.json();
+    expect(body.error.code).toBe("INVALID_FIELD");
+  });
 });
