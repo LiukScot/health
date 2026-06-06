@@ -43,7 +43,7 @@ export function readCookie(req: Request, name: string): string | null {
 export function buildSessionCookie(sid: string): string {
   return cookie.serialize(env.SESSION_COOKIE_NAME, sid, {
     httpOnly: true,
-    sameSite: "lax",
+    sameSite: "strict",
     path: "/",
     maxAge: env.SESSION_TTL_SECONDS,
     secure: env.COOKIE_SECURE
@@ -53,7 +53,7 @@ export function buildSessionCookie(sid: string): string {
 export function clearSessionCookie(): string {
   return cookie.serialize(env.SESSION_COOKIE_NAME, "", {
     httpOnly: true,
-    sameSite: "lax",
+    sameSite: "strict",
     path: "/",
     maxAge: 0,
     secure: env.COOKIE_SECURE
@@ -137,7 +137,7 @@ export function rowsToHealthBackup(diaryRows: any[], painRows: any[]): { diary: 
   const diary = {
     source: "health-backend",
     imported_at: new Date().toISOString(),
-    headers: ["date", "hour", "mood level", "depression", "anxiety", "positive moods", "negative moods", "general moods", "description", "gratitude"],
+    headers: ["date", "hour", "mood level", "depression", "anxiety", "positive moods", "negative moods", "general moods", "description", "gratitude", "reflection"],
     rows: diaryRows.map((row) => ({
       date: row.entry_date,
       hour: row.entry_time,
@@ -148,7 +148,8 @@ export function rowsToHealthBackup(diaryRows: any[], painRows: any[]): { diary: 
       "negative moods": row.negative_moods ?? "",
       "general moods": row.general_moods ?? "",
       description: row.description ?? "",
-      gratitude: row.gratitude ?? ""
+      gratitude: row.gratitude ?? "",
+      reflection: row.reflection ?? ""
     }))
   };
 
