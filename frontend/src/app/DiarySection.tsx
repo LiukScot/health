@@ -10,7 +10,8 @@ import {
   MultiSelectField,
   useDiaryColumnCap,
 } from "./shared";
-import { BarMetric, EmptyState, bandNine, diaryPreview, formatEntrySummaryDate } from "./screen-helpers";
+import { BarMetric, EmptyState } from "./screen-helpers";
+import { bandNine, diaryPreview, formatEntrySummaryDate } from "./screen-format";
 
 export function DiarySection({
   diaryForm,

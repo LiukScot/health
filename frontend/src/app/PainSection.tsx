@@ -11,7 +11,8 @@ import {
   MultiSelectField,
   useDiaryColumnCap,
 } from "./shared";
-import { BarMetric, CoffeeStepper, EmptyState, bandNine, painPreview, formatEntrySummaryDate } from "./screen-helpers";
+import { BarMetric, CoffeeStepper, EmptyState } from "./screen-helpers";
+import { bandNine, painPreview, formatEntrySummaryDate } from "./screen-format";
 
 const PAIN_TABS: { id: PainFieldKey; label: string }[] = [
   { id: "area", label: "Area" },

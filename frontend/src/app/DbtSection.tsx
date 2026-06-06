@@ -4,7 +4,8 @@ import {
   type DbtFormValues,
 } from "./core";
 import { AnimatedEditingLabel, SectionHead, useDiaryColumnCap } from "./shared";
-import { EmptyState, formatEntrySummaryDate } from "./screen-helpers";
+import { EmptyState } from "./screen-helpers";
+import { formatEntrySummaryDate } from "./screen-format";
 
 export function DbtSection({
   dbtForm,
