@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -25,6 +25,8 @@ export function useDbt(enabled: boolean) {
   const queryClient = useQueryClient();
   const [editingDbt, setEditingDbt] = useState<DbtEntry | null>(null);
   const [confirmDeleteDbt, setConfirmDeleteDbt] = useState<number | null>(null);
+  const dbtResetTimerRef = useRef<ReturnType<typeof setTimeout>>(undefined);
+  useEffect(() => () => clearTimeout(dbtResetTimerRef.current), []);
 
   const dbtQuery = useQuery({
     queryKey: ["dbt"],
@@ -64,7 +66,8 @@ export function useDbt(enabled: boolean) {
       setEditingDbt(null);
       dbtForm.reset(freshDefaults());
       await queryClient.invalidateQueries({ queryKey: ["dbt"] });
-      setTimeout(() => dbtMutation.reset(), 3000);
+      clearTimeout(dbtResetTimerRef.current);
+      dbtResetTimerRef.current = setTimeout(() => dbtMutation.reset(), 3000);
     },
   });
 

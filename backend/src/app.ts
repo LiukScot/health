@@ -2,6 +2,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { Hono } from "hono";
 import { cors } from "hono/cors";
+import { HTTPException } from "hono/http-exception";
 import { env, allowedOrigins } from "./env.ts";
 import { openDb, runMigrations } from "./db.ts";
 import { createDrizzle, type DrizzleDB } from "./db/index.ts";
@@ -40,6 +41,13 @@ type AppEnv = {
 };
 
 const app = new Hono<AppEnv>();
+
+// Global middleware: security headers
+app.use("*", async (c, next) => {
+  await next();
+  c.res.headers.set("X-Content-Type-Options", "nosniff");
+  c.res.headers.set("X-Frame-Options", "DENY");
+});
 
 // Global middleware: CORS
 app.use(
@@ -168,9 +176,8 @@ app.get("*", (c) => {
 // Global error handler
 app.onError((err, c) => {
   console.error(err);
-  if (err instanceof Response) {
-    return err;
-  }
+  if (err instanceof HTTPException) return err.getResponse();
+  if (err instanceof Response) return err;
   return c.json(
     { error: { code: "INTERNAL_ERROR", message: err?.message ?? "Internal server error" } },
     500
