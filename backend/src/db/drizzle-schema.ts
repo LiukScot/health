@@ -1,4 +1,4 @@
-import { sqliteTable, text, integer, index, primaryKey } from "drizzle-orm/sqlite-core";
+import { sqliteTable, text, integer, real, index, uniqueIndex, primaryKey } from "drizzle-orm/sqlite-core";
 
 export const users = sqliteTable("users", {
   id: integer("id").primaryKey({ autoIncrement: true }),
@@ -173,6 +173,28 @@ export const moodOptions = sqliteTable("mood_options", {
   field: text("field").notNull(),
   value: text("value").notNull(),
 });
+
+export const metricTypes = sqliteTable(
+  "metric_types",
+  {
+    id: integer("id").primaryKey({ autoIncrement: true }),
+    userId: integer("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+    key: text("key").notNull(),
+    label: text("label").notNull(),
+    kind: text("kind").notNull(),
+    unit: text("unit"),
+    minValue: real("min_value"),
+    maxValue: real("max_value"),
+    step: real("step"),
+    configJson: text("config_json").notNull().default("{}"),
+    archivedAt: text("archived_at"),
+    createdAt: text("created_at").notNull().default("CURRENT_TIMESTAMP"),
+    updatedAt: text("updated_at").notNull().default("CURRENT_TIMESTAMP"),
+  },
+  (table) => [
+    uniqueIndex("idx_metric_types_user_key").on(table.userId, table.key),
+  ]
+);
 
 export const mcpTokens = sqliteTable(
   "mcp_tokens",
