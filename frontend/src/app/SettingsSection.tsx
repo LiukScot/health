@@ -1,0 +1,61 @@
+import type { useAuth } from "../hooks/use-auth";
+import { type InlineMessage } from "./core";
+import { SettingsVariantB } from "./settings-mockups";
+
+export function SettingsSection({
+  auth,
+  birthday,
+  birthdayPending,
+  onSaveBirthday,
+  purgeConfirmArmed,
+  purgePending,
+  purgeError,
+  onPurgeArm,
+  onPurgeConfirm,
+  onPurgeCancel,
+  onExportJson,
+  onImportJson,
+  onExportXlsx,
+  onImportXlsx,
+  backupFeedback,
+}: {
+  auth: ReturnType<typeof useAuth>;
+  birthday: string | null;
+  birthdayPending: boolean;
+  onSaveBirthday: (birthday: string | null) => void;
+  purgeConfirmArmed: boolean;
+  purgePending: boolean;
+  purgeError: InlineMessage | null;
+  onPurgeArm: () => void;
+  onPurgeConfirm: () => void;
+  onPurgeCancel: () => void;
+  onExportJson: () => void;
+  onImportJson: (file: File) => void;
+  onExportXlsx: () => void;
+  onImportXlsx: (file: File) => void;
+  backupFeedback: InlineMessage | null;
+}) {
+  const variantProps = {
+    auth,
+    birthday,
+    birthdayPending,
+    onSaveBirthday,
+    purgeConfirmArmed,
+    purgePending,
+    purgeError,
+    onPurgeArm,
+    onPurgeConfirm,
+    onPurgeCancel,
+    onExportJson,
+    onImportJson,
+    onExportXlsx,
+    onImportXlsx,
+    backupFeedback,
+  };
+  return (
+    <section className="panel panel--frameless">
+      <h1 className="panel-title">Settings</h1>
+      <SettingsVariantB {...variantProps} />
+    </section>
+  );
+}

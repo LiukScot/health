@@ -1,5 +1,7 @@
 import { describe, expect, test, beforeEach } from "bun:test";
+import { eq } from "drizzle-orm";
 import authRoute from "./auth.ts";
+import { users } from "../db/index.ts";
 import {
   createTestApp,
   createTestDb,
@@ -161,6 +163,126 @@ describe("GET /auth/session", () => {
     const body = await res.json();
     expect(body.data.authenticated).toBe(true);
     expect(body.data.user.email).toBe("user@example.com");
+  });
+});
+
+describe("POST /auth/register", () => {
+  test("always returns 403 SIGNUP_DISABLED regardless of payload", async () => {
+    const ctx = createTestDb();
+    const app = createTestApp(ctx, "/auth", authRoute);
+
+    const res = await app.request("/auth/register", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email: "new@example.com", password: "Password123!" }),
+    });
+
+    expect(res.status).toBe(403);
+    const body = await res.json();
+    expect(body.error.code).toBe("SIGNUP_DISABLED");
+  });
+
+  test("returns 403 even with no body", async () => {
+    const ctx = createTestDb();
+    const app = createTestApp(ctx, "/auth", authRoute);
+
+    const res = await app.request("/auth/register", { method: "POST" });
+
+    expect(res.status).toBe(403);
+    const body = await res.json();
+    expect(body.error.code).toBe("SIGNUP_DISABLED");
+  });
+});
+
+describe("POST /auth/login — bcrypt to argon2id upgrade", () => {
+  test("upgrades bcrypt hash to argon2id on successful login", async () => {
+    const ctx = createTestDb();
+    const app = createTestApp(ctx, "/auth", authRoute);
+    const password = "Password123!";
+
+    const bcryptHash = await Bun.password.hash(password, { algorithm: "bcrypt" });
+    const inserted = ctx.db
+      .insert(users)
+      .values({ email: "bcrypt@example.com", passwordHash: bcryptHash })
+      .returning({ id: users.id })
+      .get();
+    if (!inserted) throw new Error("insert failed");
+
+    const res = await app.request("/auth/login", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email: "bcrypt@example.com", password }),
+    });
+
+    expect(res.status).toBe(200);
+
+    const updated = ctx.db
+      .select({ passwordHash: users.passwordHash })
+      .from(users)
+      .where(eq(users.id, inserted.id))
+      .limit(1)
+      .get();
+    expect(updated?.passwordHash).toBeDefined();
+    // argon2id hashes start with $argon2id$
+    expect(updated?.passwordHash).toMatch(/^\$argon2id\$/);
+  });
+
+  test("argon2id password is not re-hashed on login", async () => {
+    const ctx = createTestDb();
+    const app = createTestApp(ctx, "/auth", authRoute);
+    const password = "Password123!";
+
+    await seedUser(ctx.db, { email: "argon@example.com", password });
+
+    const before = ctx.db
+      .select({ passwordHash: users.passwordHash })
+      .from(users)
+      .where(eq(users.email, "argon@example.com"))
+      .limit(1)
+      .get();
+
+    const res = await app.request("/auth/login", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email: "argon@example.com", password }),
+    });
+
+    expect(res.status).toBe(200);
+
+    const after = ctx.db
+      .select({ passwordHash: users.passwordHash })
+      .from(users)
+      .where(eq(users.email, "argon@example.com"))
+      .limit(1)
+      .get();
+
+    expect(after?.passwordHash).toBe(before?.passwordHash);
+  });
+});
+
+describe("GET /auth/session — deleted user", () => {
+  test("returns authenticated=false when user has been deleted from DB", async () => {
+    const ctx = createTestDb();
+    const app = createTestApp(ctx, "/auth", authRoute);
+
+    await seedUser(ctx.db, { email: "gone@example.com", password: "Password123!" });
+
+    const loginRes = await app.request("/auth/login", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email: "gone@example.com", password: "Password123!" }),
+    });
+    expect(loginRes.status).toBe(200);
+    const cookie = extractSessionCookie(loginRes.headers.get("set-cookie"));
+
+    ctx.db.delete(users).where(eq(users.email, "gone@example.com")).run();
+
+    const sessionRes = await app.request("/auth/session", {
+      headers: { cookie },
+    });
+    expect(sessionRes.status).toBe(200);
+    const body = await sessionRes.json();
+    expect(body.data.authenticated).toBe(false);
   });
 });
 

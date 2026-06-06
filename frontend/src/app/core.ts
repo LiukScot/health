@@ -387,14 +387,32 @@ export function calcDeltaPercent(current: number | null, previous: number | null
   return ((current - previous) / previous) * 100;
 }
 
-const deltaSemantic: Record<string, { color: string; border: string; bg: string }> = {
-  positive: { color: "#6fe1b0", border: "rgba(111, 225, 176, 0.5)", bg: "rgba(111, 225, 176, 0.09)" },
-  negative: { color: "#ff8fb1", border: "rgba(255, 143, 177, 0.5)", bg: "rgba(255, 143, 177, 0.1)" },
-  neutral: { color: "#a1a1ad", border: "var(--border)", bg: "rgba(255, 255, 255, 0.03)" },
-};
-const deltaWhite = "#f5f5f7";
-const deltaWhiteBorder = "rgba(245, 245, 247, 0.4)";
-const deltaWhiteBg = "rgba(255, 255, 255, 0.06)";
+function getCssVar(name: string): string {
+  return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+}
+
+function hexToRgba(hex: string, alpha: number): string {
+  const r = parseInt(hex.slice(1, 3), 16);
+  const g = parseInt(hex.slice(3, 5), 16);
+  const b = parseInt(hex.slice(5, 7), 16);
+  return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+}
+
+function getDeltaSemantic(): Record<string, { color: string; border: string; bg: string }> {
+  const success = getCssVar("--success") || "#6fe1b0";
+  const muted = getCssVar("--muted") || "#a1a1ad";
+  // No token for negative delta color (#ff8fb1 — lighter pink distinct from --danger/#ff5a7f and --accent/#ff5e8a)
+  const negativeFallback = "#ff8fb1";
+  return {
+    positive: { color: success, border: hexToRgba(success, 0.5), bg: hexToRgba(success, 0.09) },
+    negative: { color: negativeFallback, border: hexToRgba(negativeFallback, 0.5), bg: hexToRgba(negativeFallback, 0.1) },
+    neutral: { color: muted, border: "var(--border)", bg: "rgba(255, 255, 255, 0.03)" },
+  };
+}
+
+function getDeltaWhite(): string {
+  return getCssVar("--text") || "#f5f5f7";
+}
 
 function blend(a: number, b: number, t: number) {
   return Math.round(a * t + b * (1 - t));
@@ -413,7 +431,11 @@ function blendHex(hexA: string, hexB: string, t: number): string {
 }
 
 export function getDeltaStyle(className: string, absPct: number): React.CSSProperties {
+  const deltaSemantic = getDeltaSemantic();
   const semantic = deltaSemantic[className] ?? deltaSemantic.neutral;
+  const deltaWhite = getDeltaWhite();
+  const deltaWhiteBorder = hexToRgba(deltaWhite, 0.4);
+  const deltaWhiteBg = hexToRgba(deltaWhite, 0.06);
   const t = Math.max(0, Math.min(1, 1 - absPct / 15));
   const useWhiteStyle = t > 0.5;
   return {
