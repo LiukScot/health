@@ -1,6 +1,6 @@
 # Modular app — architecture decision
 
-Status: **proposed** (issue #137, milestone "Modular app").
+Status: **accepted** (epic #128, milestone "Modular app"; ADR merged in #152).
 Supersedes the fixed per-page model for Pain, Diary, CBT, DBT.
 
 ## Context
@@ -61,7 +61,7 @@ locked); it is not stored as an independent flag, so the two cannot
 disagree.
 
 Same EAV engine backs both categories, so charts, search, and the MCP
-tools work uniformly — only the `editable` flag differs.
+tools work uniformly — only the `category` differs.
 
 ### Two editing surfaces
 
@@ -202,7 +202,9 @@ entry_values (
   FOREIGN KEY (entry_id) REFERENCES entries(id) ON DELETE CASCADE,
   -- RESTRICT, not CASCADE: a metric type that has history cannot be
   -- hard-deleted, so logged values are never cascaded away. Metric
-  -- types are archived (archived_at), never hard-deleted.
+  -- types are archived (archived_at), never hard-deleted. (User
+  -- deletion still works: entry_values clear via the entries->users
+  -- cascade before the metric_types path is reached.)
   FOREIGN KEY (metric_type_id) REFERENCES metric_types(id) ON DELETE RESTRICT
 )
 ```
@@ -221,7 +223,9 @@ Highest-risk step — real health data. Per user:
    - counter: coffee (`pain_entries.coffee_count`).
    - tags: positive/negative/general moods; area, symptoms, activities,
      medicines, habits, other — migrate `mood_options`/`pain_options`
-     (incl. `preselected`, removed/restore state) into `metric_options`.
+     (incl. `preselected`) into `metric_options`. Removed-state moves
+     from row-presence in the separate `*_removed_options` tables to
+     `archived_at IS NOT NULL` on `metric_options`.
    - text: diary description, gratitude; pain note; each CBT and DBT
      field.
 3. Seed 4 pages per user: Pain, Diary (`custom`); CBT, DBT (`therapy`,
@@ -232,7 +236,10 @@ Highest-risk step — real health data. Per user:
    verified; drop them in Phase 4.
 
 Reversible (down migration), idempotent (safe to re-run), and tested on
-a **copy** of prod before touching the real DB (AGENTS.md §11).
+a **copy** of prod before touching the real DB (AGENTS.md §11). The repo
+has no down-migration machinery today (migrations are forward-only —
+`migrationStatements` + `columnExists` guards in `db.ts`), so the
+rollback path must be built as part of #142, not assumed.
 
 ## Consequences
 
