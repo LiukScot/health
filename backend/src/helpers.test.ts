@@ -33,12 +33,12 @@ describe("readCookie", () => {
 });
 
 describe("buildSessionCookie", () => {
-  test("includes name, sid value, HttpOnly, Path=/, SameSite=Lax, Max-Age", () => {
+  test("includes name, sid value, HttpOnly, Path=/, SameSite=Strict, Max-Age", () => {
     const out = buildSessionCookie("abc123");
     expect(out).toContain(`${env.SESSION_COOKIE_NAME}=abc123`);
     expect(out).toContain("HttpOnly");
     expect(out).toContain("Path=/");
-    expect(out.toLowerCase()).toContain("samesite=lax");
+    expect(out.toLowerCase()).toContain("samesite=strict");
     expect(out).toContain("Max-Age=");
   });
 });

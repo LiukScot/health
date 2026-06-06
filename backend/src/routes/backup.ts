@@ -13,7 +13,7 @@ import {
   rowPainField,
   mergeOptions,
 } from "../helpers.ts";
-import { backupImportSchema, prefsSchema, DEFAULT_MODEL } from "../schemas.ts";
+import { backupImportSchema, DEFAULT_MODEL } from "../schemas.ts";
 import { requireAuth } from "../middleware/auth.ts";
 import { loadPainOptionsForUser, loadPreselectedMedicines } from "./pain.ts";
 import { loadMoodOptionsForUser } from "./mood.ts";
@@ -85,7 +85,7 @@ backup.get("/json", (c) => {
     entry_date: r.entryDate, entry_time: r.entryTime,
     mood_level: r.moodLevel, depression_level: r.depressionLevel, anxiety_level: r.anxietyLevel,
     positive_moods: r.positiveMoods, negative_moods: r.negativeMoods, general_moods: r.generalMoods,
-    description: r.description, gratitude: r.gratitude,
+    description: r.description, gratitude: r.gratitude, reflection: r.reflection,
   }));
   const painForBackup = painRows.map((r) => ({
     entry_date: r.entryDate, entry_time: r.entryTime,
@@ -137,8 +137,7 @@ backup.post("/json/import", async (c) => {
   const userId = c.get("userId");
   const body = await parseJson(c, backupImportSchema);
 
-  // Parse prefs before entering the transaction so a ZodError returns 400 not 500.
-  const parsedPrefs = body.prefs ? prefsSchema.parse(body.prefs) : null;
+  const parsedPrefs = body.prefs ?? null;
 
   const tx = rawDb.transaction(() => {
     rawDb.query(`DELETE FROM pain_entries WHERE user_id = ?`).run(userId);
@@ -271,7 +270,7 @@ backup.get("/xlsx", async (c) => {
     entry_date: r.entryDate, entry_time: r.entryTime,
     mood_level: r.moodLevel, depression_level: r.depressionLevel, anxiety_level: r.anxietyLevel,
     positive_moods: r.positiveMoods, negative_moods: r.negativeMoods, general_moods: r.generalMoods,
-    description: r.description, gratitude: r.gratitude,
+    description: r.description, gratitude: r.gratitude, reflection: r.reflection,
   }));
   const painForBackup = painRows.map((r) => ({
     entry_date: r.entryDate, entry_time: r.entryTime,
