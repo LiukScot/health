@@ -9,6 +9,8 @@ type MetricRow = {
   unit: string | null;
   min_value: number | null;
   max_value: number | null;
+  config_json: string;
+  archived_at: string | null;
 };
 type CountRow = { c: number };
 
@@ -19,27 +21,36 @@ function freshDb(): Database {
   return db;
 }
 
-function addUser(db: Database, email: string): void {
-  db.query("INSERT INTO users (email, password_hash) VALUES (?, 'x')").run(email);
+function addUser(db: Database, email: string): number {
+  const res = db.query("INSERT INTO users (email, password_hash) VALUES (?, 'x')").run(email);
+  return Number(res.lastInsertRowid);
 }
 
 function metricRows(db: Database, userId: number): MetricRow[] {
   return db
-    .query("SELECT key, kind, unit, min_value, max_value FROM metric_types WHERE user_id = ? ORDER BY id")
+    .query(
+      "SELECT key, kind, unit, min_value, max_value, config_json, archived_at FROM metric_types WHERE user_id = ? ORDER BY id"
+    )
     .all(userId) as MetricRow[];
 }
 
 describe("metric_types seed", () => {
-  test("seeds every built-in type for a user, with correct kind/range", () => {
+  test("seeds every built-in type for a user, with correct kind/range/defaults", () => {
     const db = freshDb();
-    addUser(db, "a@example.com");
+    const userId = addUser(db, "a@example.com");
     runMigrations(db); // idempotent re-run seeds the now-existing user
 
-    const rows = metricRows(db, 1);
+    const rows = metricRows(db, userId);
     expect(rows.length).toBe(BUILTIN_METRIC_TYPES.length);
 
     const byKey = new Map(rows.map((r) => [r.key, r]));
-    expect(byKey.get("mood")).toMatchObject({ kind: "scale", min_value: 1, max_value: 9 });
+    expect(byKey.get("mood")).toMatchObject({
+      kind: "scale",
+      min_value: 1,
+      max_value: 9,
+      config_json: "{}",
+      archived_at: null,
+    });
     expect(byKey.get("coffee")).toMatchObject({ kind: "counter", min_value: 0 });
     expect(byKey.get("positive_moods")?.kind).toBe("tags");
     expect(byKey.get("description")?.kind).toBe("text");
@@ -49,23 +60,35 @@ describe("metric_types seed", () => {
 
   test("is idempotent — re-running migrations adds no duplicates", () => {
     const db = freshDb();
-    addUser(db, "a@example.com");
+    const userId = addUser(db, "a@example.com");
     runMigrations(db);
     runMigrations(db);
     runMigrations(db);
 
-    const count = db.query("SELECT count(*) AS c FROM metric_types WHERE user_id = 1").get() as CountRow;
+    const count = db
+      .query("SELECT count(*) AS c FROM metric_types WHERE user_id = ?")
+      .get(userId) as CountRow;
     expect(count.c).toBe(BUILTIN_METRIC_TYPES.length);
   });
 
   test("seeds each user independently", () => {
     const db = freshDb();
-    addUser(db, "a@example.com");
-    addUser(db, "b@example.com");
+    const a = addUser(db, "a@example.com");
+    const b = addUser(db, "b@example.com");
     runMigrations(db);
 
-    expect(metricRows(db, 1).length).toBe(BUILTIN_METRIC_TYPES.length);
-    expect(metricRows(db, 2).length).toBe(BUILTIN_METRIC_TYPES.length);
+    expect(metricRows(db, a).length).toBe(BUILTIN_METRIC_TYPES.length);
+    expect(metricRows(db, b).length).toBe(BUILTIN_METRIC_TYPES.length);
+  });
+
+  test("rejects an invalid kind via the DB CHECK constraint", () => {
+    const db = freshDb();
+    const userId = addUser(db, "a@example.com");
+    expect(() =>
+      db
+        .query("INSERT INTO metric_types (user_id, key, label, kind) VALUES (?, 'bad', 'Bad', 'nonsense')")
+        .run(userId)
+    ).toThrow();
   });
 
   test("built-in keys are unique", () => {

@@ -69,7 +69,9 @@ function metricTypeSeedRow(m: BuiltinMetricType): string {
 }
 
 // INSERT OR IGNORE + the UNIQUE(user_id, key) index make this idempotent,
-// matching the mood_options/pain_options seeding pattern.
+// matching the mood_options/pain_options seeding pattern. The SQL is
+// string-built from BUILTIN_METRIC_TYPES (static developer data, never
+// user input) with single quotes escaped, so it is not an injection surface.
 function buildMetricTypesSeedSql(): string {
   const values = BUILTIN_METRIC_TYPES.map(metricTypeSeedRow).join("\n     UNION ALL\n     ");
   return `INSERT OR IGNORE INTO metric_types (user_id, key, label, kind, unit, min_value, max_value, step)
@@ -436,7 +438,7 @@ export const migrationStatements: string[] = [
     user_id INTEGER NOT NULL,
     key TEXT NOT NULL,
     label TEXT NOT NULL,
-    kind TEXT NOT NULL,
+    kind TEXT NOT NULL CHECK (kind IN (${METRIC_KINDS.map((k) => `'${k}'`).join(", ")})),
     unit TEXT,
     min_value REAL,
     max_value REAL,
