@@ -1,4 +1,86 @@
-export const SCHEMA_VERSION = 10;
+export const SCHEMA_VERSION = 11;
+
+export const METRIC_KINDS = ["scale", "counter", "tags", "text", "measure"] as const;
+export type MetricKind = (typeof METRIC_KINDS)[number];
+
+export type BuiltinMetricType = {
+  key: string;
+  label: string;
+  kind: MetricKind;
+  unit: string | null;
+  min: number | null;
+  max: number | null;
+  step: number | null;
+};
+
+// Built-in metric types seeded per user. Single source of truth for both
+// the seed SQL (built below) and the seed test, so they can never drift.
+export const BUILTIN_METRIC_TYPES: readonly BuiltinMetricType[] = [
+  // scales (1-9)
+  { key: "mood", label: "Mood", kind: "scale", unit: null, min: 1, max: 9, step: 1 },
+  { key: "depression", label: "Depression", kind: "scale", unit: null, min: 1, max: 9, step: 1 },
+  { key: "anxiety", label: "Anxiety", kind: "scale", unit: null, min: 1, max: 9, step: 1 },
+  { key: "pain", label: "Pain", kind: "scale", unit: null, min: 1, max: 9, step: 1 },
+  { key: "fatigue", label: "Fatigue", kind: "scale", unit: null, min: 1, max: 9, step: 1 },
+  // counter
+  { key: "coffee", label: "Coffee", kind: "counter", unit: null, min: 0, max: null, step: 1 },
+  // tags
+  { key: "positive_moods", label: "Positive moods", kind: "tags", unit: null, min: null, max: null, step: null },
+  { key: "negative_moods", label: "Negative moods", kind: "tags", unit: null, min: null, max: null, step: null },
+  { key: "general_moods", label: "General moods", kind: "tags", unit: null, min: null, max: null, step: null },
+  { key: "area", label: "Area", kind: "tags", unit: null, min: null, max: null, step: null },
+  { key: "symptoms", label: "Symptoms", kind: "tags", unit: null, min: null, max: null, step: null },
+  { key: "activities", label: "Activities", kind: "tags", unit: null, min: null, max: null, step: null },
+  { key: "medicines", label: "Medicines", kind: "tags", unit: null, min: null, max: null, step: null },
+  { key: "habits", label: "Habits", kind: "tags", unit: null, min: null, max: null, step: null },
+  { key: "other", label: "Other", kind: "tags", unit: null, min: null, max: null, step: null },
+  // free-text fields (diary / pain)
+  { key: "description", label: "Description", kind: "text", unit: null, min: null, max: null, step: null },
+  { key: "gratitude", label: "Gratitude", kind: "text", unit: null, min: null, max: null, step: null },
+  { key: "note", label: "Note", kind: "text", unit: null, min: null, max: null, step: null },
+  // CBT therapy fields (text)
+  { key: "cbt_situation", label: "Situation", kind: "text", unit: null, min: null, max: null, step: null },
+  { key: "cbt_thoughts", label: "Thoughts", kind: "text", unit: null, min: null, max: null, step: null },
+  { key: "cbt_helpful_reasoning", label: "Helpful reasoning", kind: "text", unit: null, min: null, max: null, step: null },
+  { key: "cbt_main_unhelpful_thought", label: "Main unhelpful thought", kind: "text", unit: null, min: null, max: null, step: null },
+  { key: "cbt_effect_of_believing", label: "Effect of believing", kind: "text", unit: null, min: null, max: null, step: null },
+  { key: "cbt_evidence_for_against", label: "Evidence for & against", kind: "text", unit: null, min: null, max: null, step: null },
+  { key: "cbt_alternative_explanation", label: "Alternative explanation", kind: "text", unit: null, min: null, max: null, step: null },
+  { key: "cbt_worst_best_scenario", label: "Worst & best scenario", kind: "text", unit: null, min: null, max: null, step: null },
+  { key: "cbt_friend_advice", label: "Friend's advice", kind: "text", unit: null, min: null, max: null, step: null },
+  { key: "cbt_productive_response", label: "Productive response", kind: "text", unit: null, min: null, max: null, step: null },
+  // DBT therapy fields (text)
+  { key: "dbt_emotion_name", label: "Emotion name", kind: "text", unit: null, min: null, max: null, step: null },
+  { key: "dbt_allow_affirmation", label: "Allow affirmation", kind: "text", unit: null, min: null, max: null, step: null },
+  { key: "dbt_watch_emotion", label: "Watch the emotion", kind: "text", unit: null, min: null, max: null, step: null },
+  { key: "dbt_body_location", label: "Body location", kind: "text", unit: null, min: null, max: null, step: null },
+  { key: "dbt_body_feeling", label: "Body feeling", kind: "text", unit: null, min: null, max: null, step: null },
+  { key: "dbt_present_moment", label: "Present moment", kind: "text", unit: null, min: null, max: null, step: null },
+  { key: "dbt_emotion_returns", label: "Emotion returns", kind: "text", unit: null, min: null, max: null, step: null },
+  // generic starters for custom pages
+  { key: "free_text", label: "Free text", kind: "text", unit: null, min: null, max: null, step: null },
+  { key: "measurement", label: "Measurement", kind: "measure", unit: null, min: null, max: null, step: null },
+];
+
+function metricTypeSeedRow(m: BuiltinMetricType): string {
+  const str = (v: string | null) => (v === null ? "NULL" : `'${v.replace(/'/g, "''")}'`);
+  const num = (v: number | null) => (v === null ? "NULL" : String(v));
+  return `SELECT ${str(m.key)} AS key, ${str(m.label)} AS label, ${str(m.kind)} AS kind, ${str(m.unit)} AS unit, ${num(m.min)} AS min_value, ${num(m.max)} AS max_value, ${num(m.step)} AS step`;
+}
+
+// INSERT OR IGNORE + the UNIQUE(user_id, key) index make this idempotent,
+// matching the mood_options/pain_options seeding pattern. The SQL is
+// string-built from BUILTIN_METRIC_TYPES (static developer data, never
+// user input) with single quotes escaped, so it is not an injection surface.
+function buildMetricTypesSeedSql(): string {
+  const values = BUILTIN_METRIC_TYPES.map(metricTypeSeedRow).join("\n     UNION ALL\n     ");
+  return `INSERT OR IGNORE INTO metric_types (user_id, key, label, kind, unit, min_value, max_value, step)
+   SELECT u.id, v.key, v.label, v.kind, v.unit, v.min_value, v.max_value, v.step
+   FROM users u
+   CROSS JOIN (
+     ${values}
+   ) AS v`;
+}
 
 export const migrationStatements: string[] = [
   `CREATE TABLE IF NOT EXISTS users (
@@ -348,7 +430,27 @@ export const migrationStatements: string[] = [
     VALUES ('delete', old.id, COALESCE(old.note, ''), COALESCE(old.symptoms, ''));
     INSERT INTO pain_fts(rowid, note, symptoms)
     VALUES (new.id, COALESCE(new.note, ''), COALESCE(new.symptoms, ''));
-  END`
+  END`,
+
+  // ── metric_types: modular value-type definitions (built-in + custom) ────
+  `CREATE TABLE IF NOT EXISTS metric_types (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id INTEGER NOT NULL,
+    key TEXT NOT NULL,
+    label TEXT NOT NULL,
+    kind TEXT NOT NULL CHECK (kind IN (${METRIC_KINDS.map((k) => `'${k}'`).join(", ")})),
+    unit TEXT,
+    min_value REAL,
+    max_value REAL,
+    step REAL,
+    config_json TEXT NOT NULL DEFAULT '{}',
+    archived_at TEXT,
+    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+  )`,
+  `CREATE UNIQUE INDEX IF NOT EXISTS idx_metric_types_user_key ON metric_types(user_id, key)`,
+  buildMetricTypesSeedSql(),
 ];
 
 export const TAG_TYPES = ["area", "symptoms", "activities", "medicines", "habits", "other"] as const;
