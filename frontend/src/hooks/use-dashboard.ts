@@ -319,16 +319,20 @@ export function useDashboard(enabled: boolean) {
     ];
   }, [filteredDiary, filteredPain, prevBounds, previousDiary, previousPain]);
 
-  const wellbeingSeries = useMemo<WellbeingSeries[]>(
-    () => [
+  const wellbeingSeries = useMemo<WellbeingSeries[]>(() => {
+    const style = getComputedStyle(document.documentElement);
+    // --success (#6fe1b0) is the only series color with a matching design token.
+    // Pain (#ff6f91), Fatigue (#f6c344), Mood (#7bd3f1), Depression (#c6a1ff)
+    // have no matching tokens; kept as-is until tokens are added.
+    const successColor = style.getPropertyValue("--success").trim() || "#6fe1b0";
+    return [
       { key: "pain", label: "Pain", color: "#ff6f91", points: buildDailyAverages(filteredPain, (e) => e.entryDate, (e) => e.painLevel) },
       { key: "fatigue", label: "Fatigue", color: "#f6c344", points: buildDailyAverages(filteredPain, (e) => e.entryDate, (e) => e.fatigueLevel) },
       { key: "mood", label: "Mood", color: "#7bd3f1", points: buildDailyAverages(filteredDiary, (e) => e.entryDate, (e) => e.moodLevel) },
       { key: "depression", label: "Depression", color: "#c6a1ff", points: buildDailyAverages(filteredDiary, (e) => e.entryDate, (e) => e.depressionLevel) },
-      { key: "anxiety", label: "Anxiety", color: "#6fe1b0", points: buildDailyAverages(filteredDiary, (e) => e.entryDate, (e) => e.anxietyLevel) },
-    ],
-    [filteredDiary, filteredPain],
-  );
+      { key: "anxiety", label: "Anxiety", color: successColor, points: buildDailyAverages(filteredDiary, (e) => e.entryDate, (e) => e.anxietyLevel) },
+    ];
+  }, [filteredDiary, filteredPain]);
 
   const wellbeingChart = useMemo(() => {
     const visibleSeries = wellbeingSeries.filter((s) => (graphSelection[s.key] ?? true) && s.points.length > 0);
@@ -360,13 +364,15 @@ export function useDashboard(enabled: boolean) {
               minUnit: "day" as const,
               displayFormats: { day: "dd MMM", week: "dd MMM", month: "MMM yyyy" },
             },
-            ticks: { color: "#a1a1ad", maxTicksLimit: 12 },
+            ticks: { color: getComputedStyle(document.documentElement).getPropertyValue("--muted").trim() || "#a1a1ad", maxTicksLimit: 12 },
+            // rgba(255,255,255,0.08) has no design token; kept until one is added
             grid: { color: "rgba(255,255,255,0.08)" },
           },
           y: {
             min: 0,
             max: 10,
-            ticks: { color: "#a1a1ad", stepSize: 1 },
+            ticks: { color: getComputedStyle(document.documentElement).getPropertyValue("--muted").trim() || "#a1a1ad", stepSize: 1 },
+            // rgba(255,255,255,0.08) has no design token; kept until one is added
             grid: { color: "rgba(255,255,255,0.08)" },
           },
         },
