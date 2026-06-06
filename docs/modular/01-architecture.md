@@ -1,6 +1,6 @@
 # Modular app — architecture decision
 
-Status: **proposed** (issue #137, milestone "Modular app").
+Status: **accepted** (epic #128, milestone "Modular app"; ADR merged in #152).
 Supersedes the fixed per-page model for Pain, Diary, CBT, DBT.
 
 ## Context
@@ -50,14 +50,18 @@ seeded defaults the user can rename, re-range, archive, or extend.
 
 ### Page categories
 
-- `custom` (`editable = true`) — user adds/removes/reorders fields and
-  edits each module. Pain and Diary start here as customizable templates.
-- `therapy` (`editable = false`) — locked preset; fields fixed and in a
-  fixed order. CBT and DBT. The user can add or hide a therapy but not
-  edit its fields (preserves the clinical structure). No inline editor.
+- `custom` — user adds/removes/reorders fields and edits each module.
+  Pain and Diary start here as customizable templates.
+- `therapy` — locked preset; fields fixed and in a fixed order. CBT and
+  DBT. The user can add or hide a therapy but not edit its fields
+  (preserves the clinical structure). No inline editor.
+
+Editability derives from `category` (`custom` → editable, `therapy` →
+locked); it is not stored as an independent flag, so the two cannot
+disagree.
 
 Same EAV engine backs both categories, so charts, search, and the MCP
-tools work uniformly — only the `editable` flag differs.
+tools work uniformly — only the `category` differs.
 
 ### Two editing surfaces
 
@@ -85,9 +89,9 @@ Both surfaces edit the **same** `metric_types` row through the same API.
   scale it was entered with (`scale_min`, `scale_max`) and the `unit`
   at write time. An old value renders as "7/9" while new ones render
   "x/5"; charts stay correct (decided #128).
-- **`kind` is immutable once entries exist.** Changing scale→counter→
-  text would garble stored values. To change kind, create a new metric
-  type. Validated at the API boundary.
+- **`kind` is immutable once entries exist.** Changing
+  scale → counter → text would garble stored values. To change kind,
+  create a new metric type. Validated at the API boundary.
 - **Removing a tag option is non-destructive.** Past `value_tags` keep
   removed tags; the option just stops being offered (today's
   remove/restore behaviour, generalized).
@@ -151,8 +155,11 @@ pages (
   name TEXT NOT NULL,
   icon TEXT NOT NULL DEFAULT '',
   position INTEGER NOT NULL DEFAULT 0,
-  category TEXT NOT NULL DEFAULT 'custom',   -- custom|therapy
-  editable INTEGER NOT NULL DEFAULT 1,
+  category TEXT NOT NULL DEFAULT 'custom'     -- custom|therapy
+    CHECK (category IN ('custom','therapy')),
+  -- editability derives from category (single source of truth, so the
+  -- two can never disagree): custom = editable, therapy = locked.
+  editable INTEGER GENERATED ALWAYS AS (category = 'custom') VIRTUAL,
   source_template TEXT,                       -- e.g. 'diary','cbt'
   archived_at TEXT,
   created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -193,7 +200,12 @@ entry_values (
   unit TEXT,                         -- snapshot at write time
   scale_min REAL, scale_max REAL,    -- snapshot at write time
   FOREIGN KEY (entry_id) REFERENCES entries(id) ON DELETE CASCADE,
-  FOREIGN KEY (metric_type_id) REFERENCES metric_types(id) ON DELETE CASCADE
+  -- RESTRICT, not CASCADE: a metric type that has history cannot be
+  -- hard-deleted, so logged values are never cascaded away. Metric
+  -- types are archived (archived_at), never hard-deleted. (User
+  -- deletion still works: entry_values clear via the entries->users
+  -- cascade before the metric_types path is reached.)
+  FOREIGN KEY (metric_type_id) REFERENCES metric_types(id) ON DELETE RESTRICT
 )
 ```
 
@@ -211,7 +223,9 @@ Highest-risk step — real health data. Per user:
    - counter: coffee (`pain_entries.coffee_count`).
    - tags: positive/negative/general moods; area, symptoms, activities,
      medicines, habits, other — migrate `mood_options`/`pain_options`
-     (incl. `preselected`, removed/restore state) into `metric_options`.
+     (incl. `preselected`) into `metric_options`. Removed-state moves
+     from row-presence in the separate `*_removed_options` tables to
+     `archived_at IS NOT NULL` on `metric_options`.
    - text: diary description, gratitude; pain note; each CBT and DBT
      field.
 3. Seed 4 pages per user: Pain, Diary (`custom`); CBT, DBT (`therapy`,
@@ -222,7 +236,10 @@ Highest-risk step — real health data. Per user:
    verified; drop them in Phase 4.
 
 Reversible (down migration), idempotent (safe to re-run), and tested on
-a **copy** of prod before touching the real DB (AGENTS.md §11).
+a **copy** of prod before touching the real DB (AGENTS.md §11). The repo
+has no down-migration machinery today (migrations are forward-only —
+`migrationStatements` + `columnExists` guards in `db.ts`), so the
+rollback path must be built as part of #142, not assumed.
 
 ## Consequences
 
