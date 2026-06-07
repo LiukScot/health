@@ -1,5 +1,22 @@
 @import "tailwindcss";
 
+/*
+ * Tailwind v4 design tokens (#159 pilot). Defining these here generates
+ * utilities (p-stack, gap-inline, m-block, ...) so components can drop
+ * hand-written `padding: var(--layout-stack)` CSS in favour of utility
+ * classes. Values mirror the --layout-* tokens in :root; as components
+ * migrate, the matching :root --layout-* entry is removed and this @theme
+ * scale becomes the single source of truth for spacing.
+ */
+@theme {
+  --spacing-tight: 4px;
+  --spacing-inline: 8px;
+  --spacing-stack: 12px;
+  --spacing-block: 20px;
+  --spacing-page: 30px;
+  --spacing-split: 48px;
+}
+
 :root {
   --bg: #121214;
   --card: #161619;
@@ -23,7 +40,9 @@
 
   /*
    * Layout spacing — use these names in CSS (no numbered --space-* ladder).
-   * Tailwind @theme --spacing-* below mirrors px for utilities; favor --layout-* in app styles.
+   * Mirrored by the @theme --spacing-* scale above. In already-migrated
+   * components prefer the Tailwind utilities (p-stack, gap-inline, ...);
+   * these vars remain for the CSS rules not yet migrated to utilities.
    */
   --layout-inline: 8px; /* chips, field gaps, panel pad, inline clusters */
   --layout-stack: 12px; /* between blocks in a column; BarMetric columns */
@@ -908,35 +927,10 @@ tbody tr:hover {
 }
 
 /* ── DateField: react-day-picker trigger + popover ── */
-.date-field {
-  position: relative;
-  display: inline-flex;
-  justify-self: start;
-}
-.date-field-trigger {
-  appearance: none;
-  background: color-mix(in srgb, white 3%, var(--bg));
-  border: 0;
-  border-radius: var(--radius-sm);
-  padding: var(--layout-inline) var(--layout-stack);
-  color: var(--text);
-  font: 500 13px var(--font-body);
-  font-variant-numeric: tabular-nums;
-  cursor: pointer;
-  text-align: left;
-  transition: background 0.15s ease, box-shadow 0.15s ease;
-}
-.date-field-trigger:hover {
-  background: color-mix(in srgb, white 5%, var(--bg));
-}
-.date-field-trigger:focus-visible {
-  background: color-mix(in srgb, white 5%, var(--bg));
-  box-shadow: inset 0 0 0 1px var(--accent);
-  outline: none;
-}
-.date-field-trigger[data-empty="true"] {
-  color: var(--muted-soft);
-}
+/* .date-field + .date-field-trigger migrated to Tailwind utilities in
+   DateField.tsx (#159 pilot). The .date-field-popover scope below stays:
+   it styles react-day-picker's own .rdp-* markup, which utilities can't
+   reach. */
 .date-field-popover {
   position: absolute;
   top: calc(100% + var(--layout-tight));
