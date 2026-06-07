@@ -32,7 +32,8 @@ test("desktop shows calendar and list, create/edit/delete works", async ({ page 
   await expect(page.locator(".feedback-message.is-error")).toHaveText("Title is required.");
   await page.getByLabel("Title").fill("Wedding");
   await page.getByLabel("Description").fill("civil ceremony");
-  await page.getByLabel("Repeat").selectOption("monthly");
+  await page.getByRole("button", { name: "Repeat" }).click();
+  await page.getByRole("option", { name: "Monthly" }).click();
   await page.getByRole("button", { name: "Save" }).click();
 
   const weddingListItem = page.locator(".memorable-list-item").filter({ hasText: "Wedding" });

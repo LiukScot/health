@@ -6,6 +6,7 @@ import { emojiCatalog, emojiCategoryLabels, type EmojiCategory, type EmojiRecord
 import { getErrorMessage } from "../lib";
 import { memorableDayPayloadSchema, matchesMemorableDate, type useMemorableDays } from "../hooks/use-memorable-days";
 import { DateField } from "./DateField";
+import { Select } from "../components/ui/select";
 
 type Props = {
   memorable: ReturnType<typeof useMemorableDays>;
@@ -38,6 +39,12 @@ type EmojiPickerState = {
 };
 
 const emojiCategoryOrder = Object.keys(emojiCategoryLabels) as EmojiCategory[];
+
+const REPEAT_OPTIONS: { value: DraftState["repeatMode"]; label: string }[] = [
+  { value: "one-time", label: "One-time" },
+  { value: "monthly", label: "Monthly" },
+  { value: "yearly", label: "Yearly" },
+];
 
 function createEmojiPickerScrollTopByCategory(): EmojiPickerScrollTopByCategory {
   return {
@@ -600,14 +607,19 @@ export function MemorableDaysSection({ memorable }: Props) {
               <span className="field-line-label">Description</span>
               <textarea rows={3} value={draft.description} onChange={(event) => setDraft((current) => current ? { ...current, description: event.target.value } : current)} />
             </label>
-            <label className="field field-line">
+            <div className="field field-line">
               <span className="field-line-label">Repeat</span>
-              <select value={draft.repeatMode} onChange={(event) => setDraft((current) => current ? { ...current, repeatMode: event.target.value as DraftState["repeatMode"] } : current)} disabled={draft.locked}>
-                <option value="one-time">One-time</option>
-                <option value="monthly">Monthly</option>
-                <option value="yearly">Yearly</option>
-              </select>
-            </label>
+              <Select
+                ariaLabel="Repeat"
+                value={draft.repeatMode}
+                onValueChange={(value) => {
+                  const option = REPEAT_OPTIONS.find((item) => item.value === value);
+                  if (option) setDraft((current) => current ? { ...current, repeatMode: option.value } : current);
+                }}
+                options={REPEAT_OPTIONS}
+                disabled={draft.locked}
+              />
+            </div>
             {draft.locked ? <p className="hint">Edit birthday in Settings. Same truth, less duplication.</p> : null}
             <div className="memorable-modal-actions">
               <button type="button" className="btn btn-primary" onClick={() => void onSave()} disabled={memorable.isSaving || draft.locked}>
