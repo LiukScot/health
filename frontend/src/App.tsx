@@ -1,12 +1,24 @@
-import { useEffect, useRef, useState } from "react";
+import { lazy, Suspense, useEffect, useRef, useState } from "react";
 import { Toaster } from "sonner";
 import { useAuth, useDiary, usePain, useCbt, useDbt, useDashboard, useMemorableDays, useSettings } from "./hooks";
 import { LoginScreen } from "./app/LoginScreen";
 import { Sidebar } from "./app/Sidebar";
-import { CbtSection, DbtSection, DashboardSection, DesignSystemSection, DiarySection, PainSection, SettingsSection } from "./app/screens";
-import { MemorableDaysSection } from "./app/memorable-days";
+import { DashboardSection } from "./app/DashboardSection";
 import { SectionErrorBoundary } from "./app/ErrorBoundary";
 import { formatDocumentTitle, navLabels, type NavItem } from "./app/core";
+
+// The Dashboard is the default view and stays eager so the first paint after
+// login has no loading flash. The other sections are reached only via nav, so
+// they are lazy-loaded — this keeps each section's form code and its heaviest
+// dependency (memorable-days pulls in the full emoji dataset) out of the
+// initial bundle until the user actually opens that section.
+const DiarySection = lazy(() => import("./app/DiarySection").then((m) => ({ default: m.DiarySection })));
+const PainSection = lazy(() => import("./app/PainSection").then((m) => ({ default: m.PainSection })));
+const CbtSection = lazy(() => import("./app/CbtSection").then((m) => ({ default: m.CbtSection })));
+const DbtSection = lazy(() => import("./app/DbtSection").then((m) => ({ default: m.DbtSection })));
+const SettingsSection = lazy(() => import("./app/SettingsSection").then((m) => ({ default: m.SettingsSection })));
+const DesignSystemSection = lazy(() => import("./app/DesignSystemSection").then((m) => ({ default: m.DesignSystemSection })));
+const MemorableDaysSection = lazy(() => import("./app/memorable-days").then((m) => ({ default: m.MemorableDaysSection })));
 
 function App() {
   const auth = useAuth();
@@ -278,6 +290,7 @@ function App() {
         </button>
 
         <SectionErrorBoundary resetKey={nav}>
+        <Suspense fallback={<p className="hint">Loading…</p>}>
         {nav === "dashboard" && (
           <DashboardSection
             dashboardFrom={dashboard.dashboardFrom} dashboardTo={dashboard.dashboardTo}
@@ -351,6 +364,7 @@ function App() {
         )}
 
         {nav === "design-system" && <DesignSystemSection />}
+        </Suspense>
         </SectionErrorBoundary>
       </main>
     </div>
