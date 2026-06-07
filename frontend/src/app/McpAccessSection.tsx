@@ -1,6 +1,14 @@
 import { useState } from "react";
 import { useMcpTokens, type ExpiryChoice } from "../hooks/use-mcp-tokens";
 import { InlineFeedback, SectionHead } from "./shared";
+import { Select } from "../components/ui/select";
+
+const EXPIRY_OPTIONS: { value: ExpiryChoice; label: string }[] = [
+  { value: "never", label: "Never" },
+  { value: "30d", label: "30 days" },
+  { value: "90d", label: "90 days" },
+  { value: "1y", label: "1 year" },
+];
 
 type ClientTab = "generic" | "claude-desktop" | "claude-code" | "curl";
 
@@ -177,12 +185,15 @@ export function McpAccessSection({ enabled }: { enabled: boolean }) {
           </label>
           <label className="field field-line">
             <span className="field-line-label">Expiry</span>
-            <select value={newExpiry} onChange={(e) => setNewExpiry(e.target.value as ExpiryChoice)}>
-              <option value="never">Never</option>
-              <option value="30d">30 days</option>
-              <option value="90d">90 days</option>
-              <option value="1y">1 year</option>
-            </select>
+            <Select
+              ariaLabel="Expiry"
+              value={newExpiry}
+              onValueChange={(value) => {
+                const choice = EXPIRY_OPTIONS.find((option) => option.value === value);
+                if (choice) setNewExpiry(choice.value);
+              }}
+              options={EXPIRY_OPTIONS}
+            />
           </label>
           <div className="save-section">
             <button type="button" className="btn btn-primary" onClick={handleCreate} disabled={tokens.createPending}>

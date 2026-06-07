@@ -1,0 +1,83 @@
+/* Radix Select styled with the app's design tokens. Trigger mirrors
+   .date-field-trigger; the portaled content mirrors .date-field-popover so
+   both custom controls read the same in every theme. */
+
+.ui-select-trigger {
+  appearance: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--layout-inline);
+  width: 100%;
+  background: color-mix(in srgb, white 3%, var(--bg));
+  border: 0;
+  border-radius: var(--radius-sm);
+  padding: var(--layout-inline) var(--layout-stack);
+  color: var(--text);
+  font: 500 13px var(--font-body);
+  cursor: pointer;
+  text-align: left;
+  transition: background 0.15s ease, box-shadow 0.15s ease;
+}
+.ui-select-trigger:hover {
+  background: color-mix(in srgb, white 5%, var(--bg));
+}
+.ui-select-trigger:focus-visible {
+  background: color-mix(in srgb, white 5%, var(--bg));
+  box-shadow: inset 0 0 0 1px var(--accent);
+  outline: none;
+}
+.ui-select-trigger[data-disabled] {
+  cursor: not-allowed;
+  color: var(--muted-soft);
+}
+.ui-select-trigger[data-placeholder] {
+  color: var(--muted-soft);
+}
+
+:root[data-theme="oled"] .ui-select-trigger {
+  background: var(--card-soft);
+}
+:root[data-theme="oled"] .ui-select-trigger:hover,
+:root[data-theme="oled"] .ui-select-trigger:focus-visible {
+  background: color-mix(in srgb, white 6%, var(--card-soft));
+}
+
+.ui-select-icon {
+  font-size: 11px;
+  color: var(--muted);
+  pointer-events: none;
+}
+
+.ui-select-content {
+  z-index: 40;
+  min-width: var(--radix-select-trigger-width);
+  background: var(--card-strong);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow);
+  overflow: hidden;
+}
+.ui-select-viewport {
+  padding: var(--layout-tight);
+  display: grid;
+  gap: var(--layout-tight);
+}
+.ui-select-item {
+  display: flex;
+  align-items: center;
+  padding: var(--layout-inline) var(--layout-stack);
+  border-radius: var(--radius-sm);
+  color: var(--text);
+  font: 500 13px var(--font-body);
+  cursor: pointer;
+  user-select: none;
+  outline: none;
+}
+.ui-select-item[data-highlighted] {
+  background: color-mix(in srgb, white 6%, var(--bg));
+}
+.ui-select-item[data-state="checked"] {
+  background: var(--accent);
+  color: var(--text);
+}
