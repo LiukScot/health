@@ -3,7 +3,7 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { apiEnvelopeSchema, apiFetch, getErrorMessage, splitDateTime, toLocalDateTimeValue } from "../lib";
+import { apiEnvelopeSchema, apiFetch, splitDateTime, toLocalDateTimeValue } from "../lib";
 import { dbtFormSchema, dbtListSchema } from "../app/core";
 import type { DbtEntry, DbtFormValues } from "../app/core";
 
@@ -67,10 +67,13 @@ export function useDbt(enabled: boolean) {
       setEditingDbt(null);
       dbtForm.reset(freshDefaults());
       await queryClient.invalidateQueries({ queryKey: ["dbt"] });
+      toast.success("Entry saved");
       clearTimeout(dbtResetTimerRef.current);
       dbtResetTimerRef.current = setTimeout(() => dbtMutation.reset(), 3000);
     },
-    onError: (error) => toast.error(getErrorMessage(error)),
+    onError: () => {
+      toast.error("Couldn't save entry. Try again.");
+    },
   });
 
   const dbtDeleteMutation = useMutation({
@@ -81,7 +84,6 @@ export function useDbt(enabled: boolean) {
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: ["dbt"] });
     },
-    onError: (error) => toast.error(getErrorMessage(error)),
   });
 
   const resetDbtForm = () => {

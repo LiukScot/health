@@ -1,40 +1,35 @@
 import { describe, expect, test, vi, beforeEach } from "vitest";
-import type { ReactNode } from "react";
 import { renderHook, waitFor } from "@testing-library/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { toast } from "sonner";
-import { useDiary } from "./use-diary";
-import { apiFetch } from "../lib";
+import type { ReactNode } from "react";
 
-vi.mock("sonner", () => ({
-  toast: { error: vi.fn(), success: vi.fn() },
+const { toastSuccess, toastError, apiFetch } = vi.hoisted(() => ({
+  toastSuccess: vi.fn(),
+  toastError: vi.fn(),
+  apiFetch: vi.fn(),
 }));
 
-// Mock only the network boundary; keep every other lib export real so the
-// real getErrorMessage / splitDateTime / schemas run unchanged.
-vi.mock("../lib", async (importActual) => {
-  const actual = await importActual<typeof import("../lib")>();
-  return { ...actual, apiFetch: vi.fn() };
+vi.mock("sonner", () => ({
+  toast: { success: toastSuccess, error: toastError },
+}));
+
+// Mock the network boundary only: apiFetch is the single HTTP call site.
+vi.mock("../lib", async () => {
+  const actual = await vi.importActual<typeof import("../lib")>("../lib");
+  return { ...actual, apiFetch: (...args: unknown[]) => apiFetch(...args) };
 });
 
-const mockApiFetch = vi.mocked(apiFetch);
-const mockToastError = vi.mocked(toast.error);
+import { useDiary } from "./use-diary";
 
-function createWrapper() {
-  const queryClient = new QueryClient({
-    defaultOptions: {
-      mutations: { retry: false },
-      queries: { retry: false },
-    },
+function wrapper({ children }: { children: ReactNode }) {
+  const client = new QueryClient({
+    defaultOptions: { queries: { retry: false }, mutations: { retry: false } },
   });
-  return ({ children }: { children: ReactNode }) => (
-    <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
-  );
+  return <QueryClientProvider client={client}>{children}</QueryClientProvider>;
 }
 
-// Minimal values that satisfy diaryFormSchema (dateTime min(1), rest default).
-const validValues = {
-  dateTime: "2026-06-07T10:30",
+const validEntry = {
+  dateTime: "2026-06-07T10:00",
   moodLevel: null,
   depressionLevel: null,
   anxietyLevel: null,
@@ -45,37 +40,30 @@ const validValues = {
   gratitude: "",
 };
 
-beforeEach(() => {
-  vi.clearAllMocks();
-});
-
-describe("useDiary diaryMutation error contract", () => {
-  test("shows an error toast when the mutation rejects", async () => {
-    mockApiFetch.mockRejectedValueOnce(new Error("Network down"));
-
-    const { result } = renderHook(() => useDiary(false), {
-      wrapper: createWrapper(),
-    });
-
-    result.current.diaryMutation.mutate(validValues);
-
-    await waitFor(() => {
-      expect(mockToastError).toHaveBeenCalledWith("Network down");
-    });
+describe("useDiary toasts", () => {
+  beforeEach(() => {
+    toastSuccess.mockClear();
+    toastError.mockClear();
+    apiFetch.mockReset();
   });
 
-  test("does not show an error toast when the mutation succeeds", async () => {
-    mockApiFetch.mockResolvedValueOnce({ id: 1 });
+  test("fires a success toast when a diary entry saves", async () => {
+    apiFetch.mockResolvedValue({ id: 1 });
+    const { result } = renderHook(() => useDiary(true), { wrapper });
 
-    const { result } = renderHook(() => useDiary(false), {
-      wrapper: createWrapper(),
-    });
+    result.current.diaryMutation.mutate(validEntry);
 
-    result.current.diaryMutation.mutate(validValues);
+    await waitFor(() => expect(toastSuccess).toHaveBeenCalledWith("Entry saved"));
+    expect(toastError).not.toHaveBeenCalled();
+  });
 
-    await waitFor(() => {
-      expect(result.current.diaryMutation.isSuccess).toBe(true);
-    });
-    expect(mockToastError).not.toHaveBeenCalled();
+  test("fires an error toast when the save fails", async () => {
+    apiFetch.mockRejectedValue(new Error("network down"));
+    const { result } = renderHook(() => useDiary(true), { wrapper });
+
+    result.current.diaryMutation.mutate(validEntry);
+
+    await waitFor(() => expect(toastError).toHaveBeenCalledWith("Couldn't save entry. Try again."));
+    expect(toastSuccess).not.toHaveBeenCalled();
   });
 });

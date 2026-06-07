@@ -1,9 +1,11 @@
 import { useEffect, useRef, useState } from "react";
+import { Toaster } from "sonner";
 import { useAuth, useDiary, usePain, useCbt, useDbt, useDashboard, useMemorableDays, useSettings } from "./hooks";
 import { LoginScreen } from "./app/LoginScreen";
 import { Sidebar } from "./app/Sidebar";
 import { CbtSection, DbtSection, DashboardSection, DesignSystemSection, DiarySection, PainSection, SettingsSection } from "./app/screens";
 import { MemorableDaysSection } from "./app/memorable-days";
+import { SectionErrorBoundary } from "./app/ErrorBoundary";
 import { formatDocumentTitle, navLabels, type NavItem } from "./app/core";
 
 function App() {
@@ -240,11 +242,21 @@ function App() {
     // we only need to attach the listeners once at mount.
   }, []);
 
+  // The app ships only dark themes (dark, grey, oled — see themeIds in app/core.ts),
+  // so the toaster is pinned to "dark" to match. There is no light mode to follow.
+  const toaster = <Toaster theme="dark" richColors position="bottom-right" />;
+
   if (!auth.user) {
-    return <LoginScreen loginForm={auth.loginForm} loginMutation={auth.loginMutation} />;
+    return (
+      <>
+        <LoginScreen loginForm={auth.loginForm} loginMutation={auth.loginMutation} />
+        {toaster}
+      </>
+    );
   }
 
   return (
+    <>
     <div className={`shell${sidebarCollapsed ? " collapsed" : ""}${mobileSidebarOpen ? " mobile-open" : ""}`}>
       <Sidebar
         nav={nav}
@@ -265,6 +277,7 @@ function App() {
           <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
         </button>
 
+        <SectionErrorBoundary resetKey={nav}>
         {nav === "dashboard" && (
           <DashboardSection
             dashboardFrom={dashboard.dashboardFrom} dashboardTo={dashboard.dashboardTo}
@@ -338,8 +351,11 @@ function App() {
         )}
 
         {nav === "design-system" && <DesignSystemSection />}
+        </SectionErrorBoundary>
       </main>
     </div>
+    {toaster}
+    </>
   );
 }
 
