@@ -183,7 +183,7 @@ export function McpAccessSection({ enabled }: { enabled: boolean }) {
               maxLength={100}
             />
           </label>
-          <label className="field field-line">
+          <div className="field field-line">
             <span className="field-line-label">Expiry</span>
             <Select
               ariaLabel="Expiry"
@@ -194,7 +194,7 @@ export function McpAccessSection({ enabled }: { enabled: boolean }) {
               }}
               options={EXPIRY_OPTIONS}
             />
-          </label>
+          </div>
           <div className="save-section">
             <button type="button" className="btn btn-primary" onClick={handleCreate} disabled={tokens.createPending}>
               {tokens.createPending ? "Creating…" : "Create token"}

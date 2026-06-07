@@ -607,7 +607,7 @@ export function MemorableDaysSection({ memorable }: Props) {
               <span className="field-line-label">Description</span>
               <textarea rows={3} value={draft.description} onChange={(event) => setDraft((current) => current ? { ...current, description: event.target.value } : current)} />
             </label>
-            <label className="field field-line">
+            <div className="field field-line">
               <span className="field-line-label">Repeat</span>
               <Select
                 ariaLabel="Repeat"
@@ -619,7 +619,7 @@ export function MemorableDaysSection({ memorable }: Props) {
                 options={REPEAT_OPTIONS}
                 disabled={draft.locked}
               />
-            </label>
+            </div>
             {draft.locked ? <p className="hint">Edit birthday in Settings. Same truth, less duplication.</p> : null}
             <div className="memorable-modal-actions">
               <button type="button" className="btn btn-primary" onClick={() => void onSave()} disabled={memorable.isSaving || draft.locked}>
