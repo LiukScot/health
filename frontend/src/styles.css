@@ -17,6 +17,14 @@
   --spacing-split: 48px;
 }
 
+/*
+ * App styles live inside @layer components so Tailwind utilities (emitted in
+ * the later `utilities` layer) reliably win over them. Without this, the app's
+ * rules are unlayered and unlayered CSS always beats @layer rules, so utility
+ * classes like `text-[13px]` would lose to `button { font-size: 14px }`. This
+ * is the foundation that makes the #159 utility migration possible.
+ */
+@layer components {
 :root {
   --bg: #121214;
   --card: #161619;
@@ -3423,4 +3431,5 @@ section.panel > .entry-row + .entry-row { margin-top: var(--layout-tight); }
   .backup-row { flex-direction: column; align-items: stretch; }
   .backup-row-actions { justify-content: flex-end; }
   .settings-mockup-header { flex-direction: column; align-items: stretch; }
+}
 }
