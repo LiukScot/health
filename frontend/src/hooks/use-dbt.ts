@@ -2,7 +2,8 @@ import { useEffect, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { apiEnvelopeSchema, apiFetch, splitDateTime, toLocalDateTimeValue } from "../lib";
+import { toast } from "sonner";
+import { apiEnvelopeSchema, apiFetch, getErrorMessage, splitDateTime, toLocalDateTimeValue } from "../lib";
 import { dbtFormSchema, dbtListSchema } from "../app/core";
 import type { DbtEntry, DbtFormValues } from "../app/core";
 
@@ -69,6 +70,7 @@ export function useDbt(enabled: boolean) {
       clearTimeout(dbtResetTimerRef.current);
       dbtResetTimerRef.current = setTimeout(() => dbtMutation.reset(), 3000);
     },
+    onError: (error) => toast.error(getErrorMessage(error)),
   });
 
   const dbtDeleteMutation = useMutation({
@@ -79,6 +81,7 @@ export function useDbt(enabled: boolean) {
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: ["dbt"] });
     },
+    onError: (error) => toast.error(getErrorMessage(error)),
   });
 
   const resetDbtForm = () => {

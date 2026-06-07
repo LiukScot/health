@@ -2,7 +2,8 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { useForm, useWatch } from "react-hook-form";
 import { z } from "zod";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { apiEnvelopeSchema, apiFetch, splitDateTime, toLocalDateTimeValue } from "../lib";
+import { toast } from "sonner";
+import { apiEnvelopeSchema, apiFetch, getErrorMessage, splitDateTime, toLocalDateTimeValue } from "../lib";
 import {
   listToCsv,
   painFormSchema,
@@ -108,6 +109,7 @@ export function usePain(enabled: boolean) {
       clearTimeout(painResetTimerRef.current);
       painResetTimerRef.current = setTimeout(() => painMutation.reset(), 3000);
     },
+    onError: (error) => toast.error(getErrorMessage(error)),
   });
 
   const painDeleteMutation = useMutation({
@@ -118,6 +120,7 @@ export function usePain(enabled: boolean) {
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: ["pain"] });
     },
+    onError: (error) => toast.error(getErrorMessage(error)),
   });
 
   const resetPainForm = () => {

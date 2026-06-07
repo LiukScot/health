@@ -7,6 +7,7 @@ import { getErrorMessage } from "../lib";
 import { InlineFeedback, SectionHead } from "./shared";
 import { McpAccessSection } from "./McpAccessSection";
 import { MedicinePreselectionSection } from "./MedicinePreselectionSection";
+import { DateField } from "./DateField";
 
 type SettingsSectionProps = {
   auth: ReturnType<typeof useAuth>;
@@ -23,7 +24,6 @@ type SettingsSectionProps = {
   onImportJson: (file: File) => void;
   onExportXlsx: () => void;
   onImportXlsx: (file: File) => void;
-  backupFeedback: InlineMessage | null;
 };
 
 function BirthdayBlock({
@@ -45,7 +45,7 @@ function BirthdayBlock({
     <div className="stack">
       <SectionHead title="Birthday" ruled />
       <label className="field field-line">
-        <input type="date" aria-label="Birthday" value={value} onChange={(event) => handleChange(event.target.value)} />
+        <DateField value={value} onChange={handleChange} ariaLabel="Birthday" placeholder="Select birthday" />
       </label>
       <p className="hint">Why: this becomes a locked birthday item in Memorable days.{birthdayPending ? " Saving…" : ""}</p>
     </div>
@@ -141,8 +141,7 @@ function BackupBlock({
   onImportJson,
   onExportXlsx,
   onImportXlsx,
-  backupFeedback,
-}: Pick<SettingsSectionProps, "onExportJson" | "onImportJson" | "onExportXlsx" | "onImportXlsx" | "backupFeedback">) {
+}: Pick<SettingsSectionProps, "onExportJson" | "onImportJson" | "onExportXlsx" | "onImportXlsx">) {
   return (
     <div className="settings-backup">
       <div className="backup-row">
@@ -187,7 +186,6 @@ function BackupBlock({
           </label>
         </div>
       </div>
-      <InlineFeedback message={backupFeedback} />
     </div>
   );
 }
@@ -297,7 +295,6 @@ export function SettingsVariantB(props: SettingsSectionProps) {
             onImportJson={props.onImportJson}
             onExportXlsx={props.onExportXlsx}
             onImportXlsx={props.onImportXlsx}
-            backupFeedback={props.backupFeedback}
           />
         ) : null}
         {tab === "mcp" ? <McpAccessSection enabled /> : null}

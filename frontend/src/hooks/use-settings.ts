@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { z } from "zod";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
 import { apiEnvelopeSchema, apiFetch, getErrorMessage } from "../lib";
 import {
   BACKUP_JSON_EXPORT_OK,
@@ -51,7 +52,6 @@ export function usePrefs(enabled: boolean) {
 export function useSettings(enabled: boolean) {
   const queryClient = useQueryClient();
   const { prefsQuery, prefsMutation, savePrefsPatch } = usePrefs(enabled);
-  const [backupFeedback, setBackupFeedback] = useState<InlineMessage | null>(null);
   const [purgeConfirmArmed, setPurgeConfirmArmed] = useState(false);
 
   const purgeMutation = useMutation({
@@ -71,12 +71,11 @@ export function useSettings(enabled: boolean) {
   });
 
   const runBackupAction = async (action: () => Promise<void>, successMessage: InlineMessage) => {
-    setBackupFeedback(null);
     try {
       await action();
-      setBackupFeedback(successMessage);
+      toast.success(successMessage.text);
     } catch (error) {
-      setBackupFeedback({ tone: "error", text: getErrorMessage(error) });
+      toast.error(getErrorMessage(error));
     }
   };
 
@@ -144,7 +143,6 @@ export function useSettings(enabled: boolean) {
       purgeMutation.reset();
       setPurgeConfirmArmed(false);
     },
-    backupFeedback,
     onExportJson: () => void runBackupAction(doExportJson, BACKUP_JSON_EXPORT_OK),
     onImportJson: (file: File) => void runBackupAction(() => doImportJson(file), BACKUP_JSON_IMPORT_OK),
     onExportXlsx: () => void runBackupAction(doExportXlsx, BACKUP_XLSX_EXPORT_OK),

@@ -5,6 +5,7 @@ import { toDateKey, type InlineMessage, type MemorableDay } from "./core";
 import { emojiCatalog, emojiCategoryLabels, type EmojiCategory, type EmojiRecord } from "./emoji-catalog";
 import { getErrorMessage } from "../lib";
 import { memorableDayPayloadSchema, matchesMemorableDate, type useMemorableDays } from "../hooks/use-memorable-days";
+import { DateField } from "./DateField";
 
 type Props = {
   memorable: ReturnType<typeof useMemorableDays>;
@@ -491,7 +492,7 @@ export function MemorableDaysSection({ memorable }: Props) {
             <div className="memorable-modal-top-row">
               <label className="field field-line">
                 <span className="field-line-label">Date</span>
-                <input type="date" value={draft.date} onChange={(event) => setDraft((current) => current ? { ...current, date: event.target.value } : current)} />
+                <DateField value={draft.date} onChange={(value) => setDraft((current) => current ? { ...current, date: value } : current)} ariaLabel="Date" />
               </label>
               <label className="field field-line memorable-emoji-field">
                 <span className="field-line-label">Emoji</span>

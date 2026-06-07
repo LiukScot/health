@@ -17,7 +17,6 @@ export function SettingsSection({
   onImportJson,
   onExportXlsx,
   onImportXlsx,
-  backupFeedback,
 }: {
   auth: ReturnType<typeof useAuth>;
   birthday: string | null;
@@ -33,7 +32,6 @@ export function SettingsSection({
   onImportJson: (file: File) => void;
   onExportXlsx: () => void;
   onImportXlsx: (file: File) => void;
-  backupFeedback: InlineMessage | null;
 }) {
   const variantProps = {
     auth,
@@ -50,7 +48,6 @@ export function SettingsSection({
     onImportJson,
     onExportXlsx,
     onImportXlsx,
-    backupFeedback,
   };
   return (
     <section className="panel panel--frameless">

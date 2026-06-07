@@ -2,7 +2,8 @@ import { useEffect, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { apiEnvelopeSchema, apiFetch, splitDateTime, toLocalDateTimeValue } from "../lib";
+import { toast } from "sonner";
+import { apiEnvelopeSchema, apiFetch, getErrorMessage, splitDateTime, toLocalDateTimeValue } from "../lib";
 import { cbtFormSchema, cbtListSchema } from "../app/core";
 import type { CbtEntry, CbtFormValues } from "../app/core";
 
@@ -75,6 +76,7 @@ export function useCbt(enabled: boolean) {
       clearTimeout(cbtResetTimerRef.current);
       cbtResetTimerRef.current = setTimeout(() => cbtMutation.reset(), 3000);
     },
+    onError: (error) => toast.error(getErrorMessage(error)),
   });
 
   const cbtDeleteMutation = useMutation({
@@ -85,6 +87,7 @@ export function useCbt(enabled: boolean) {
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: ["cbt"] });
     },
+    onError: (error) => toast.error(getErrorMessage(error)),
   });
 
   const resetCbtForm = () => {

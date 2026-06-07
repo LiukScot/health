@@ -2,7 +2,8 @@ import { useEffect, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { apiEnvelopeSchema, apiFetch, splitDateTime, toLocalDateTimeValue } from "../lib";
+import { toast } from "sonner";
+import { apiEnvelopeSchema, apiFetch, getErrorMessage, splitDateTime, toLocalDateTimeValue } from "../lib";
 import {
   diaryFormSchema,
   diaryListSchema,
@@ -96,6 +97,7 @@ export function useDiary(enabled: boolean) {
       clearTimeout(diaryResetTimerRef.current);
       diaryResetTimerRef.current = setTimeout(() => diaryMutation.reset(), 3000);
     },
+    onError: (error) => toast.error(getErrorMessage(error)),
   });
 
   const diaryDeleteMutation = useMutation({
@@ -106,6 +108,7 @@ export function useDiary(enabled: boolean) {
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: ["diary"] });
     },
+    onError: (error) => toast.error(getErrorMessage(error)),
   });
 
   const resetDiaryForm = () => {
