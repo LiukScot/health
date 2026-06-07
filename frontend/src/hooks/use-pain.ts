@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { useForm, useWatch } from "react-hook-form";
 import { z } from "zod";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
 import { apiEnvelopeSchema, apiFetch, splitDateTime, toLocalDateTimeValue } from "../lib";
 import {
   listToCsv,
@@ -105,8 +106,12 @@ export function usePain(enabled: boolean) {
       setEditingPain(null);
       painForm.reset(createDefaultPainFormValues());
       await queryClient.invalidateQueries({ queryKey: ["pain"] });
+      toast.success("Entry saved");
       clearTimeout(painResetTimerRef.current);
       painResetTimerRef.current = setTimeout(() => painMutation.reset(), 3000);
+    },
+    onError: () => {
+      toast.error("Couldn't save entry. Try again.");
     },
   });
 

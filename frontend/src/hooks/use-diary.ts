@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
 import { apiEnvelopeSchema, apiFetch, splitDateTime, toLocalDateTimeValue } from "../lib";
 import {
   diaryFormSchema,
@@ -93,8 +94,12 @@ export function useDiary(enabled: boolean) {
         gratitude: "",
       });
       await queryClient.invalidateQueries({ queryKey: ["diary"] });
+      toast.success("Entry saved");
       clearTimeout(diaryResetTimerRef.current);
       diaryResetTimerRef.current = setTimeout(() => diaryMutation.reset(), 3000);
+    },
+    onError: () => {
+      toast.error("Couldn't save entry. Try again.");
     },
   });
 
