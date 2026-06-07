@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { Toaster } from "sonner";
 import { useAuth, useDiary, usePain, useCbt, useDbt, useDashboard, useMemorableDays, useSettings } from "./hooks";
 import { LoginScreen } from "./app/LoginScreen";
 import { Sidebar } from "./app/Sidebar";
@@ -241,11 +242,21 @@ function App() {
     // we only need to attach the listeners once at mount.
   }, []);
 
+  // The app ships only dark themes (dark, grey, oled — see themeIds in app/core.ts),
+  // so the toaster is pinned to "dark" to match. There is no light mode to follow.
+  const toaster = <Toaster theme="dark" richColors position="bottom-right" />;
+
   if (!auth.user) {
-    return <LoginScreen loginForm={auth.loginForm} loginMutation={auth.loginMutation} />;
+    return (
+      <>
+        <LoginScreen loginForm={auth.loginForm} loginMutation={auth.loginMutation} />
+        {toaster}
+      </>
+    );
   }
 
   return (
+    <>
     <div className={`shell${sidebarCollapsed ? " collapsed" : ""}${mobileSidebarOpen ? " mobile-open" : ""}`}>
       <Sidebar
         nav={nav}
@@ -343,6 +354,8 @@ function App() {
         </SectionErrorBoundary>
       </main>
     </div>
+    {toaster}
+    </>
   );
 }
 

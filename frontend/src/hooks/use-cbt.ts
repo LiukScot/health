@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
 import { apiEnvelopeSchema, apiFetch, splitDateTime, toLocalDateTimeValue } from "../lib";
 import { cbtFormSchema, cbtListSchema } from "../app/core";
 import type { CbtEntry, CbtFormValues } from "../app/core";
@@ -72,8 +73,12 @@ export function useCbt(enabled: boolean) {
       setEditingCbt(null);
       cbtForm.reset(freshDefaults());
       await queryClient.invalidateQueries({ queryKey: ["cbt"] });
+      toast.success("Entry saved");
       clearTimeout(cbtResetTimerRef.current);
       cbtResetTimerRef.current = setTimeout(() => cbtMutation.reset(), 3000);
+    },
+    onError: () => {
+      toast.error("Couldn't save entry. Try again.");
     },
   });
 
