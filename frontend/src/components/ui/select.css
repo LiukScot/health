@@ -1,0 +1,102 @@
+/* Hand-rolled select styled with the app's design tokens. The trigger mirrors
+   .date-field-trigger and the listbox mirrors .date-field-popover so both
+   custom controls read the same in every theme. */
+
+.ui-select {
+  position: relative;
+  display: inline-flex;
+  width: 100%;
+}
+
+.ui-select-trigger {
+  appearance: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--layout-inline);
+  width: 100%;
+  background: color-mix(in srgb, white 3%, var(--bg));
+  border: 0;
+  border-radius: var(--radius-sm);
+  padding: var(--layout-inline) var(--layout-stack);
+  color: var(--text);
+  font: 500 13px var(--font-body);
+  cursor: pointer;
+  text-align: left;
+  transition: background 0.15s ease, box-shadow 0.15s ease;
+}
+.ui-select-trigger:hover {
+  background: color-mix(in srgb, white 5%, var(--bg));
+}
+.ui-select-trigger:focus-visible {
+  background: color-mix(in srgb, white 5%, var(--bg));
+  box-shadow: inset 0 0 0 1px var(--accent);
+  outline: none;
+}
+.ui-select-trigger:disabled {
+  cursor: not-allowed;
+  color: var(--muted-soft);
+}
+.ui-select-trigger[data-empty="true"] {
+  color: var(--muted-soft);
+}
+
+:root[data-theme="oled"] .ui-select-trigger {
+  background: var(--card-soft);
+}
+:root[data-theme="oled"] .ui-select-trigger:hover,
+:root[data-theme="oled"] .ui-select-trigger:focus-visible {
+  background: color-mix(in srgb, white 6%, var(--card-soft));
+}
+
+.ui-select-value {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ui-select-icon {
+  font-size: 11px;
+  color: var(--muted);
+  pointer-events: none;
+}
+
+.ui-select-listbox {
+  position: absolute;
+  top: calc(100% + var(--layout-tight));
+  left: 0;
+  z-index: 40;
+  min-width: 100%;
+  margin: 0;
+  list-style: none;
+  background: var(--card-strong);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow);
+  padding: var(--layout-tight);
+  display: grid;
+  gap: var(--layout-tight);
+  outline: none;
+}
+
+.ui-select-option {
+  display: flex;
+  align-items: center;
+  padding: var(--layout-inline) var(--layout-stack);
+  border-radius: var(--radius-sm);
+  color: var(--text);
+  font: 500 13px var(--font-body);
+  cursor: pointer;
+  user-select: none;
+}
+.ui-select-option[data-active="true"] {
+  background: color-mix(in srgb, white 6%, var(--bg));
+}
+.ui-select-option[aria-selected="true"] {
+  background: var(--accent);
+  color: var(--text);
+}
+
+:root[data-theme="oled"] .ui-select-option[data-active="true"] {
+  background: color-mix(in srgb, white 6%, var(--card-soft));
+}
