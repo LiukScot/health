@@ -15,6 +15,11 @@
   --spacing-block: 20px;
   --spacing-page: 30px;
   --spacing-split: 48px;
+
+  /* Compact control text — the recurring 13px used by date/select controls.
+     A named token (not text-sm=14px) keeps the exact design size while
+     avoiding an arbitrary text-[13px] utility. */
+  --text-control: 13px;
 }
 
 /*
