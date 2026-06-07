@@ -14,6 +14,7 @@ import {
 } from "./core";
 import { SectionHead } from "./shared";
 import { EmptyState } from "./screen-helpers";
+import { DateField } from "./DateField";
 
 const WellbeingChart = lazy(() => import("./WellbeingChart"));
 
@@ -59,11 +60,11 @@ export function DashboardSection({
       <div className="dashboard-filters">
         <label className="field field-line">
           <span className="field-line-label">From</span>
-          <input type="date" value={dashboardFrom} onChange={(event) => onDateChange("from", event.target.value)} />
+          <DateField value={dashboardFrom} onChange={(value) => onDateChange("from", value)} ariaLabel="From date" />
         </label>
         <label className="field field-line">
           <span className="field-line-label">To</span>
-          <input type="date" value={dashboardTo} onChange={(event) => onDateChange("to", event.target.value)} />
+          <DateField value={dashboardTo} onChange={(value) => onDateChange("to", value)} ariaLabel="To date" />
         </label>
         <div className="dashboard-quick-ranges">
           {dashboardQuickRanges.map((range) => (

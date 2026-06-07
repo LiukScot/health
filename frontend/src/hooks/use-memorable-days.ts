@@ -1,7 +1,8 @@
 import { useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { z } from "zod";
-import { apiEnvelopeSchema, apiFetch } from "../lib";
+import { toast } from "sonner";
+import { apiEnvelopeSchema, apiFetch, getErrorMessage } from "../lib";
 import { memorableDayListSchema, memorableRepeatModeSchema } from "../app/core";
 import type { MemorableDay, MemorableRepeatMode } from "../app/core";
 
@@ -53,6 +54,7 @@ export function useMemorableDays(enabled: boolean) {
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: ["memorable-days"] });
     },
+    onError: (error) => toast.error(getErrorMessage(error)),
   });
 
   const updateMutation = useMutation({
@@ -61,6 +63,7 @@ export function useMemorableDays(enabled: boolean) {
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: ["memorable-days"] });
     },
+    onError: (error) => toast.error(getErrorMessage(error)),
   });
 
   const deleteMutation = useMutation({
@@ -69,6 +72,7 @@ export function useMemorableDays(enabled: boolean) {
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: ["memorable-days"] });
     },
+    onError: (error) => toast.error(getErrorMessage(error)),
   });
 
   const sortedItems = useMemo(
