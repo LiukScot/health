@@ -1,6 +1,6 @@
 import type { useAuth } from "../hooks/use-auth";
 import { type InlineMessage } from "./core";
-import { SettingsVariantB } from "./settings-mockups";
+import { SettingsPanel } from "./SettingsPanel";
 
 export function SettingsSection({
   auth,
@@ -52,7 +52,7 @@ export function SettingsSection({
   return (
     <section className="panel panel--frameless">
       <h1 className="panel-title">Settings</h1>
-      <SettingsVariantB {...variantProps} />
+      <SettingsPanel {...variantProps} />
     </section>
   );
 }
