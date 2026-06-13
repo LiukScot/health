@@ -37,6 +37,7 @@ playwright-report/
 *.suo
 *.sw?
 .DS_Store
+Thumbs.db
 
 # Claude AI config
 .claude/

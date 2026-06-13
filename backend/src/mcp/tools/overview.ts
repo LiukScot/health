@@ -163,6 +163,7 @@ export function registerOverviewTools(server: McpServer, ctx: McpToolContext): v
         )
         SELECT a.v AS va, b.v AS vb
         FROM a INNER JOIN b ON a.d = b.d
+        LIMIT 3650
       `;
 
       type Row = { va: number; vb: number };

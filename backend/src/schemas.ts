@@ -6,7 +6,7 @@ function isoDateRefine(val: string): boolean {
   const parsed = new Date(val);
   if (isNaN(parsed.getTime())) return false;
   const [year, month, day] = val.split("-").map(Number);
-  return parsed.getFullYear() === year && parsed.getMonth() + 1 === month && parsed.getDate() === day;
+  return parsed.getUTCFullYear() === year && parsed.getUTCMonth() + 1 === month && parsed.getUTCDate() === day;
 }
 
 export const loginSchema = z.object({
@@ -92,7 +92,7 @@ export const prefsSchema = z.object({
   model: z.string().max(200).default(DEFAULT_MODEL),
   chatRange: z.string().default("all"),
   lastRange: z.string().default("all"),
-  graphSelection: z.record(z.string(), z.any()).default({}),
+  graphSelection: z.record(z.string(), z.unknown()).default({}),
   birthday: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).refine(isoDateRefine, {
     message: "Invalid birthday: must be a valid calendar date in YYYY-MM-DD format"
   }).nullable().optional().default(null),
@@ -118,11 +118,13 @@ export const mcpTokenCreateSchema = z.object({
   expiresAt: z.string().datetime().nullable().optional().default(null).refine(
     (val) => {
       if (!val) return true;
+      const ts = new Date(val).getTime();
+      if (ts < Date.now()) return false;
       const max = new Date();
       max.setFullYear(max.getFullYear() + 1);
-      return new Date(val) <= max;
+      return ts <= max.getTime();
     },
-    { message: "Expiry must be within 1 year from now" }
+    { message: "Expiry must be in the future and within 1 year from now" }
   ),
 });
 

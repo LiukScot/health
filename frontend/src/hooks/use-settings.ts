@@ -80,7 +80,7 @@ export function useSettings(enabled: boolean) {
   };
 
   const doExportJson = async () => {
-    const payload = await apiFetch("/api/v1/backup/json", { method: "GET" }, (raw) => apiEnvelopeSchema(z.any()).parse(raw).data);
+    const payload = await apiFetch("/api/v1/backup/json", { method: "GET" }, (raw) => apiEnvelopeSchema(z.unknown()).parse(raw).data);
     const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
     const anchor = document.createElement("a");
     anchor.href = URL.createObjectURL(blob);
@@ -91,7 +91,12 @@ export function useSettings(enabled: boolean) {
 
   const doImportJson = async (file: File) => {
     const text = await file.text();
-    const parsed = JSON.parse(text);
+    let parsed: unknown;
+    try {
+      parsed = JSON.parse(text);
+    } catch {
+      throw new Error("File is not valid JSON");
+    }
     await apiFetch("/api/v1/backup/json/import", { method: "POST", body: JSON.stringify(parsed) }, (raw) =>
       apiEnvelopeSchema(z.object({ ok: z.boolean() })).parse(raw).data,
     );
