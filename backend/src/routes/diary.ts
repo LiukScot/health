@@ -53,6 +53,7 @@ diary.get("/", (c) => {
       generalMoods: row.generalMoods ?? "",
       description: row.description ?? "",
       gratitude: row.gratitude ?? "",
+      reflection: row.reflection ?? "",
       createdAt: row.createdAt,
       updatedAt: row.updatedAt
     }))

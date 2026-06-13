@@ -199,7 +199,7 @@ backup.post("/json/import", async (c) => {
          ON CONFLICT(user_id, field, value) DO NOTHING`
       );
       for (const field of PAIN_MULTI_FIELDS) {
-        const values = (removed as any)[field];
+        const values = (removed as Record<string, unknown>)[field];
         if (!Array.isArray(values)) continue;
         for (const raw of values) {
           const normalized = String(raw).trim();
@@ -226,7 +226,7 @@ backup.post("/json/import", async (c) => {
          ON CONFLICT(user_id, field, value) DO NOTHING`
       );
       for (const field of PAIN_MULTI_FIELDS) {
-        const values = (importedOptions as any)[field];
+        const values = (importedOptions as Record<string, unknown>)[field];
         if (!Array.isArray(values)) continue;
         for (const raw of values) {
           const normalized = String(raw).trim();
@@ -306,7 +306,6 @@ const XLSX_UPLOAD_MAX_BASE64_CHARS = Math.ceil(XLSX_UPLOAD_MAX_BYTES / 3) * 4 + 
 const XLSX_MIME_TYPES = new Set([
   "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
   "application/vnd.ms-excel",
-  "application/octet-stream"
 ]);
 
 backup.post("/xlsx/import", async (c) => {
@@ -329,7 +328,7 @@ backup.post("/xlsx/import", async (c) => {
         400
       );
     }
-    if (file.type && !XLSX_MIME_TYPES.has(file.type)) {
+    if (!XLSX_MIME_TYPES.has(file.type)) {
       return c.json(
         { error: { code: "INVALID_FILE_TYPE", message: "Unsupported MIME type" } },
         400
@@ -344,7 +343,7 @@ backup.post("/xlsx/import", async (c) => {
     const arrayBuffer = await file.arrayBuffer();
     await workbook.xlsx.load(arrayBuffer);
   } else {
-    const payload = (await c.req.json().catch(() => null)) as any;
+    const payload = (await c.req.json().catch(() => null)) as Record<string, unknown> | null;
     if (!payload?.base64 || typeof payload.base64 !== "string") {
       return c.json({ error: { code: "MISSING_FILE", message: "Expected multipart form upload or JSON {base64}" } }, 400);
     }
@@ -429,6 +428,8 @@ backup.post("/purge", async (c) => {
     rawDb.query(`DELETE FROM dbt_entries WHERE user_id = ?`).run(userId);
     rawDb.query(`DELETE FROM memorable_days WHERE user_id = ?`).run(userId);
     rawDb.query(`DELETE FROM user_preferences WHERE user_id = ?`).run(userId);
+    rawDb.query(`DELETE FROM pain_options WHERE user_id = ?`).run(userId);
+    rawDb.query(`DELETE FROM pain_removed_options WHERE user_id = ?`).run(userId);
   });
   tx();
   return c.json({ data: { ok: true } });
