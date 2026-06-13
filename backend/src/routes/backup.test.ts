@@ -287,3 +287,75 @@ describe("backup data isolation (IDOR)", () => {
     expect(res.data.pain.rows).toEqual([]);
   });
 });
+
+describe("POST /backup/purge", () => {
+  test("requires authentication", async () => {
+    const { app } = await setup();
+    const res = await app.request("/backup/purge", { method: "POST" });
+    expect(res.status).toBe(401);
+  });
+
+  test("wipes the authenticated user's data", async () => {
+    const { app, cookie } = await setup();
+    await app.request("/diary", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", cookie },
+      body: JSON.stringify(diaryBody),
+    });
+    await app.request("/pain", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", cookie },
+      body: JSON.stringify(painBody),
+    });
+    const before = await (
+      await app.request("/backup/json", { headers: { cookie } })
+    ).json();
+    expect(before.data.diary.rows).toHaveLength(1);
+    expect(before.data.pain.rows).toHaveLength(1);
+
+    const purge = await app.request("/backup/purge", {
+      method: "POST",
+      headers: { cookie },
+    });
+    expect(purge.status).toBe(200);
+
+    const after = await (
+      await app.request("/backup/json", { headers: { cookie } })
+    ).json();
+    expect(after.data.diary.rows).toEqual([]);
+    expect(after.data.pain.rows).toEqual([]);
+  });
+
+  test("does not wipe another user's data (IDOR isolation)", async () => {
+    const { ctx, app, cookie } = await setup();
+    await app.request("/diary", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", cookie },
+      body: JSON.stringify(diaryBody),
+    });
+    await app.request("/pain", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", cookie },
+      body: JSON.stringify(painBody),
+    });
+
+    await seedUser(ctx.db, { email: "purger@example.com", password: "Password123!" });
+    const otherLogin = await app.request("/auth/login", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email: "purger@example.com", password: "Password123!" }),
+    });
+    const otherCookie = extractSessionCookie(otherLogin.headers.get("set-cookie"));
+    const purge = await app.request("/backup/purge", {
+      method: "POST",
+      headers: { cookie: otherCookie },
+    });
+    expect(purge.status).toBe(200);
+
+    const victim = await (
+      await app.request("/backup/json", { headers: { cookie } })
+    ).json();
+    expect(victim.data.diary.rows).toHaveLength(1);
+    expect(victim.data.pain.rows).toHaveLength(1);
+  });
+});
