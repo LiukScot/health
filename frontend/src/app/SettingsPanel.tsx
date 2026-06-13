@@ -259,7 +259,7 @@ const settingsTabs: { id: SettingsTab; label: string; danger?: boolean }[] = [
   { id: "danger", label: "Danger zone", danger: true },
 ];
 
-export function SettingsVariantB(props: SettingsSectionProps) {
+export function SettingsPanel(props: SettingsSectionProps) {
   const [tab, setTab] = useState<SettingsTab>("account");
   return (
     <div className="settings-mock settings-mock-b">
