@@ -4,6 +4,7 @@ import backupRoute from "./backup.ts";
 import diaryRoute from "./diary.ts";
 import painRoute from "./pain.ts";
 import { extractSessionCookie, seedUser, setupAuthedApp } from "../test-helpers.ts";
+import type { SQLiteDB } from "../db.ts";
 
 async function setup() {
   const s = await setupAuthedApp([
@@ -288,6 +289,36 @@ describe("backup data isolation (IDOR)", () => {
   });
 });
 
+// The purge handler deletes from every user-data table; seed and count all of
+// them so a dropped DELETE for any one table is caught, not just diary/pain.
+const PURGE_TABLES = [
+  "pain_entries",
+  "diary_entries",
+  "cbt_entries",
+  "dbt_entries",
+  "memorable_days",
+  "user_preferences",
+] as const;
+
+function seedAllUserTables(rawDb: SQLiteDB, userId: number): void {
+  rawDb.query("INSERT INTO diary_entries (user_id, entry_date, entry_time) VALUES (?, '2026-05-16', '08:00')").run(userId);
+  rawDb.query("INSERT INTO pain_entries (user_id, entry_date, entry_time) VALUES (?, '2026-05-16', '09:00')").run(userId);
+  rawDb.query("INSERT INTO cbt_entries (user_id, entry_date, entry_time) VALUES (?, '2026-05-16', '10:00')").run(userId);
+  rawDb.query("INSERT INTO dbt_entries (user_id, entry_date, entry_time) VALUES (?, '2026-05-16', '11:00')").run(userId);
+  rawDb.query("INSERT INTO memorable_days (user_id, date, title, repeat_mode) VALUES (?, '2026-05-16', 'Anniversary', 'yearly')").run(userId);
+  rawDb.query("INSERT INTO user_preferences (user_id) VALUES (?)").run(userId);
+}
+
+function countUserRows(rawDb: SQLiteDB, userId: number): number {
+  let total = 0;
+  for (const table of PURGE_TABLES) {
+    // table names come from the const list above, never user input.
+    const row = rawDb.query(`SELECT COUNT(*) AS n FROM ${table} WHERE user_id = ?`).get(userId) as { n: number };
+    total += row.n;
+  }
+  return total;
+}
+
 describe("POST /backup/purge", () => {
   test("requires authentication", async () => {
     const { app } = await setup();
@@ -295,49 +326,26 @@ describe("POST /backup/purge", () => {
     expect(res.status).toBe(401);
   });
 
-  test("wipes the authenticated user's data", async () => {
-    const { app, cookie } = await setup();
-    await app.request("/diary", {
-      method: "POST",
-      headers: { "Content-Type": "application/json", cookie },
-      body: JSON.stringify(diaryBody),
-    });
-    await app.request("/pain", {
-      method: "POST",
-      headers: { "Content-Type": "application/json", cookie },
-      body: JSON.stringify(painBody),
-    });
-    const before = await (
-      await app.request("/backup/json", { headers: { cookie } })
-    ).json();
-    expect(before.data.diary.rows).toHaveLength(1);
-    expect(before.data.pain.rows).toHaveLength(1);
+  test("wipes the authenticated user's data across every table", async () => {
+    const { ctx, app, cookie, userId } = await setup();
+    seedAllUserTables(ctx.rawDb, userId);
+    expect(countUserRows(ctx.rawDb, userId)).toBe(PURGE_TABLES.length);
 
     const purge = await app.request("/backup/purge", {
       method: "POST",
       headers: { cookie },
     });
     expect(purge.status).toBe(200);
+    expect(await purge.json()).toEqual({ data: { ok: true } });
 
-    const after = await (
-      await app.request("/backup/json", { headers: { cookie } })
-    ).json();
-    expect(after.data.diary.rows).toEqual([]);
-    expect(after.data.pain.rows).toEqual([]);
+    expect(countUserRows(ctx.rawDb, userId)).toBe(0);
   });
 
   test("does not wipe another user's data (IDOR isolation)", async () => {
-    const { ctx, app, cookie } = await setup();
-    await app.request("/diary", {
-      method: "POST",
-      headers: { "Content-Type": "application/json", cookie },
-      body: JSON.stringify(diaryBody),
-    });
-    await app.request("/pain", {
-      method: "POST",
-      headers: { "Content-Type": "application/json", cookie },
-      body: JSON.stringify(painBody),
-    });
+    const { ctx, app, userId } = await setup();
+    seedAllUserTables(ctx.rawDb, userId);
+    const seeded = countUserRows(ctx.rawDb, userId);
+    expect(seeded).toBe(PURGE_TABLES.length);
 
     await seedUser(ctx.db, { email: "purger@example.com", password: "Password123!" });
     const otherLogin = await app.request("/auth/login", {
@@ -352,10 +360,6 @@ describe("POST /backup/purge", () => {
     });
     expect(purge.status).toBe(200);
 
-    const victim = await (
-      await app.request("/backup/json", { headers: { cookie } })
-    ).json();
-    expect(victim.data.diary.rows).toHaveLength(1);
-    expect(victim.data.pain.rows).toHaveLength(1);
+    expect(countUserRows(ctx.rawDb, userId)).toBe(seeded);
   });
 });
