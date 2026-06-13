@@ -1,5 +1,5 @@
 import { createMiddleware } from "hono/factory";
-import { eq, and, gt, sql } from "drizzle-orm";
+import { eq, and, gt, isNull, sql } from "drizzle-orm";
 import { env } from "../env.ts";
 import { readCookie } from "../helpers.ts";
 import type { DrizzleDB } from "../db/index.ts";
@@ -18,7 +18,12 @@ export function getSession(db: DrizzleDB, req: Request): SessionData | null {
   const row = db
     .select({ sid: sessions.sid, userId: sessions.userId, email: sessions.email })
     .from(sessions)
-    .where(and(eq(sessions.sid, sid), gt(sessions.expiresAt, sql`datetime('now')`)))
+    .innerJoin(users, eq(sessions.userId, users.id))
+    .where(and(
+      eq(sessions.sid, sid),
+      gt(sessions.expiresAt, sql`datetime('now')`),
+      isNull(users.disabledAt),
+    ))
     .limit(1)
     .get();
   if (!row) return null;
@@ -59,18 +64,8 @@ export const requireAuth = createMiddleware<{
     return c.json({ error: { code: "UNAUTHORIZED", message: "Authentication required" } }, 401);
   }
 
-  const me = db
-    .select({ id: users.id, email: users.email, name: users.name, disabledAt: users.disabledAt })
-    .from(users)
-    .where(eq(users.id, session.userId))
-    .limit(1)
-    .get();
-  if (!me || me.disabledAt) {
-    return c.json({ error: { code: "UNAUTHORIZED", message: "Authentication required" } }, 401);
-  }
-
-  c.set("userId", me.id);
-  c.set("userEmail", me.email);
+  c.set("userId", session.userId);
+  c.set("userEmail", session.email);
   c.set("sessionSid", session.sid);
   await next();
 });

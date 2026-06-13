@@ -133,7 +133,36 @@ export function mergeOptions(current: string[], incoming: string[]): string[] {
   return out;
 }
 
-export function rowsToHealthBackup(diaryRows: any[], painRows: any[]): { diary: any; pain: any } {
+interface DiaryBackupRow {
+  entry_date: string; entry_time: string;
+  mood_level?: number | null; depression_level?: number | null; anxiety_level?: number | null;
+  positive_moods?: string | null; negative_moods?: string | null; general_moods?: string | null;
+  description?: string | null; gratitude?: string | null; reflection?: string | null;
+}
+
+interface PainBackupRow {
+  entry_date: string; entry_time: string;
+  pain_level?: number | null; fatigue_level?: number | null; coffee_count?: number | null;
+  symptoms?: string | null; area?: string | null; activities?: string | null;
+  habits?: string | null; other?: string | null; medicines?: string | null; note?: string | null;
+}
+
+interface PainApiRow {
+  id: number; entryDate: string; entryTime: string;
+  painLevel: number | null; fatigueLevel: number | null; coffeeCount: number | null;
+  area: string | null; symptoms: string | null; activities: string | null;
+  medicines: string | null; habits: string | null; other: string | null;
+  note: string | null; createdAt: string; updatedAt: string;
+}
+
+interface HealthBackupSheet {
+  source: string;
+  imported_at: string;
+  headers: string[];
+  rows: Record<string, string | number | null>[];
+}
+
+export function rowsToHealthBackup(diaryRows: DiaryBackupRow[], painRows: PainBackupRow[]): { diary: HealthBackupSheet; pain: HealthBackupSheet } {
   const diary = {
     source: "health-backend",
     imported_at: new Date().toISOString(),
@@ -179,7 +208,7 @@ export function rowsToHealthBackup(diaryRows: any[], painRows: any[]): { diary: 
   return { diary, pain };
 }
 
-export function painRowToApi(row: any) {
+export function painRowToApi(row: PainApiRow) {
   return {
     id: row.id,
     entryDate: row.entryDate,
