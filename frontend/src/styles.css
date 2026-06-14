@@ -135,14 +135,22 @@ body {
   --rdp-accent-background-color: color-mix(in srgb, var(--accent) 18%, transparent);
   --rdp-background-color: var(--card-soft);
   --rdp-today-color: var(--accent);
-  --rdp-day-width: 36px;
-  --rdp-day-height: 36px;
-  --rdp-day_button-width: 36px;
-  --rdp-day_button-height: 36px;
-  --rdp-day_button-border-radius: var(--radius-sm);
+  --rdp-day-width: 32px;
+  --rdp-day-height: 32px;
+  --rdp-day_button-width: 32px;
+  --rdp-day_button-height: 32px;
+  --rdp-day_button-border-radius: 999px;
   color: var(--text);
   font: 500 13px var(--font-body);
   margin: 0;
+}
+.date-field-popover .rdp-day_button {
+  font-size: 13px;
+  font-weight: 500;
+}
+.date-field-popover .rdp-caption_label {
+  font-size: 14px;
+  font-weight: 600;
 }
 .date-field-popover .rdp-caption_label,
 .date-field-popover .rdp-weekday {
@@ -174,4 +182,5 @@ body {
   background: var(--accent);
   color: var(--text);
   border-color: var(--accent);
+  font-weight: 600;
 }

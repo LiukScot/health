@@ -14,10 +14,15 @@ import {
 } from "./core";
 import { SectionHead } from "./shared";
 import { EmptyState } from "./screen-helpers";
-import { FIELD_LINE_LABEL } from "../components/ui/FieldLine";
-import { DateField } from "./DateField";
+import { FIELD_LINE_INPUT, FIELD_LINE_LABEL } from "../components/ui/FieldLine";
 
 const WellbeingChart = lazy(() => import("./WellbeingChart"));
+
+// Native date input styled like the form date/time fields (auto width, tinted,
+// themed calendar-picker indicator) so the dashboard range filters match the
+// rest of the app instead of a bespoke calendar popover.
+const DATE_INPUT =
+  "!w-auto max-w-full justify-self-start cursor-pointer tabular-nums [&::-webkit-calendar-picker-indicator]:cursor-pointer [&::-webkit-calendar-picker-indicator]:ml-inline [&::-webkit-calendar-picker-indicator]:invert [&::-webkit-calendar-picker-indicator]:opacity-60 hover:[&::-webkit-calendar-picker-indicator]:opacity-100";
 
 const DASH_CARD =
   "grid grid-rows-[auto_auto_22px] gap-inline content-start w-full max-w-[200px] justify-self-start rounded-md p-stack bg-card-soft";
@@ -79,11 +84,23 @@ export function DashboardSection({
       <div className="flex flex-wrap gap-stack items-end mb-block">
         <label className="flex flex-col gap-inline">
           <span className={FIELD_LINE_LABEL}>From</span>
-          <DateField value={dashboardFrom} onChange={(value) => onDateChange("from", value)} ariaLabel="From date" />
+          <input
+            type="date"
+            value={dashboardFrom}
+            onChange={(e) => onDateChange("from", e.target.value)}
+            aria-label="From date"
+            className={`${FIELD_LINE_INPUT} ${DATE_INPUT}`}
+          />
         </label>
         <label className="flex flex-col gap-inline">
           <span className={FIELD_LINE_LABEL}>To</span>
-          <DateField value={dashboardTo} onChange={(value) => onDateChange("to", value)} ariaLabel="To date" />
+          <input
+            type="date"
+            value={dashboardTo}
+            onChange={(e) => onDateChange("to", e.target.value)}
+            aria-label="To date"
+            className={`${FIELD_LINE_INPUT} ${DATE_INPUT}`}
+          />
         </label>
         <div className="flex gap-inline flex-wrap">
           {dashboardQuickRanges.map((range) => (

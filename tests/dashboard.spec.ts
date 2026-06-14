@@ -92,8 +92,8 @@ test("renders dashboard data and supports chart toggles", async ({ page }) => {
   await expect(statsGrid.locator("article").first()).toHaveCSS("box-shadow", "none");
   await expect(statsGrid.locator("article").first()).toHaveCSS("background-color", "rgb(30, 30, 34)");
   await expect(page.getByTestId("series-toggle").first()).toHaveCSS("border-top-width", "0px");
-  await expect(page.getByRole("button", { name: "From date" })).toHaveCSS("font-size", "13px");
-  await expect(page.getByRole("button", { name: "From date" })).toHaveCSS("font-weight", "500");
+  await expect(page.getByLabel("From date")).toHaveCSS("font-size", "13px");
+  await expect(page.getByLabel("From date")).toHaveCSS("font-weight", "500");
   await page.setViewportSize({ width: 850, height: 1000 });
   const firstCardBox = await statsGrid.locator("article").nth(0).boundingBox();
   expect(firstCardBox?.width ?? 0).toBeLessThanOrEqual(176);
