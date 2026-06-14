@@ -108,4 +108,70 @@ body {
   color: var(--text);
   background: var(--bg);
 }
+
+}
+
+/*
+ * DateField popover — styles react-day-picker's library-rendered .rdp-* markup,
+ * which Tailwind utilities can't reach. INTENTIONALLY UNLAYERED (outside @layer
+ * components): react-day-picker/style.css is loaded unlayered and sets
+ * `--rdp-accent-color: blue` on .rdp-root, and unlayered CSS beats @layer rules
+ * regardless of specificity. So the overrides live here, unlayered, and target
+ * `.rdp-root` directly (specificity 0,2,0 > the library's own 0,1,0 rule).
+ */
+.date-field-popover {
+  position: absolute;
+  top: calc(100% + var(--spacing-tight));
+  left: 0;
+  z-index: 40;
+  background: var(--card-strong);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow);
+  padding: var(--spacing-stack);
+}
+.date-field-popover .rdp-root {
+  --rdp-accent-color: var(--accent);
+  --rdp-accent-background-color: color-mix(in srgb, var(--accent) 18%, transparent);
+  --rdp-background-color: var(--card-soft);
+  --rdp-today-color: var(--accent);
+  --rdp-day-width: 36px;
+  --rdp-day-height: 36px;
+  --rdp-day_button-width: 36px;
+  --rdp-day_button-height: 36px;
+  --rdp-day_button-border-radius: var(--radius-sm);
+  color: var(--text);
+  font: 500 13px var(--font-body);
+  margin: 0;
+}
+.date-field-popover .rdp-caption_label,
+.date-field-popover .rdp-weekday {
+  color: var(--muted);
+}
+.date-field-popover .rdp-dropdowns {
+  gap: var(--spacing-inline);
+}
+.date-field-popover .rdp-dropdown {
+  color: var(--text);
+}
+.date-field-popover .rdp-dropdown option {
+  background: var(--card-strong);
+  color: var(--text);
+}
+.date-field-popover .rdp-button_previous,
+.date-field-popover .rdp-button_next {
+  color: var(--text);
+  border-radius: var(--radius-sm);
+}
+.date-field-popover .rdp-button_previous:hover,
+.date-field-popover .rdp-button_next:hover {
+  background: var(--card-soft);
+}
+.date-field-popover .rdp-day_button:hover {
+  background: color-mix(in srgb, white 6%, var(--bg));
+}
+.date-field-popover .rdp-selected .rdp-day_button {
+  background: var(--accent);
+  color: var(--text);
+  border-color: var(--accent);
 }
