@@ -3,7 +3,8 @@ services:
     build: .
     image: health:local
     container_name: health
-    network_mode: host
+    ports:
+      - "5555:5555"
     mem_limit: 512m
     cpus: "0.5"
     user: "1000:1000"
