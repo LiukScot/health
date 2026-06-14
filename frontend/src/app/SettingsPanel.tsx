@@ -8,6 +8,9 @@ import { InlineFeedback, SectionHead } from "./shared";
 import { McpAccessSection } from "./McpAccessSection";
 import { MedicinePreselectionSection } from "./MedicinePreselectionSection";
 import { DateField } from "./DateField";
+import { Button, buttonClass } from "../components/ui/Button";
+import { FieldLine } from "../components/ui/FieldLine";
+import { TAG_TAB_BTN } from "./entries";
 
 type SettingsSectionProps = {
   auth: ReturnType<typeof useAuth>;
@@ -42,12 +45,12 @@ function BirthdayBlock({
   };
 
   return (
-    <div className="stack">
+    <div className="grid gap-stack">
       <SectionHead title="Birthday" ruled />
-      <label className="field field-line">
+      <label className="grid gap-inline content-start">
         <DateField value={value} onChange={handleChange} ariaLabel="Birthday" placeholder="Select birthday" />
       </label>
-      <p className="hint">Why: this becomes a locked birthday item in Memorable days.{birthdayPending ? " Saving…" : ""}</p>
+      <p className="text-muted text-control">Why: this becomes a locked birthday item in Memorable days.{birthdayPending ? " Saving…" : ""}</p>
     </div>
   );
 }
@@ -55,25 +58,28 @@ function BirthdayBlock({
 function ThemeBlock() {
   const { theme, setTheme } = useTheme();
   return (
-    <div className="stack">
+    <div className="grid gap-stack">
       <SectionHead title="Theme" ruled />
-      <div className="theme-swatches" role="group" aria-label="Theme">
+      <div className="flex flex-wrap gap-block" role="group" aria-label="Theme">
         {THEMES.map((t) => {
           const selected = t.id === theme;
+          const dotShadow = selected
+            ? "shadow-[0_0_0_2px_var(--accent)]"
+            : "shadow-[var(--shadow-sm)] group-hover/sw:shadow-[0_0_0_2px_color-mix(in_srgb,var(--accent)_40%,transparent)]";
           return (
             <button
               key={t.id}
               type="button"
-              className={`theme-swatch${selected ? " is-selected" : ""}`}
+              className="group/sw flex p-0 min-h-0 bg-transparent border-0 rounded-none shadow-none cursor-pointer"
               aria-pressed={selected}
               aria-label={t.label}
               title={t.label}
               onClick={() => setTheme(t.id)}
             >
-              <span className="theme-swatch-dot" style={{ background: t.bg }}>
+              <span className={`w-[44px] h-[44px] rounded-full border border-border grid place-items-center transition-[box-shadow] duration-150 ease-[ease] ${dotShadow}`} style={{ background: t.bg }}>
                 {selected ? (
                   <svg
-                    className="theme-swatch-check"
+                    className="text-text w-[18px] h-[18px]"
                     viewBox="0 0 24 24"
                     fill="none"
                     stroke="currentColor"
@@ -96,28 +102,19 @@ function ThemeBlock() {
 
 function AccountBlock({ auth }: Pick<SettingsSectionProps, "auth">) {
   return (
-    <div className="settings-account-block">
+    <div className="flex flex-col gap-inline">
       <form
-        className="stack"
+        className="grid gap-stack"
         onFocus={auth.clearPasswordStatus}
         onSubmit={auth.changePasswordForm.handleSubmit((v) => auth.changePasswordMutation.mutate(v))}
       >
-        <label className="field field-line">
-          <span className="field-line-label">Current password</span>
-          <input type="password" autoComplete="current-password" {...auth.changePasswordForm.register("currentPassword")} />
-        </label>
-        <label className="field field-line">
-          <span className="field-line-label">New password</span>
-          <input type="password" autoComplete="new-password" {...auth.changePasswordForm.register("newPassword")} />
-        </label>
-        <label className="field field-line">
-          <span className="field-line-label">Confirm</span>
-          <input type="password" autoComplete="new-password" {...auth.changePasswordForm.register("confirmPassword")} />
-        </label>
-        <div className="save-section">
-          <button type="submit" className="btn btn-primary" disabled={auth.changePasswordMutation.isPending}>
+        <FieldLine label="Current password" type="password" autoComplete="current-password" {...auth.changePasswordForm.register("currentPassword")} />
+        <FieldLine label="New password" type="password" autoComplete="new-password" {...auth.changePasswordForm.register("newPassword")} />
+        <FieldLine label="Confirm" type="password" autoComplete="new-password" {...auth.changePasswordForm.register("confirmPassword")} />
+        <div className="flex justify-end pt-inline">
+          <Button type="submit" variant="primary" className="mt-[12px]" disabled={auth.changePasswordMutation.isPending}>
             Change password
-          </button>
+          </Button>
         </div>
         <InlineFeedback
           message={
@@ -127,10 +124,10 @@ function AccountBlock({ auth }: Pick<SettingsSectionProps, "auth">) {
           }
         />
       </form>
-      <div className="save-section">
-        <button type="button" className="btn" onClick={() => auth.logoutMutation.mutate()} disabled={auth.logoutMutation.isPending}>
+      <div className="flex justify-end pt-inline">
+        <Button type="button" onClick={() => auth.logoutMutation.mutate()} disabled={auth.logoutMutation.isPending}>
           Log out
-        </button>
+        </Button>
       </div>
     </div>
   );
@@ -143,19 +140,20 @@ function BackupBlock({
   onImportXlsx,
 }: Pick<SettingsSectionProps, "onExportJson" | "onImportJson" | "onExportXlsx" | "onImportXlsx">) {
   return (
-    <div className="settings-backup">
-      <div className="backup-row">
-        <div className="backup-row-head">
-          <span className="backup-row-title">JSON</span>
-          <span className="backup-row-meta">Full database</span>
+    <div className="grid grid-cols-[repeat(auto-fit,minmax(320px,1fr))] gap-inline">
+      <div className="flex items-center justify-between gap-block px-[14px] py-[12px] rounded-md bg-card-strong max-[640px]:flex-col max-[640px]:items-stretch">
+        <div className="flex flex-col gap-[2px] min-w-0">
+          <span className="text-sm font-bold text-text">JSON</span>
+          <span className="text-xs text-muted">Full database</span>
         </div>
-        <div className="backup-row-actions">
-          <button type="button" className="btn" onClick={onExportJson}>Export</button>
-          <label className="btn file-input-btn">
+        <div className="flex gap-inline flex-shrink-0 max-[640px]:justify-end">
+          <Button type="button" size="sm" onClick={onExportJson}>Export</Button>
+          <label className={`${buttonClass("default", "sm")} relative overflow-hidden cursor-pointer`}>
             Import
             <input
               type="file"
               accept=".json"
+              className="absolute inset-0 opacity-0 cursor-pointer"
               onChange={(e) => {
                 const file = e.target.files?.[0];
                 if (file) onImportJson(file);
@@ -165,18 +163,19 @@ function BackupBlock({
           </label>
         </div>
       </div>
-      <div className="backup-row">
-        <div className="backup-row-head">
-          <span className="backup-row-title">XLSX</span>
-          <span className="backup-row-meta">Spreadsheet</span>
+      <div className="flex items-center justify-between gap-block px-[14px] py-[12px] rounded-md bg-card-strong max-[640px]:flex-col max-[640px]:items-stretch">
+        <div className="flex flex-col gap-[2px] min-w-0">
+          <span className="text-sm font-bold text-text">XLSX</span>
+          <span className="text-xs text-muted">Spreadsheet</span>
         </div>
-        <div className="backup-row-actions">
-          <button type="button" className="btn" onClick={onExportXlsx}>Export</button>
-          <label className="btn file-input-btn">
+        <div className="flex gap-inline flex-shrink-0 max-[640px]:justify-end">
+          <Button type="button" size="sm" onClick={onExportXlsx}>Export</Button>
+          <label className={`${buttonClass("default", "sm")} relative overflow-hidden cursor-pointer`}>
             Import
             <input
               type="file"
               accept=".xlsx,.xls"
+              className="absolute inset-0 opacity-0 cursor-pointer"
               onChange={(e) => {
                 const file = e.target.files?.[0];
                 if (file) onImportXlsx(file);
@@ -199,33 +198,32 @@ function DangerBlock({
   onPurgeCancel,
 }: Pick<SettingsSectionProps, "purgeConfirmArmed" | "purgePending" | "purgeError" | "onPurgeArm" | "onPurgeConfirm" | "onPurgeCancel">) {
   return (
-    <div className="settings-danger-block">
-      <p className="settings-danger-description">
+    <div className="flex flex-col gap-stack">
+      <p className="m-0 px-stack py-inline bg-[color-mix(in_srgb,var(--danger)_7%,var(--card))] border-l-2 border-[color-mix(in_srgb,var(--danger)_55%,transparent)] rounded-sm text-muted text-hint leading-[1.45]">
         Permanently deletes all diary entries, pain logs, CBT/DBT records, and stored preferences for this account. This cannot be undone.
       </p>
       {purgeConfirmArmed ? (
-        <div className="inline-confirmation" role="group" aria-label="Confirm purge all data">
+        <div className="mt-stack p-stack border border-[color-mix(in_srgb,var(--danger)_40%,var(--border))] rounded-[12px] bg-[color-mix(in_srgb,var(--danger)_8%,var(--card))] grid gap-stack" role="group" aria-label="Confirm purge all data">
           <InlineFeedback
-            className="confirmation-copy"
             message={{
               tone: "warning",
               text: "This permanently deletes all diary, pain, and preference data for this account.",
             }}
           />
-          <div className="row-actions confirmation-actions">
-            <button type="button" className="btn btn-danger" onClick={onPurgeConfirm} disabled={purgePending}>
+          <div className="flex gap-stack items-center flex-wrap [grid-column:1/-1]">
+            <Button type="button" variant="danger" onClick={onPurgeConfirm} disabled={purgePending}>
               {purgePending ? "Purging..." : "Confirm purge all data"}
-            </button>
-            <button type="button" className="btn" onClick={onPurgeCancel} disabled={purgePending}>
+            </Button>
+            <Button type="button" onClick={onPurgeCancel} disabled={purgePending}>
               Cancel
-            </button>
+            </Button>
           </div>
         </div>
       ) : (
-        <div className="save-section">
-          <button type="button" className="btn btn-danger" onClick={onPurgeArm}>
+        <div className="flex justify-end pt-inline">
+          <Button type="button" variant="danger" onClick={onPurgeArm}>
             Purge all data
-          </button>
+          </Button>
         </div>
       )}
       <InlineFeedback message={purgeError} />
@@ -237,13 +235,13 @@ function AccountIdentity({ auth }: Pick<SettingsSectionProps, "auth">) {
   const email = auth.user?.email ?? "—";
   const name = auth.user?.name?.trim();
   return (
-    <div className="settings-identity">
-      <div className="settings-identity-avatar" aria-hidden="true">
+    <div className="flex items-center gap-stack p-stack bg-card border border-[var(--border-soft)] rounded-sm">
+      <div className="w-[36px] h-[36px] rounded-full grid place-items-center text-sm font-bold font-body text-accent bg-[color-mix(in_srgb,var(--accent)_14%,transparent)] border border-[color-mix(in_srgb,var(--accent)_35%,transparent)]" aria-hidden="true">
         {(name || email).slice(0, 1).toUpperCase()}
       </div>
-      <div className="settings-identity-meta">
-        <div className="settings-identity-name">{name || email.split("@")[0]}</div>
-        <div className="settings-identity-email">{email}</div>
+      <div className="flex flex-col gap-[2px] min-w-0">
+        <div className="text-sm font-semibold font-body text-text overflow-hidden text-ellipsis whitespace-nowrap">{name || email.split("@")[0]}</div>
+        <div className="text-xs text-muted tabular-nums">{email}</div>
       </div>
     </div>
   );
@@ -262,24 +260,29 @@ const settingsTabs: { id: SettingsTab; label: string; danger?: boolean }[] = [
 export function SettingsPanel(props: SettingsSectionProps) {
   const [tab, setTab] = useState<SettingsTab>("account");
   return (
-    <div className="settings-mock settings-mock-b">
+    <div className="flex flex-col gap-block">
       <AccountIdentity auth={props.auth} />
-      <nav className="tag-tabs settings-mock-tabs" aria-label="Settings sections">
-        {settingsTabs.map((t) => (
-          <button
-            key={t.id}
-            type="button"
-            className={`${tab === t.id ? "active" : ""}${t.danger ? " settings-mock-tab--danger" : ""}`}
-            onClick={() => setTab(t.id)}
-          >
-            {t.label}
-          </button>
-        ))}
+      <nav className="flex flex-wrap gap-y-tight gap-x-block mb-[-10px] pb-inline" aria-label="Settings sections">
+        {settingsTabs.map((t) => {
+          const isActive = tab === t.id;
+          const color = t.danger ? "text-danger" : isActive ? "text-text" : "text-muted hover:text-text";
+          const border = isActive ? (t.danger ? "border-b-danger" : "border-b-accent") : "border-b-transparent";
+          return (
+            <button
+              key={t.id}
+              type="button"
+              className={`${TAG_TAB_BTN} ${color} ${border}`}
+              onClick={() => setTab(t.id)}
+            >
+              {t.label}
+            </button>
+          );
+        })}
       </nav>
-      <div className="settings-mock-panel">
+      <div className="pt-[4px] flex flex-col gap-stack">
         {tab === "account" ? <AccountBlock auth={props.auth} /> : null}
         {tab === "preferences" ? (
-          <div className="stack">
+          <div className="grid gap-stack">
             <ThemeBlock />
             <BirthdayBlock
               birthday={props.birthday}

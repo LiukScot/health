@@ -88,6 +88,10 @@ export function PastEntriesColumn({
 export const TAG_MINI =
   "py-[2px] px-inline text-micro text-muted bg-[color-mix(in_srgb,var(--card)_60%,var(--card-strong))] rounded-[4px]";
 
+// Accent-underline tab button shape (no color), shared by TagTabs + Settings tabs.
+export const TAG_TAB_BTN =
+  "inline-flex items-center gap-inline py-tight px-0 text-control font-medium bg-transparent border-0 border-b rounded-none shadow-none cursor-pointer font-[inherit] whitespace-nowrap min-h-0 transition-[color,border-color] duration-150 ease-[ease]";
+
 // Accent-underline tab strip shared by Diary (moods) and Pain (medicines).
 export function TagTabs<T extends string>({
   tabs,
@@ -108,7 +112,7 @@ export function TagTabs<T extends string>({
           type="button"
           role="tab"
           aria-selected={active === t.id}
-          className={`inline-flex items-center gap-inline py-tight px-0 text-control font-medium bg-transparent border-0 border-b rounded-none shadow-none cursor-pointer font-[inherit] whitespace-nowrap min-h-0 transition-[color,border-color] duration-150 ease-[ease] ${active === t.id ? "text-text border-b-accent" : "text-muted border-b-transparent hover:text-text"}`}
+          className={`${TAG_TAB_BTN} ${active === t.id ? "text-text border-b-accent" : "text-muted border-b-transparent hover:text-text"}`}
           onClick={() => onSelect(t.id)}
         >
           {t.label} <span className={`text-micro font-medium ${active === t.id ? "text-accent" : "text-muted-soft"}`}>{t.count}</span>

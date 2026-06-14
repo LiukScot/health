@@ -2,6 +2,13 @@ import { useState } from "react";
 import { useMcpTokens, type ExpiryChoice } from "../hooks/use-mcp-tokens";
 import { InlineFeedback, SectionHead } from "./shared";
 import { Select } from "../components/ui/select";
+import { Button } from "../components/ui/Button";
+import { FieldLine, FIELD_LINE_LABEL } from "../components/ui/FieldLine";
+import { TAG_TAB_BTN } from "./entries";
+
+const MCP_INTRO = "mt-[6px] mb-0 text-hint leading-[1.45] text-muted";
+const CODE_BLOCK =
+  "m-0 p-stack bg-card-soft text-text border border-[var(--border-soft)] rounded-sm font-medium text-xs font-mono leading-normal overflow-x-auto whitespace-pre";
 
 const EXPIRY_OPTIONS: { value: ExpiryChoice; label: string }[] = [
   { value: "never", label: "Never" },
@@ -107,84 +114,82 @@ export function McpAccessSection({ enabled }: { enabled: boolean }) {
   };
 
   return (
-    <div className="mcp-access">
+    <div className="flex flex-col">
       <SectionHead title="MCP access" />
-      <p className="mcp-intro">
+      <p className={MCP_INTRO}>
         Connect any MCP-compliant AI client (Cline, Continue, Cursor, Claude Desktop, Claude Code, or your own) to your health data over HTTP.
       </p>
 
       {tokens.justCreated ? (
-        <div className="mcp-just-created">
+        <div className="flex flex-col gap-inline mt-[8px] p-stack bg-[color-mix(in_srgb,var(--warning)_10%,var(--card))] border border-[color-mix(in_srgb,var(--warning)_40%,var(--border))] rounded-sm">
           <InlineFeedback
             message={{
               tone: "warning",
               text: "Copy this token now — it will not be shown again after you dismiss this panel.",
             }}
           />
-          <pre className="code-block">{tokens.justCreated.plaintext}</pre>
-          <div className="row-actions mcp-just-created-actions">
-            <button type="button" className="btn btn-primary" onClick={() => handleCopy(tokens.justCreated!.plaintext)}>
+          <pre className={CODE_BLOCK}>{tokens.justCreated.plaintext}</pre>
+          <div className="flex gap-stack items-center flex-wrap mt-stack">
+            <Button type="button" variant="primary" onClick={() => handleCopy(tokens.justCreated!.plaintext)}>
               Copy token
-            </button>
-            <button type="button" className="btn" onClick={() => handleTest(tokens.justCreated!.id)}>
+            </Button>
+            <Button type="button" onClick={() => handleTest(tokens.justCreated!.id)}>
               Test connection
-            </button>
+            </Button>
             {testStatus[tokens.justCreated.id] === "ok" ? (
-              <span className="mcp-test-status mcp-test-status--ok">✓ connected</span>
+              <span className="text-xs font-semibold font-body tabular-nums text-success">✓ connected</span>
             ) : null}
             {testStatus[tokens.justCreated.id] === "fail" ? (
-              <span className="mcp-test-status mcp-test-status--fail">✗ failed</span>
+              <span className="text-xs font-semibold font-body tabular-nums text-danger">✗ failed</span>
             ) : null}
-            <button type="button" className="btn" onClick={tokens.dismissJustCreated}>
+            <Button type="button" onClick={tokens.dismissJustCreated}>
               Dismiss
-            </button>
+            </Button>
           </div>
         </div>
       ) : null}
 
       <SectionHead title="Active tokens" />
       {tokens.isLoading ? (
-        <p className="mcp-empty">Loading…</p>
+        <p className="mt-[6px] text-hint text-muted-soft italic">Loading…</p>
       ) : tokens.tokens.length === 0 ? (
-        <p className="mcp-empty">No tokens yet. Create one below to connect an AI client.</p>
+        <p className="mt-[6px] text-hint text-muted-soft italic">No tokens yet. Create one below to connect an AI client.</p>
       ) : (
-        <ul className="mcp-token-list">
+        <ul className="list-none p-0 mt-[4px] mb-0 flex flex-col">
           {tokens.tokens.map((t) => (
-            <li key={t.id} className="mcp-token-row">
-              <div className="mcp-token-meta">
-                <div className="mcp-token-label">{t.label || `Token #${t.id}`}</div>
-                <div className="mcp-token-sub">
+            <li key={t.id} className="flex items-center justify-between gap-stack px-[2px] py-[10px] border-b border-[var(--border-soft)] last:border-b-0">
+              <div className="min-w-0 flex-1 flex flex-col gap-[2px]">
+                <div className="text-[13.5px] font-semibold font-body text-text overflow-hidden text-ellipsis whitespace-nowrap">{t.label || `Token #${t.id}`}</div>
+                <div className="text-[11.5px] text-muted tabular-nums">
                   Created {t.createdAt.slice(0, 10)} · Last used {formatRelative(t.lastUsedAt)} · {formatExpiry(t.expiresAt)}
                 </div>
               </div>
-              <button
+              <Button
                 type="button"
-                className="btn btn-danger"
+                variant="danger"
                 onClick={() => tokens.onRevoke(t.id)}
                 disabled={tokens.revokePending}
               >
                 Revoke
-              </button>
+              </Button>
             </li>
           ))}
         </ul>
       )}
 
       {showCreateForm ? (
-        <div className="mcp-create-form">
+        <div className="flex flex-col mt-[4px]">
           <SectionHead title="New token" />
-          <label className="field field-line">
-            <span className="field-line-label">Label</span>
-            <input
-              type="text"
-              value={newLabel}
-              onChange={(e) => setNewLabel(e.target.value)}
-              placeholder="e.g. Claude Desktop MacBook"
-              maxLength={100}
-            />
-          </label>
-          <div className="field field-line">
-            <span className="field-line-label">Expiry</span>
+          <FieldLine
+            label="Label"
+            type="text"
+            value={newLabel}
+            onChange={(e) => setNewLabel(e.target.value)}
+            placeholder="e.g. Claude Desktop MacBook"
+            maxLength={100}
+          />
+          <div className="grid gap-inline content-start">
+            <span className={FIELD_LINE_LABEL}>Expiry</span>
             <Select
               ariaLabel="Expiry"
               value={newExpiry}
@@ -195,34 +200,34 @@ export function McpAccessSection({ enabled }: { enabled: boolean }) {
               options={EXPIRY_OPTIONS}
             />
           </div>
-          <div className="save-section">
-            <button type="button" className="btn btn-primary" onClick={handleCreate} disabled={tokens.createPending}>
+          <div className="flex justify-end gap-inline pt-[4px]">
+            <Button type="button" variant="primary" onClick={handleCreate} disabled={tokens.createPending}>
               {tokens.createPending ? "Creating…" : "Create token"}
-            </button>
-            <button type="button" className="btn" onClick={() => setShowCreateForm(false)} disabled={tokens.createPending}>
+            </Button>
+            <Button type="button" onClick={() => setShowCreateForm(false)} disabled={tokens.createPending}>
               Cancel
-            </button>
+            </Button>
           </div>
         </div>
       ) : (
-        <div className="save-section">
-          <button type="button" className="btn" onClick={() => setShowCreateForm(true)}>
+        <div className="flex justify-end pt-inline">
+          <Button type="button" onClick={() => setShowCreateForm(true)}>
             + Create new token
-          </button>
+          </Button>
         </div>
       )}
 
       <InlineFeedback message={tokens.feedback} />
 
       <SectionHead title="How to connect" />
-      <nav className="tag-tabs mcp-client-tabs" role="tablist" aria-label="MCP client instructions">
+      <nav className="flex flex-wrap gap-y-tight gap-x-block mt-[4px]" role="tablist" aria-label="MCP client instructions">
         {(["generic", "claude-desktop", "claude-code", "curl"] as const).map((tab) => (
           <button
             key={tab}
             type="button"
             role="tab"
             aria-selected={activeTab === tab}
-            className={activeTab === tab ? "active" : ""}
+            className={`${TAG_TAB_BTN} ${activeTab === tab ? "text-text border-b-accent" : "text-muted border-b-transparent hover:text-text"}`}
             onClick={() => setActiveTab(tab)}
           >
             {tab === "generic" ? "Any client" : tab === "claude-desktop" ? "Claude Desktop" : tab === "claude-code" ? "Claude Code" : "Curl test"}
@@ -270,13 +275,13 @@ function McpClientInstructions({
   }
 
   return (
-    <div className="mcp-instructions">
-      <p className="mcp-intro">{description}</p>
-      <pre className="code-block">{snippet}</pre>
-      <div className="save-section">
-        <button type="button" className="btn" onClick={() => onCopy(snippet)}>
+    <div className="flex flex-col gap-inline mt-[4px]">
+      <p className={MCP_INTRO}>{description}</p>
+      <pre className={CODE_BLOCK}>{snippet}</pre>
+      <div className="flex justify-end pt-inline">
+        <Button type="button" onClick={() => onCopy(snippet)}>
           Copy
-        </button>
+        </Button>
       </div>
     </div>
   );
