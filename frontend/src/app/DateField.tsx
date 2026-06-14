@@ -57,7 +57,7 @@ export function DateField({ value, onChange, ariaLabel, placeholder = "Select da
     <div ref={containerRef} className="relative inline-flex justify-self-start">
       <button
         type="button"
-        className="appearance-none border-0 cursor-pointer text-left rounded-[var(--radius-sm)] px-stack py-inline text-control font-medium [font-family:var(--font-body)] tabular-nums text-[var(--text)] bg-[color-mix(in_srgb,white_3%,var(--bg))] transition-[background,box-shadow] duration-150 ease-[ease] hover:bg-[color-mix(in_srgb,white_5%,var(--bg))] focus-visible:bg-[color-mix(in_srgb,white_5%,var(--bg))] focus-visible:shadow-[inset_0_0_0_1px_var(--accent)] focus-visible:outline-none data-[empty=true]:text-[var(--muted-soft)]"
+        className="appearance-none border-0 cursor-pointer text-left rounded-sm px-stack py-inline text-control font-medium font-body tabular-nums text-text bg-[color-mix(in_srgb,white_3%,var(--bg))] transition-[background,box-shadow] duration-150 ease-[ease] hover:bg-[color-mix(in_srgb,white_5%,var(--bg))] focus-visible:bg-[color-mix(in_srgb,white_5%,var(--bg))] focus-visible:shadow-[inset_0_0_0_1px_var(--accent)] focus-visible:outline-none data-[empty=true]:text-muted-soft"
         aria-label={ariaLabel}
         aria-haspopup="dialog"
         aria-expanded={open}
