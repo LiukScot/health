@@ -6,6 +6,28 @@ import {
 import { AnimatedEditingLabel, SectionHead, useDiaryColumnCap } from "./shared";
 import { EmptyState } from "./screen-helpers";
 import { formatEntrySummaryDate } from "./screen-format";
+import { Button } from "../components/ui/Button";
+import { FieldLine } from "../components/ui/FieldLine";
+import {
+  DELETE_CONFIRM,
+  DETAIL_ACTIONS,
+  DETAIL_ACTION_BTN,
+  DetailGroup,
+  EntriesHeading,
+  ENTRY_CHEVRON,
+  ENTRY_DATE,
+  ENTRY_EXPANDED,
+  ENTRY_PREVIEW,
+  ENTRY_ROW,
+  ENTRY_SUMMARY,
+  PainBadge,
+  PastEntriesColumn,
+} from "./entries";
+
+const DATETIME_FIELD =
+  "!w-auto max-w-full justify-self-start cursor-pointer tabular-nums [&::-webkit-calendar-picker-indicator]:cursor-pointer [&::-webkit-calendar-picker-indicator]:ml-inline [&::-webkit-calendar-picker-indicator]:invert [&::-webkit-calendar-picker-indicator]:opacity-60 hover:[&::-webkit-calendar-picker-indicator]:opacity-100";
+const THERAPY_CALLOUT =
+  "m-0 px-stack py-inline bg-card-soft border-l-2 border-[color-mix(in_srgb,var(--accent)_50%,transparent)] rounded-sm text-muted text-hint leading-[1.45]";
 
 export function DbtSection({
   dbtForm,
@@ -92,149 +114,128 @@ export function DbtSection({
     overflow: pastEntriesOverflow,
   } = useDiaryColumnCap(dbtEntries, isLoading);
 
+  const dbtDetails: { label: string; key: keyof DbtEntry }[] = [
+    { label: "Emotion", key: "emotionName" },
+    { label: "Affirmation", key: "allowAffirmation" },
+    { label: "Watch", key: "watchEmotion" },
+    { label: "Body location", key: "bodyLocation" },
+    { label: "Body feeling", key: "bodyFeeling" },
+    { label: "Present moment", key: "presentMoment" },
+  ];
+
   return (
-    <section className="panel">
-      <h1 className="panel-title">DBT Distress Tolerance</h1>
-      <div className="panel-split panel-split--diary">
-        <div className="panel-col" ref={leftColRef}>
-          <h2 className="entries-heading">New entry</h2>
-      <form className="dense-form-grid therapy-form" onSubmit={dbtForm.handleSubmit(onSubmit)}>
-        <div className="core-col">
-          <label className="field field-line">
-            <span className="field-line-label">Date &amp; time</span>
-            <input
-              type="datetime-local"
-              {...dbtForm.register("dateTime")}
-              aria-label="Date/time"
-              onClick={(e) => {
-                const el = e.currentTarget as HTMLInputElement & { showPicker?: () => void };
-                el.showPicker?.();
-              }}
+    <section className="@container p-inline">
+      <h1 className="m-0 mb-stack text-[22px] font-bold tracking-[-0.02em] text-text">DBT Distress Tolerance</h1>
+      <div className="grid gap-page min-[1100px]:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] min-[1100px]:gap-split min-[1100px]:items-start">
+        <div className="min-w-0 max-[1099px]:border-b max-[1099px]:border-[var(--border-soft)]" ref={leftColRef}>
+          <EntriesHeading className="min-[1100px]:mt-0">New entry</EntriesHeading>
+          <form className="mb-inline" onSubmit={dbtForm.handleSubmit(onSubmit)}>
+            <div className="grid gap-stack content-start min-w-0">
+              <FieldLine
+                label="Date & time"
+                type="datetime-local"
+                className={DATETIME_FIELD}
+                {...dbtForm.register("dateTime")}
+                aria-label="Date/time"
+                onClick={(e) => {
+                  const el = e.currentTarget as HTMLInputElement & { showPicker?: () => void };
+                  el.showPicker?.();
+                }}
+              />
+              {dbtGroups.map((g) => (
+                <div key={g.title} className="flex flex-col gap-stack">
+                  <SectionHead title={g.title} variant="ds" />
+                  {g.callouts?.map((c) => (
+                    <p key={c} className={THERAPY_CALLOUT}>{c}</p>
+                  ))}
+                  {g.fields.map((f) => (
+                    <FieldLine
+                      key={f.key}
+                      label={f.label}
+                      multiline={f.multiline}
+                      compact={f.multiline}
+                      rows={f.multiline ? 2 : undefined}
+                      type={f.multiline ? undefined : "text"}
+                      placeholder={f.hint}
+                      aria-label={f.label}
+                      {...dbtForm.register(f.key)}
+                    />
+                  ))}
+                </div>
+              ))}
+              <p className={`${THERAPY_CALLOUT} mt-stack`}>
+                When the emotion comes back, that's ok. Emotions come and go — watch it again, float with the wave.
+              </p>
+              {editingDbt ? (
+                <div className="flex gap-inline flex-wrap">
+                  <button type="button" onClick={onCancelEdit}>
+                    Cancel edit
+                  </button>
+                </div>
+              ) : null}
+            </div>
+            <div className="flex justify-end pt-inline">
+              <Button type="submit" variant={dbtMutationState.isSuccess ? "success" : "primary"} className="mb-block">
+                {dbtMutationState.isSuccess ? "✓ Saved" : editingDbt ? "Update entry" : "Save entry"}
+              </Button>
+            </div>
+          </form>
+        </div>
+        <PastEntriesColumn
+          title="Past entries"
+          isLoading={isLoading}
+          loadingText="Loading DBT entries..."
+          isEmpty={dbtEntries.length === 0}
+          emptyState={
+            <EmptyState
+              title="No DBT entries yet"
+              description="Work through the steps above to log your first distress-tolerance practice. Saved entries will appear here."
             />
-          </label>
-          {dbtGroups.map((g) => (
-            <div key={g.title} className="ds-section">
-              <SectionHead title={g.title} />
-              {g.callouts?.map((c) => (
-                <p key={c} className="hint therapy-callout">{c}</p>
-              ))}
-              {g.fields.map((f) => (
-                <label key={f.key} className="field field-line">
-                  <span className="field-line-label">{f.label}</span>
-                  {f.multiline ? (
-                    <textarea rows={2} placeholder={f.hint} aria-label={f.label} {...dbtForm.register(f.key)} />
-                  ) : (
-                    <input type="text" placeholder={f.hint} aria-label={f.label} {...dbtForm.register(f.key)} />
-                  )}
-                </label>
-              ))}
-            </div>
+          }
+          overflow={pastEntriesOverflow}
+          colRef={pastColRef}
+          bodyRef={pastEntriesBodyRef}
+        >
+          {dbtEntries.map((entry) => (
+            <details key={entry.id} className={ENTRY_ROW}>
+              <summary className={ENTRY_SUMMARY}>
+                <span className={ENTRY_DATE}>{formatEntrySummaryDate(entry.entryDate, entry.entryTime)}</span>
+                <PainBadge variant="muted" sm>DBT</PainBadge>
+                <span className={ENTRY_PREVIEW}>{entry.emotionName || entry.presentMoment || "—"}</span>
+                <span />
+                <span className={ENTRY_CHEVRON} aria-hidden="true">▶</span>
+              </summary>
+              <div className={ENTRY_EXPANDED}>
+                {dbtDetails.map((d) => (
+                  <DetailGroup key={d.key} label={d.label}>{(entry[d.key] as string) || "—"}</DetailGroup>
+                ))}
+                <div className={DETAIL_ACTIONS}>
+                  <button
+                    type="button"
+                    className={DETAIL_ACTION_BTN}
+                    onClick={() => {
+                      if (editingDbt) {
+                        onCancelEdit();
+                        return;
+                      }
+                      onStartEdit(entry);
+                    }}
+                  >
+                    <AnimatedEditingLabel active={Boolean(editingDbt)} />
+                  </button>
+                  <button
+                    type="button"
+                    className={`${DETAIL_ACTION_BTN} ${confirmDeleteDbt === entry.id ? DELETE_CONFIRM : ""}`}
+                    onClick={() => onDeleteClick(entry.id)}
+                    onBlur={onDeleteBlur}
+                  >
+                    {confirmDeleteDbt === entry.id ? "Delete?" : "Delete"}
+                  </button>
+                </div>
+              </div>
+            </details>
           ))}
-          <p className="hint therapy-callout">
-            When the emotion comes back, that's ok. Emotions come and go — watch it again, float with the wave.
-          </p>
-          {editingDbt ? (
-            <div className="dense-form-inline-actions">
-              <button type="button" onClick={onCancelEdit}>
-                Cancel edit
-              </button>
-            </div>
-          ) : null}
-        </div>
-        <div className="save-section">
-          <button type="submit" className={`btn btn-primary${dbtMutationState.isSuccess ? " is-success-pulse" : ""}`}>
-            {dbtMutationState.isSuccess ? "✓ Saved" : editingDbt ? "Update entry" : "Save entry"}
-          </button>
-        </div>
-      </form>
-        </div>
-        <div className="panel-col diary-past-col" ref={pastColRef}>
-
-      {isLoading && <p className="hint">Loading DBT entries...</p>}
-
-      <h2 className="entries-heading">Past entries</h2>
-      {dbtEntries.length === 0 ? (
-        <EmptyState
-          title="No DBT entries yet"
-          description="Work through the steps above to log your first distress-tolerance practice. Saved entries will appear here."
-        />
-      ) : (
-        <div className="diary-past-entries-stack">
-          <div className="diary-past-entries-body" ref={pastEntriesBodyRef}>
-        {dbtEntries.map((entry) => (
-          <details key={entry.id} className="entry-row">
-            <summary>
-              <span className="date">{formatEntrySummaryDate(entry.entryDate, entry.entryTime)}</span>
-              <span className="pain-badge sm muted">DBT</span>
-              <span className="preview">{entry.emotionName || entry.presentMoment || "—"}</span>
-              <span />
-              <span className="chevron" aria-hidden="true">▶</span>
-            </summary>
-            <div className="entry-expanded">
-              <div className="detail-group">
-                <span className="label">Emotion</span>
-                <span className="value">{entry.emotionName || "—"}</span>
-              </div>
-              <div className="detail-group">
-                <span className="label">Affirmation</span>
-                <span className="value">{entry.allowAffirmation || "—"}</span>
-              </div>
-              <div className="detail-group">
-                <span className="label">Watch</span>
-                <span className="value">{entry.watchEmotion || "—"}</span>
-              </div>
-              <div className="detail-group">
-                <span className="label">Body location</span>
-                <span className="value">{entry.bodyLocation || "—"}</span>
-              </div>
-              <div className="detail-group">
-                <span className="label">Body feeling</span>
-                <span className="value">{entry.bodyFeeling || "—"}</span>
-              </div>
-              <div className="detail-group">
-                <span className="label">Present moment</span>
-                <span className="value">{entry.presentMoment || "—"}</span>
-              </div>
-              <div className="detail-actions">
-                <button
-                  type="button"
-                  className={editingDbt?.id === entry.id ? "active is-editing" : editingDbt ? "is-editing" : undefined}
-                  onClick={() => {
-                    if (editingDbt) {
-                      onCancelEdit();
-                      return;
-                    }
-                    onStartEdit(entry);
-                  }}
-                >
-                  <AnimatedEditingLabel active={Boolean(editingDbt)} />
-                </button>
-                <button
-                  type="button"
-                  className={confirmDeleteDbt === entry.id ? "btn-delete-confirm" : ""}
-                  onClick={() => onDeleteClick(entry.id)}
-                  onBlur={onDeleteBlur}
-                >
-                  {confirmDeleteDbt === entry.id ? "Delete?" : "Delete"}
-                </button>
-              </div>
-            </div>
-          </details>
-        ))}
-          </div>
-          <div
-            className={`save-section diary-past-footer-slot${pastEntriesOverflow ? " diary-past-more" : ""}`}
-            aria-hidden={!pastEntriesOverflow}
-          >
-            {!isLoading && pastEntriesOverflow ? (
-              <button type="button" className="btn">
-                Show more
-              </button>
-            ) : null}
-          </div>
-        </div>
-      )}
-        </div>
+        </PastEntriesColumn>
       </div>
     </section>
   );
