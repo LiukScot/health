@@ -31,6 +31,17 @@ function parseDateParts(date: string) {
   return { year, month, day };
 }
 
+function daysInMonth(year: number, month: number) {
+  return new Date(Date.UTC(year, month, 0)).getUTCDate();
+}
+
+// A monthly/yearly day-of-month that exceeds the target month's length fires on
+// that month's last day (e.g. a "31st" event hits Feb 28/29, Apr 30).
+function matchesDayOfMonth(anchorDay: number, target: { year: number; month: number; day: number }) {
+  const clampedDay = Math.min(anchorDay, daysInMonth(target.year, target.month));
+  return target.day === clampedDay;
+}
+
 export function matchesMemorableDate(anchorDate: string, repeatMode: MemorableRepeatMode, targetDate: string) {
   const anchor = parseDateParts(anchorDate);
   const target = parseDateParts(targetDate);
@@ -39,8 +50,8 @@ export function matchesMemorableDate(anchorDate: string, repeatMode: MemorableRe
   const targetTs = Date.UTC(target.year, target.month - 1, target.day);
   if (targetTs < anchorTs) return false;
   if (repeatMode === "one-time") return anchorDate === targetDate;
-  if (repeatMode === "monthly") return anchor.day === target.day;
-  return anchor.month === target.month && anchor.day === target.day;
+  if (repeatMode === "monthly") return matchesDayOfMonth(anchor.day, target);
+  return anchor.month === target.month && matchesDayOfMonth(anchor.day, target);
 }
 
 export function countMemorableOccurrences(anchorDate: string, repeatMode: MemorableRepeatMode, targetDate: string) {
