@@ -29,23 +29,12 @@ import {
   ENTRY_SUMMARY,
   PainBadge,
   PastEntriesColumn,
-  TAG_MINI,
+  TagList,
   TagTabs,
 } from "./entries";
 
 const DATETIME_FIELD =
   "!w-auto max-w-full justify-self-start cursor-pointer tabular-nums [&::-webkit-calendar-picker-indicator]:cursor-pointer [&::-webkit-calendar-picker-indicator]:ml-inline [&::-webkit-calendar-picker-indicator]:invert [&::-webkit-calendar-picker-indicator]:opacity-60 hover:[&::-webkit-calendar-picker-indicator]:opacity-100";
-
-function TagList({ items }: { items: string[] }) {
-  if (!items.length) return <>—</>;
-  return (
-    <>
-      {items.map((t) => (
-        <span key={t} className={TAG_MINI}>{t}</span>
-      ))}
-    </>
-  );
-}
 
 export function DiarySection({
   diaryForm,

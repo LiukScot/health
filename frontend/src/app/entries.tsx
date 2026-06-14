@@ -118,6 +118,18 @@ export function TagTabs<T extends string>({
   );
 }
 
+// Renders a list of tag chips inside a detail value, or an em-dash when empty.
+export function TagList({ items }: { items: string[] }) {
+  if (!items.length) return <>—</>;
+  return (
+    <>
+      {items.map((t) => (
+        <span key={t} className={TAG_MINI}>{t}</span>
+      ))}
+    </>
+  );
+}
+
 export function DetailGroup({ label, children }: { label: ReactNode; children: ReactNode }) {
   return (
     <div className="grid gap-tight">
