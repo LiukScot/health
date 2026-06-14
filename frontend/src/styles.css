@@ -35,13 +35,14 @@
 }
 
 /*
- * Colors use @theme inline so each utility (bg-card, text-muted, border-border,
- * ...) emits the underlying var() directly instead of a baked value. That lets
- * bg-*/text-*/border-* re-resolve when --bg/--card/... are overridden under
- * :root[data-theme="..."], so utilities follow the active theme. A plain
- * @theme would freeze the default-theme value and break dark/oled.
+ * Colors map each --color-* token to the themed runtime var. Tailwind emits
+ * `:root { --color-card: var(--card) }` plus the utility (.bg-card {
+ * background: var(--color-card) }); since --color-card forwards to var(--card),
+ * which is overridden under :root[data-theme="..."], the utilities re-resolve
+ * per theme (dark/grey/oled). NB: @theme inline drops these (it tries to
+ * resolve var(--card) at build time and can't), so the plain form is required.
  */
-@theme inline {
+@theme {
   --color-bg: var(--bg);
   --color-card: var(--card);
   --color-card-strong: var(--card-strong);
