@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { apiFetch } from "../lib";
 import {
@@ -26,6 +26,17 @@ import type {
   WellbeingSeriesKey,
 } from "../app/core";
 import { usePrefs } from "./use-settings";
+
+type ChartThemeColors = { success: string; muted: string };
+
+function readChartThemeColors(): ChartThemeColors {
+  const style = getComputedStyle(document.documentElement);
+  return {
+    // --success (#6fe1b0) is the only series color with a matching design token.
+    success: style.getPropertyValue("--success").trim() || "#6fe1b0",
+    muted: style.getPropertyValue("--muted").trim() || "#a1a1ad",
+  };
+}
 
 type DashboardDay = {
   date: string;
@@ -222,6 +233,14 @@ export function useDashboard(enabled: boolean) {
   const [dashboardBoundsOverride, setDashboardBoundsOverride] = useState<{ from: string; to: string } | null>(null);
   const [activeQuickRangeOverride, setActiveQuickRangeOverride] = useState<DashboardQuickRange | null>(null);
   const [graphSelectionOverride, setGraphSelectionOverride] = useState<Record<WellbeingSeriesKey, boolean> | null>(null);
+  const [chartThemeColors, setChartThemeColors] = useState<ChartThemeColors>(readChartThemeColors);
+
+  useEffect(() => {
+    const root = document.documentElement;
+    const observer = new MutationObserver(() => setChartThemeColors(readChartThemeColors()));
+    observer.observe(root, { attributes: true, attributeFilter: ["data-theme"] });
+    return () => observer.disconnect();
+  }, []);
 
   const diaryQuery = useQuery({
     queryKey: ["diary"],
@@ -320,19 +339,16 @@ export function useDashboard(enabled: boolean) {
   }, [filteredDiary, filteredPain, prevBounds, previousDiary, previousPain]);
 
   const wellbeingSeries = useMemo<WellbeingSeries[]>(() => {
-    const style = getComputedStyle(document.documentElement);
-    // --success (#6fe1b0) is the only series color with a matching design token.
     // Pain (#ff6f91), Fatigue (#f6c344), Mood (#7bd3f1), Depression (#c6a1ff)
     // have no matching tokens; kept as-is until tokens are added.
-    const successColor = style.getPropertyValue("--success").trim() || "#6fe1b0";
     return [
       { key: "pain", label: "Pain", color: "#ff6f91", points: buildDailyAverages(filteredPain, (e) => e.entryDate, (e) => e.painLevel) },
       { key: "fatigue", label: "Fatigue", color: "#f6c344", points: buildDailyAverages(filteredPain, (e) => e.entryDate, (e) => e.fatigueLevel) },
       { key: "mood", label: "Mood", color: "#7bd3f1", points: buildDailyAverages(filteredDiary, (e) => e.entryDate, (e) => e.moodLevel) },
       { key: "depression", label: "Depression", color: "#c6a1ff", points: buildDailyAverages(filteredDiary, (e) => e.entryDate, (e) => e.depressionLevel) },
-      { key: "anxiety", label: "Anxiety", color: successColor, points: buildDailyAverages(filteredDiary, (e) => e.entryDate, (e) => e.anxietyLevel) },
+      { key: "anxiety", label: "Anxiety", color: chartThemeColors.success, points: buildDailyAverages(filteredDiary, (e) => e.entryDate, (e) => e.anxietyLevel) },
     ];
-  }, [filteredDiary, filteredPain]);
+  }, [filteredDiary, filteredPain, chartThemeColors.success]);
 
   const wellbeingChart = useMemo(() => {
     const visibleSeries = wellbeingSeries.filter((s) => (graphSelection[s.key] ?? true) && s.points.length > 0);
@@ -364,21 +380,21 @@ export function useDashboard(enabled: boolean) {
               minUnit: "day" as const,
               displayFormats: { day: "dd MMM", week: "dd MMM", month: "MMM yyyy" },
             },
-            ticks: { color: getComputedStyle(document.documentElement).getPropertyValue("--muted").trim() || "#a1a1ad", maxTicksLimit: 12 },
+            ticks: { color: chartThemeColors.muted, maxTicksLimit: 12 },
             // rgba(255,255,255,0.08) has no design token; kept until one is added
             grid: { color: "rgba(255,255,255,0.08)" },
           },
           y: {
             min: 0,
             max: 10,
-            ticks: { color: getComputedStyle(document.documentElement).getPropertyValue("--muted").trim() || "#a1a1ad", stepSize: 1 },
+            ticks: { color: chartThemeColors.muted, stepSize: 1 },
             // rgba(255,255,255,0.08) has no design token; kept until one is added
             grid: { color: "rgba(255,255,255,0.08)" },
           },
         },
       },
     };
-  }, [wellbeingSeries, graphSelection]);
+  }, [wellbeingSeries, graphSelection, chartThemeColors.muted]);
 
   const handleGraphToggle = (key: WellbeingSeriesKey, checked: boolean) => {
     const nextSelection = { ...graphSelection, [key]: checked };
