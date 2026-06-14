@@ -16,10 +16,42 @@
   --spacing-page: 30px;
   --spacing-split: 48px;
 
-  /* Compact control text — the recurring 13px used by date/select controls.
-     A named token (not text-sm=14px) keeps the exact design size while
-     avoiding an arbitrary text-[13px] utility. */
-  --text-control: 13px;
+  /* Typography. 12/14/16px map 1:1 to Tailwind's built-in text-xs/sm/base,
+     so only the off-scale sizes get a named token here. A named token (not
+     an arbitrary text-[11px]) keeps the exact design size. */
+  --text-micro: 11px; /* micro labels, badges, field-line caps */
+  --text-hint: 12.5px; /* hints, therapy callouts */
+  --text-control: 13px; /* compact date/select control text */
+
+  /* Radius — single-sourced here (formerly duplicated in :root). */
+  --radius-sm: 10px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+
+  /* Font family. */
+  --font-body: "Manrope", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+/*
+ * Colors use @theme inline so each utility (bg-card, text-muted, border-border,
+ * ...) emits the underlying var() directly instead of a baked value. That lets
+ * bg-*/text-*/border-* re-resolve when --bg/--card/... are overridden under
+ * :root[data-theme="..."], so utilities follow the active theme. A plain
+ * @theme would freeze the default-theme value and break dark/oled.
+ */
+@theme inline {
+  --color-bg: var(--bg);
+  --color-card: var(--card);
+  --color-card-strong: var(--card-strong);
+  --color-card-soft: var(--card-soft);
+  --color-text: var(--text);
+  --color-muted: var(--muted);
+  --color-muted-soft: var(--muted-soft);
+  --color-border: var(--border);
+  --color-accent: var(--accent);
+  --color-danger: var(--danger);
+  --color-success: var(--success);
+  --color-warning: var(--warning);
 }
 
 /*
@@ -46,10 +78,6 @@
   --warning: #f5a623;
   --shadow: 0 16px 40px rgba(0, 0, 0, 0.45);
   --shadow-sm: 0 2px 6px rgba(0, 0, 0, 0.25);
-  --radius-lg: 16px;
-  --radius-md: 12px;
-  --radius-sm: 10px;
-  --font-body: "Manrope", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 
   /*
    * Layout spacing — use these names in CSS (no numbered --space-* ladder).
