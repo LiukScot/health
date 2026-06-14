@@ -90,6 +90,7 @@ export function DashboardSection({
             <button
               type="button"
               key={range.value}
+              aria-pressed={activeQuickRange === range.value}
               className={`${QUICK_RANGE_BASE} ${activeQuickRange === range.value ? QUICK_RANGE_ACTIVE : QUICK_RANGE_IDLE}`}
               onClick={() => onQuickRange(range.value)}
             >
@@ -135,7 +136,7 @@ export function DashboardSection({
           ) : null}
 
           <SectionHead title="Averages" variant="dashboard" />
-          <div className="grid grid-cols-[repeat(auto-fit,minmax(128px,1fr))] gap-stack">
+          <div data-testid="averages" className="grid grid-cols-[repeat(auto-fit,minmax(128px,1fr))] gap-stack">
             {dashboardCards.map((card) => {
               const deltaPct = calcDeltaPercent(card.value, card.previous);
               const delta = deltaPct === null ? null : formatDelta(deltaPct, Boolean(card.invertDelta));
@@ -172,6 +173,7 @@ export function DashboardSection({
                   return (
                     <label
                       key={series.key}
+                      data-testid="series-toggle"
                       className={`inline-flex items-center gap-inline border-0 rounded-full px-stack py-tight bg-card-soft text-micro font-semibold leading-none shadow-none${hasData ? "" : " opacity-50"}`}
                       style={{ "--series-color": series.color } as CSSProperties}
                     >
@@ -205,7 +207,7 @@ export function DashboardSection({
           <div className="grid grid-cols-[repeat(2,minmax(0,1fr))] gap-block items-start @max-[720px]:grid-cols-1">
             <section className="grid gap-stack">
               <SectionHead title="At a glance" variant="dashboard" />
-              <div className="grid gap-stack">
+              <div data-testid="insights" className="grid gap-stack">
                 {dashboardInsights.map((insight) => (
                   <div key={insight.title} className="grid gap-tight">
                     <strong className="text-muted text-nano font-bold tracking-[0.16em] uppercase">{insight.title}</strong>
