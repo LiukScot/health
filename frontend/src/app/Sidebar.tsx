@@ -5,8 +5,8 @@ import { navLabels, type NavItem } from "./core";
 // collapse/mobile state is driven by props (desktop collapse gated behind
 // min-[721px], the mobile drawer behind max-[720px]).
 const NAV_ITEM =
-  "flex items-center gap-stack w-full p-stack border border-transparent rounded-sm bg-transparent font-[inherit] text-sm font-semibold cursor-pointer transition-all whitespace-nowrap overflow-hidden shadow-none [&>svg]:flex-shrink-0 [&>svg]:w-5 [&>svg]:h-5 max-[720px]:p-[14px_12px] max-[720px]:text-base max-[720px]:[&>svg]:w-[22px] max-[720px]:[&>svg]:h-[22px]";
-const NAV_ITEM_IDLE = "text-muted hover:text-text hover:bg-card-strong";
+  "flex items-center gap-stack w-full p-stack border border-transparent rounded-sm font-[inherit] text-sm font-semibold cursor-pointer transition-all whitespace-nowrap overflow-hidden shadow-none [&>svg]:flex-shrink-0 [&>svg]:w-5 [&>svg]:h-5 max-[720px]:p-[14px_12px] max-[720px]:text-base max-[720px]:[&>svg]:w-[22px] max-[720px]:[&>svg]:h-[22px]";
+const NAV_ITEM_IDLE = "text-muted bg-transparent hover:text-text hover:bg-card-strong";
 const NAV_ITEM_ACTIVE = "text-accent bg-[color-mix(in_srgb,var(--accent)_10%,transparent)]";
 const NAV_ITEM_SOFT_IDLE = "text-muted bg-card-soft hover:text-text hover:bg-[color-mix(in_srgb,var(--text)_4%,var(--card-soft))]";
 const NAV_LABEL = "opacity-100 transition-opacity";
