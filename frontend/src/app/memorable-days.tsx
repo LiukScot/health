@@ -14,9 +14,9 @@ import { EntriesHeading } from "./entries";
 const MEMO_BACKDROP =
   "fixed inset-0 bg-[rgba(7,7,10,0.6)] [backdrop-filter:blur(6px)] grid place-items-center p-block z-40";
 const MEMO_MODAL = "w-[min(520px,100%)] p-block flex flex-col gap-stack bg-card border-0 rounded-md shadow-none";
-const MEMO_DAY_CELL =
+export const MEMO_DAY_CELL =
   "min-h-[108px] p-stack rounded-md bg-card-soft text-text text-left flex flex-col gap-inline relative transition-[background,color] duration-150 ease-[ease] hover:bg-[color-mix(in_srgb,var(--text)_4%,var(--card-soft))]";
-const MEMO_LIST_ITEM =
+export const MEMO_LIST_ITEM =
   "flex items-center justify-between flex-[0_0_auto] w-full gap-stack p-stack rounded-md border-0 bg-card-soft text-text shadow-none hover:bg-[color-mix(in_srgb,var(--text)_4%,var(--card-soft))]";
 const MEMO_MODAL_ACTIONS = "flex items-center gap-stack justify-end flex-wrap";
 const EMOJI_TAB =

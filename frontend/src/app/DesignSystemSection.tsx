@@ -1,5 +1,27 @@
 import { useState } from "react";
 import { BarMetric, CoffeeStepper } from "./screen-helpers";
+import { Button } from "../components/ui/Button";
+import { FieldLine } from "../components/ui/FieldLine";
+import { SectionHead } from "./shared";
+import { NAV_ITEM, NAV_ITEM_ACTIVE, NAV_ITEM_IDLE } from "./Sidebar";
+import { MEMO_DAY_CELL, MEMO_LIST_ITEM } from "./memorable-days";
+import {
+  DetailGroup,
+  EntriesHeading,
+  ENTRY_CHEVRON,
+  ENTRY_DATE,
+  ENTRY_EXPANDED,
+  ENTRY_PREVIEW,
+  ENTRY_ROW,
+  ENTRY_SUMMARY,
+  PainBadge,
+  TAG_MINI,
+  TagTabs,
+} from "./entries";
+
+const DAY_NUMBER = "bg-transparent border-0 shadow-none min-h-0 p-0 font-[inherit] text-[inherit] cursor-pointer leading-none";
+const EMOJI_TRIGGER =
+  "min-w-0 min-h-0 p-0 rounded-none inline-flex items-center justify-center bg-transparent border border-transparent text-text shadow-none cursor-pointer focus-visible:outline-none focus-visible:shadow-[0_0_0_2px_color-mix(in_srgb,var(--accent)_28%,transparent)]";
 
 const DESIGN_COLOR_TOKENS: { name: string; varName: string; role: string }[] = [
   { name: "Background", varName: "--bg", role: "App canvas" },
@@ -19,12 +41,12 @@ const DESIGN_COLOR_TOKENS: { name: string; varName: string; role: string }[] = [
 ];
 
 const DESIGN_SPACING_TOKENS: { varName: string; px: string }[] = [
-  { varName: "--layout-tight", px: "4px" },
-  { varName: "--layout-inline", px: "8px" },
-  { varName: "--layout-stack", px: "12px" },
-  { varName: "--layout-block", px: "20px" },
-  { varName: "--layout-page", px: "30px" },
-  { varName: "--layout-split", px: "48px" },
+  { varName: "--spacing-tight", px: "4px" },
+  { varName: "--spacing-inline", px: "8px" },
+  { varName: "--spacing-stack", px: "12px" },
+  { varName: "--spacing-block", px: "20px" },
+  { varName: "--spacing-page", px: "30px" },
+  { varName: "--spacing-split", px: "48px" },
 ];
 
 const DS_MEMORABLE_WEEKDAY_LABELS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"] as const;
@@ -48,61 +70,55 @@ export function DesignSystemSection() {
   const [tabDemo, setTabDemo] = useState<"positive" | "negative" | "general">("positive");
 
   return (
-    <section className="panel">
-      <h1 className="panel-title">Design System</h1>
-      <p className="hint ds-lede">
+    <section className="@container p-inline">
+      <h1 className="m-0 mb-stack text-[22px] font-bold tracking-[-0.02em] text-text">Design System</h1>
+      <p className="text-muted text-control mt-inline mb-block max-w-[72ch] [&_code]:px-[6px] [&_code]:py-[1px] [&_code]:rounded-[6px] [&_code]:bg-card-soft [&_code]:text-text">
         Living reference for tokens, primitives, and patterns used across Diary, Pain, therapy forms, and Memorable days.
         Examples use the same classes as production &mdash; edit <code>styles.css</code> and this page tracks it.
       </p>
 
-      <div className="panel-split panel-split--diary panel-split--after-intro">
-        <div className="panel-col ds-col">
-          <h2 className="entries-heading">Foundations</h2>
+      <div className="grid gap-page mt-page items-start min-[1100px]:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] min-[1100px]:gap-split">
+        <div className="block min-w-0 [&>section+section]:mt-stack">
+          <EntriesHeading className="mt-0 mb-block">Foundations</EntriesHeading>
 
-          <section className="ds-section">
-            <div className="section-head">
-              <span className="section-title">Colors</span>
-              <span className="section-aside">CSS custom properties</span>
-            </div>
-            <ul className="ds-swatches">
+          <section className="flex flex-col gap-stack">
+            <SectionHead title="Colors" aside="CSS custom properties" variant="ds" />
+            <ul className="list-none m-0 p-0 grid grid-cols-[repeat(auto-fill,minmax(170px,1fr))] gap-stack">
               {DESIGN_COLOR_TOKENS.map((t) => (
-                <li key={t.varName} className="ds-swatch">
-                  <span className="ds-swatch-chip" style={{ background: `var(${t.varName})` }} />
-                  <div className="ds-swatch-meta">
-                    <span className="ds-swatch-name">{t.name}</span>
-                    <code className="ds-swatch-var">{t.varName}</code>
-                    <span className="ds-swatch-role">{t.role}</span>
+                <li key={t.varName} className="flex items-center gap-stack p-inline rounded-sm bg-card-soft">
+                  <span className="w-[32px] h-[32px] rounded-[8px] flex-shrink-0" style={{ background: `var(${t.varName})` }} />
+                  <div className="flex flex-col gap-[2px] min-w-0">
+                    <span className="text-xs font-semibold text-text">{t.name}</span>
+                    <code className="text-micro text-muted">{t.varName}</code>
+                    <span className="text-micro text-muted-soft">{t.role}</span>
                   </div>
                 </li>
               ))}
             </ul>
           </section>
 
-          <section className="ds-section">
-            <div className="section-head">
-              <span className="section-title">Typography</span>
-              <span className="section-aside">Manrope</span>
-            </div>
-            <dl className="ds-type-scale">
-              <div className="ds-type-row">
+          <section className="flex flex-col gap-stack">
+            <SectionHead title="Typography" aside="Manrope" variant="ds" />
+            <dl className="m-0 flex flex-col gap-stack">
+              <div className="flex flex-col gap-[2px] py-[2px] [&_dt]:m-0 [&_dt]:min-w-0 [&_dd]:m-0 [&_dd]:text-micro [&_dd]:text-muted-soft">
                 <dt style={{ font: "700 28px var(--font-body)" }}>Panel title</dt>
                 <dd>28 / 700</dd>
               </div>
-              <div className="ds-type-row">
+              <div className="flex flex-col gap-[2px] py-[2px] [&_dt]:m-0 [&_dt]:min-w-0 [&_dd]:m-0 [&_dd]:text-micro [&_dd]:text-muted-soft">
                 <dt style={{ font: "700 10px var(--font-body)", letterSpacing: "0.16em", textTransform: "uppercase", color: "var(--muted)" }}>
                   Entries heading
                 </dt>
                 <dd>10 / 700 / 0.16em</dd>
               </div>
-              <div className="ds-type-row">
+              <div className="flex flex-col gap-[2px] py-[2px] [&_dt]:m-0 [&_dt]:min-w-0 [&_dd]:m-0 [&_dd]:text-micro [&_dd]:text-muted-soft">
                 <dt style={{ font: "500 14px var(--font-body)" }}>Body</dt>
                 <dd>14 / 500</dd>
               </div>
-              <div className="ds-type-row">
+              <div className="flex flex-col gap-[2px] py-[2px] [&_dt]:m-0 [&_dt]:min-w-0 [&_dd]:m-0 [&_dd]:text-micro [&_dd]:text-muted-soft">
                 <dt style={{ font: "500 12px var(--font-body)", color: "var(--muted)" }}>Hint</dt>
                 <dd>12 / 500 / muted</dd>
               </div>
-              <div className="ds-type-row">
+              <div className="flex flex-col gap-[2px] py-[2px] [&_dt]:m-0 [&_dt]:min-w-0 [&_dd]:m-0 [&_dd]:text-micro [&_dd]:text-muted-soft">
                 <dt style={{ font: "500 12px var(--font-mono, ui-monospace, Menlo, monospace)", fontVariantNumeric: "tabular-nums", color: "var(--muted)" }}>
                   Entry date · Apr 18, 5:03 PM
                 </dt>
@@ -111,285 +127,181 @@ export function DesignSystemSection() {
             </dl>
           </section>
 
-          <section className="ds-section">
-            <div className="section-head">
-              <span className="section-title">Spacing</span>
-              <span className="section-aside">Layout tokens</span>
-            </div>
-            <p className="hint ds-spacing-lede">
-              Use named steps from <code>--layout-tight</code> (4px) through <code>--layout-split</code> — no numbered scale; bar length matches each variable.
+          <section className="flex flex-col gap-stack">
+            <SectionHead title="Spacing" aside="Layout tokens" variant="ds" />
+            <p className="text-muted text-control m-0 mb-stack max-w-[62ch] [&_code]:px-[6px] [&_code]:py-[1px] [&_code]:rounded-[6px] [&_code]:bg-card-soft [&_code]:text-text">
+              Use named steps from <code>--spacing-tight</code> (4px) through <code>--spacing-split</code> — no numbered scale; bar length matches each variable.
             </p>
-            <ul className="ds-layout-token-list">
+            <ul className="list-none m-0 p-0 flex flex-col gap-inline">
               {DESIGN_SPACING_TOKENS.map((t) => (
-                <li key={t.varName} className="ds-layout-token-row">
+                <li key={t.varName} className="grid grid-cols-[minmax(13rem,auto)_3rem_minmax(0,1fr)] items-center gap-inline text-micro text-muted [&_code]:text-micro [&_code]:text-muted-soft">
                   <code>{t.varName}</code>
-                  <span className="ds-layout-token-px">{t.px}</span>
-                  <span className="ds-layout-token-bar" style={{ width: `var(${t.varName})` }} aria-hidden title={t.varName} />
+                  <span className="text-micro text-muted tabular-nums">{t.px}</span>
+                  <span className="h-[8px] bg-accent rounded-[4px] max-w-full min-w-0" style={{ width: `var(${t.varName})` }} aria-hidden title={t.varName} />
                 </li>
               ))}
             </ul>
-            <div className="ds-field-line-spacing-demo">
-              <p className="ds-field-line-demo-title">Field-line (label ↔ control)</p>
-              <label className="field field-line">
-                <span className="field-line-label">Example</span>
-                <input type="text" defaultValue="Spacing demo" aria-label="Field-line spacing demo" />
-              </label>
-              <p className="ds-field-line-spacing-note">
-                <code>.field-line</code> uses <strong>gap: var(--layout-inline)</strong>. <code>.field-line-label</code> uses{" "}
-                <strong>padding-top: var(--layout-stack)</strong>, <strong>padding-bottom: var(--layout-inline)</strong>; inputs use{" "}
-                <strong>padding: var(--layout-inline) var(--layout-stack)</strong> (see <code>styles.css</code>).
+            <div className="max-w-[320px]">
+              <p className="mt-stack mb-inline text-control font-semibold text-text">Field-line (label ↔ control)</p>
+              <FieldLine label="Example" type="text" defaultValue="Spacing demo" aria-label="Field-line spacing demo" />
+              <p className="mt-[10px] text-micro text-muted-soft leading-[1.45] max-w-[42ch] [&_code]:text-muted">
+                <code>.field-line</code> stacks an uppercase micro-label over a borderless tinted control, with{" "}
+                <strong>gap-inline</strong> between them — the same primitive the production forms use.
               </p>
             </div>
           </section>
 
-          <section className="ds-section">
-            <div className="section-head">
-              <span className="section-title">Radius</span>
-              <span className="section-aside">Rounded corners</span>
-            </div>
-            <ul className="ds-radius-list">
+          <section className="flex flex-col gap-stack">
+            <SectionHead title="Radius" aside="Rounded corners" variant="ds" />
+            <ul className="list-none m-0 p-0 flex flex-wrap gap-stack">
               {DESIGN_RADIUS_TOKENS.map((t) => (
-                <li key={t.varName} className="ds-radius-item">
-                  <span className="ds-radius-chip" style={{ borderRadius: `var(${t.varName})` }} />
+                <li key={t.varName} className="flex flex-col items-center gap-tight text-micro text-muted">
+                  <span className="w-[54px] h-[54px] bg-card-strong" style={{ borderRadius: `var(${t.varName})` }} />
                   <code>{t.varName}</code>
-                  <span className="ds-scale-val">{t.px}</span>
+                  <span className="text-muted-soft tabular-nums">{t.px}</span>
                 </li>
               ))}
             </ul>
           </section>
 
-          <section className="ds-section">
-            <div className="section-head">
-              <span className="section-title">Badges</span>
-              <span className="section-aside">9-point scale</span>
-            </div>
-            <div className="ds-badges">
-              <span className="pain-badge sm low">2</span>
-              <span className="pain-badge sm mid">5</span>
-              <span className="pain-badge sm high">8</span>
-              <span className="pain-badge sm muted">&mdash;</span>
+          <section className="flex flex-col gap-stack">
+            <SectionHead title="Badges" aside="9-point scale" variant="ds" />
+            <div className="flex gap-inline flex-wrap">
+              <PainBadge variant="low" sm>2</PainBadge>
+              <PainBadge variant="mid" sm>5</PainBadge>
+              <PainBadge variant="high" sm>8</PainBadge>
+              <PainBadge variant="muted" sm>&mdash;</PainBadge>
             </div>
           </section>
         </div>
 
-        <div className="panel-col ds-col">
-          <h2 className="entries-heading">Components</h2>
+        <div className="block min-w-0 [&>section+section]:mt-stack min-[1100px]:border-l min-[1100px]:border-[var(--border-soft)] min-[1100px]:pl-split">
+          <EntriesHeading className="mt-0 mb-block">Components</EntriesHeading>
 
-          <section className="ds-section">
-            <div className="section-head">
-              <span className="section-title">Buttons</span>
-              <span className="section-aside">Pill utility</span>
-            </div>
-            <div className="ds-btn-row">
-              <button type="button" className="btn">Default</button>
-              <button type="button" className="btn btn-primary">Primary</button>
-              <button type="button" className="btn btn-primary is-success-pulse">✓ Saved</button>
-              <button type="button" className="btn btn-danger">Danger</button>
+          <section className="flex flex-col gap-stack">
+            <SectionHead title="Buttons" aside="Pill utility" variant="ds" />
+            <div className="flex gap-inline flex-wrap">
+              <Button>Default</Button>
+              <Button variant="primary">Primary</Button>
+              <Button variant="success">✓ Saved</Button>
+              <Button variant="danger">Danger</Button>
             </div>
           </section>
 
-          <section className="ds-section">
-            <div className="section-head">
-              <span className="section-title">Sidebar nav</span>
-              <span className="section-aside">.sidebar-item</span>
-            </div>
-            <p className="hint ds-sidebar-preview-note">
+          <section className="flex flex-col gap-stack">
+            <SectionHead title="Sidebar nav" aside=".sidebar-item" variant="ds" />
+            <p className="m-0 text-micro text-muted-soft leading-[1.4] [&_code]:text-muted">
               Uses production classes. Default → hover <code>card-strong</code>; <code>active</code> → accent tint.
             </p>
-            <div className="ds-sidebar-preview">
-              <button type="button" className="sidebar-item" tabIndex={-1}>
+            <div className="max-w-[220px] flex flex-col gap-stack">
+              <button type="button" className={`${NAV_ITEM} ${NAV_ITEM_IDLE}`} tabIndex={-1}>
                 {DS_SIDEBAR_DEMO_ICON}
-                <span className="sidebar-item-label">Dashboard</span>
+                <span className="opacity-100">Dashboard</span>
               </button>
-              <button type="button" className="sidebar-item active" tabIndex={-1}>
+              <button type="button" className={`${NAV_ITEM} ${NAV_ITEM_ACTIVE}`} tabIndex={-1}>
                 {DS_SIDEBAR_DEMO_ICON}
-                <span className="sidebar-item-label">Settings</span>
+                <span className="opacity-100">Settings</span>
               </button>
             </div>
           </section>
 
-          <section className="ds-section">
-            <div className="section-head">
-              <span className="section-title">Form fields</span>
-              <span className="section-aside">Field-line</span>
-            </div>
-            <div className="ds-fields">
-              <label className="field field-line">
-                <span className="field-line-label">Text</span>
-                <input type="text" defaultValue="Sample value" aria-label="Text" />
-              </label>
-              <label className="field field-line">
-                <span className="field-line-label">Date &amp; time</span>
-                <input type="datetime-local" defaultValue="2026-04-18T17:30" aria-label="Date/time" />
-              </label>
-              <label className="field field-line">
-                <span className="field-line-label">Description</span>
-                <textarea rows={2} placeholder="Free text area…" aria-label="Description" />
-              </label>
+          <section className="flex flex-col gap-stack">
+            <SectionHead title="Form fields" aside="Field-line" variant="ds" />
+            <div className="flex flex-col gap-stack">
+              <FieldLine label="Text" type="text" defaultValue="Sample value" aria-label="Text" />
+              <FieldLine label="Date & time" type="datetime-local" defaultValue="2026-04-18T17:30" aria-label="Date/time" className="!w-auto justify-self-start" />
+              <FieldLine label="Description" multiline rows={2} placeholder="Free text area…" aria-label="Description" />
             </div>
           </section>
 
-          <section className="ds-section">
-            <div className="section-head">
-              <span className="section-title">Metrics</span>
-              <span className="section-aside">BarMetric · Stepper</span>
-            </div>
-            <div className="ds-metrics">
+          <section className="flex flex-col gap-stack">
+            <SectionHead title="Metrics" aside="BarMetric · Stepper" variant="ds" />
+            <div className="flex flex-col gap-inline">
               <BarMetric label="Mood" value={moodDemo} fractionDigits={1} higherIsBetter onChange={setMoodDemo} />
               <BarMetric label="Pain" value={painDemo} onChange={setPainDemo} />
               <CoffeeStepper value={coffeeDemo} onChange={setCoffeeDemo} />
             </div>
           </section>
 
-          <section className="ds-section">
-            <div className="section-head">
-              <span className="section-title">Tabs</span>
-              <span className="section-aside">Underline, accent</span>
-            </div>
-            <nav className="tag-tabs" role="tablist" aria-label="Demo tabs">
-              {(["positive", "negative", "general"] as const).map((id) => (
-                <button
-                  key={id}
-                  type="button"
-                  role="tab"
-                  aria-selected={tabDemo === id}
-                  className={tabDemo === id ? "active" : ""}
-                  onClick={() => setTabDemo(id)}
-                >
-                  {id[0].toUpperCase() + id.slice(1)} <span className="count">0</span>
-                </button>
-              ))}
-            </nav>
+          <section className="flex flex-col gap-stack">
+            <SectionHead title="Tabs" aside="Underline, accent" variant="ds" />
+            <TagTabs
+              tabs={(["positive", "negative", "general"] as const).map((id) => ({ id, label: id[0].toUpperCase() + id.slice(1), count: 0 }))}
+              active={tabDemo}
+              onSelect={setTabDemo}
+              ariaLabel="Demo tabs"
+            />
           </section>
 
-          <section className="ds-section">
-            <div className="section-head">
-              <span className="section-title">Entry row</span>
-              <span className="section-aside">Collapsible details</span>
-            </div>
-            <details className="entry-row" open>
-              <summary>
-                <span className="date">Apr 18, 5:03 PM</span>
-                <span className="pain-badge sm mid">6</span>
-                <span className="preview">grateful · distracted, restless</span>
+          <section className="flex flex-col gap-stack">
+            <SectionHead title="Entry row" aside="Collapsible details" variant="ds" />
+            <details className={ENTRY_ROW} open>
+              <summary className={ENTRY_SUMMARY}>
+                <span className={ENTRY_DATE}>Apr 18, 5:03 PM</span>
+                <PainBadge variant="mid" sm>6</PainBadge>
+                <span className={ENTRY_PREVIEW}>grateful · distracted, restless</span>
                 <span />
-                <span className="chevron" aria-hidden="true">▶</span>
+                <span className={ENTRY_CHEVRON} aria-hidden="true">▶</span>
               </summary>
-              <div className="entry-expanded">
-                <div className="detail-group">
-                  <span className="label">Mood · Dep · Anx</span>
-                  <span className="value">6 · 4 · 4</span>
-                </div>
-                <div className="detail-group">
-                  <span className="label">Positive</span>
-                  <span className="value">
-                    <span className="tag-mini">grateful</span>
-                  </span>
-                </div>
+              <div className={ENTRY_EXPANDED}>
+                <DetailGroup label="Mood · Dep · Anx">6 · 4 · 4</DetailGroup>
+                <DetailGroup label="Positive"><span className={TAG_MINI}>grateful</span></DetailGroup>
               </div>
             </details>
           </section>
 
-          <section className="ds-section">
-            <div className="section-head">
-              <span className="section-title">Memorable days</span>
-              <span className="section-aside">Calendar · list · emoji</span>
-            </div>
-            <div className="ds-memorable-stack">
-              <div className="memorable-calendar-head">
-                <div className="memorable-calendar-nav">
-                  <button type="button" className="btn memorable-month-nav">
-                    Prev
-                  </button>
-                  <button type="button" className="btn memorable-month-label" aria-label="Go to current month (demo)">
-                    May 2026
-                  </button>
-                  <button type="button" className="btn memorable-month-nav">
-                    Next
-                  </button>
+          <section className="flex flex-col gap-stack">
+            <SectionHead title="Memorable days" aside="Calendar · list · emoji" variant="ds" />
+            <div className="flex flex-col gap-stack items-stretch">
+              <div className="flex items-center">
+                <div className="flex gap-inline items-center">
+                  <Button className="flex-shrink-0 tracking-[0.01em]">Prev</Button>
+                  <Button className="tracking-[0.01em] min-w-0 flex-1 overflow-hidden text-ellipsis whitespace-nowrap" aria-label="Go to current month (demo)">May 2026</Button>
+                  <Button className="flex-shrink-0 tracking-[0.01em]">Next</Button>
                 </div>
               </div>
-              <button type="button" className="btn btn-primary memorable-add-btn">
-                Add new
-              </button>
-              <div className="memorable-weekdays">
+              <Button variant="primary">Add new</Button>
+              <div className="flex items-center gap-inline mb-inline">
                 {DS_MEMORABLE_WEEKDAY_LABELS.map((d) => (
-                  <span key={d}>{d}</span>
+                  <span key={d} className="flex-1 text-center text-muted text-xs font-bold uppercase">{d}</span>
                 ))}
               </div>
-              <div className="ds-memorable-calendar-preview">
-                <div className="memorable-calendar-grid">
-                  <div className="memorable-day-cell is-outside">
-                    <span className="memorable-day-top">
-                      <button type="button" className="memorable-day-number" tabIndex={-1} onClick={(e) => e.preventDefault()}>
-                        27
-                      </button>
-                    </span>
-                  </div>
-                  <div className="memorable-day-cell is-today">
-                    <span className="memorable-day-top">
-                      <button type="button" className="memorable-day-number" tabIndex={-1} onClick={(e) => e.preventDefault()}>
-                        28
-                      </button>
-                    </span>
-                  </div>
-                  <div className="memorable-day-cell">
-                    <span className="memorable-day-top">
-                      <button type="button" className="memorable-day-number" tabIndex={-1} onClick={(e) => e.preventDefault()}>
-                        29
-                      </button>
-                    </span>
-                    <span className="memorable-day-markers">
-                      <span className="memorable-day-marker">Team lunch</span>
-                    </span>
-                  </div>
-                  <div className="memorable-day-cell">
-                    <span className="memorable-day-top">
-                      <button type="button" className="memorable-day-number" tabIndex={-1} onClick={(e) => e.preventDefault()}>
-                        30
-                      </button>
-                    </span>
-                  </div>
-                  <div className="memorable-day-cell">
-                    <span className="memorable-day-top">
-                      <button type="button" className="memorable-day-number" tabIndex={-1} onClick={(e) => e.preventDefault()}>
-                        1
-                      </button>
-                    </span>
-                  </div>
-                  <div className="memorable-day-cell">
-                    <span className="memorable-day-top">
-                      <button type="button" className="memorable-day-number" tabIndex={-1} onClick={(e) => e.preventDefault()}>
-                        2
-                      </button>
-                    </span>
-                  </div>
-                  <div className="memorable-day-cell">
-                    <span className="memorable-day-top">
-                      <button type="button" className="memorable-day-number" tabIndex={-1} onClick={(e) => e.preventDefault()}>
-                        3
-                      </button>
-                    </span>
-                  </div>
+              <div className="max-w-[480px] w-full">
+                <div className="grid grid-cols-[repeat(7,minmax(0,1fr))] gap-inline">
+                  {[
+                    { n: 27, mod: "opacity-[0.48]" },
+                    { n: 28, mod: "shadow-[0_0_0_1px_color-mix(in_srgb,var(--accent)_28%,transparent)]" },
+                    { n: 29, marker: "Team lunch" },
+                    { n: 30 }, { n: 1 }, { n: 2 }, { n: 3 },
+                  ].map((cell) => (
+                    <div key={cell.n} className={`${MEMO_DAY_CELL} !min-h-[72px] !p-inline ${cell.mod ?? ""}`}>
+                      <span className="flex items-center justify-between">
+                        <button type="button" className={DAY_NUMBER} tabIndex={-1} onClick={(e) => e.preventDefault()}>{cell.n}</button>
+                      </span>
+                      {cell.marker ? (
+                        <span className="flex flex-col gap-inline">
+                          <span className="text-xs leading-[1.35] text-muted whitespace-nowrap overflow-hidden text-ellipsis">{cell.marker}</span>
+                        </span>
+                      ) : null}
+                    </div>
+                  ))}
                 </div>
               </div>
-              <button type="button" className="memorable-list-item">
-                <span className="memorable-list-emoji">🎂</span>
-                <span className="memorable-list-body">
-                  <span className="memorable-list-topline">
-                    <strong>Sample day</strong>
-                    <span className="memorable-list-date">05-15</span>
+              <button type="button" className={MEMO_LIST_ITEM}>
+                <span className="text-[22px] leading-none">🎂</span>
+                <span className="flex-1 flex flex-col gap-tight items-start">
+                  <span className="w-full flex items-baseline justify-between gap-stack">
+                    <strong className="text-[15px] min-w-0 text-text">Sample day</strong>
+                    <span className="text-muted text-control flex-shrink-0 text-right">05-15</span>
                   </span>
-                  <span className="memorable-list-meta">yearly</span>
+                  <span className="text-micro text-muted-soft">yearly</span>
                 </span>
               </button>
-              <div className="ds-memorable-emoji-row">
-                <button type="button" className="btn memorable-emoji-picker-trigger" aria-label="Emoji picker trigger demo">
-                  <span className="memorable-emoji-picker-trigger-emoji" aria-hidden>
-                    ✨
-                  </span>
+              <div className="flex items-center gap-inline flex-wrap">
+                <button type="button" className={EMOJI_TRIGGER} aria-label="Emoji picker trigger demo">
+                  <span className="text-[32px] leading-none" aria-hidden>✨</span>
                 </button>
-                <p className="hint">Same trigger class as the modal emoji control.</p>
+                <p className="m-0 text-micro text-muted">Same trigger class as the modal emoji control.</p>
               </div>
             </div>
           </section>

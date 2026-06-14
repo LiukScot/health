@@ -24,6 +24,7 @@ const VARIANT: Record<ButtonVariant, string> = {
 };
 
 // Shared so non-<button> controls (e.g. a file-input <label>) can wear the pill.
+// eslint-disable-next-line react-refresh/only-export-components
 export function buttonClass(variant: ButtonVariant = "default", size: ButtonSize = "md", extra = "") {
   return `${COMMON} ${SIZE[size]} ${VARIANT[variant]} ${extra}`;
 }
