@@ -1,5 +1,8 @@
 import { bandNine, formatMetricDisplay } from "./screen-format";
 
+const STEPPER_BTN =
+  "w-[26px] h-[26px] min-h-[26px] p-0 text-sm text-muted bg-transparent border border-[var(--border-soft)] rounded-full shadow-none cursor-pointer transition-[color,border-color] duration-150 ease-[ease] hover:text-accent hover:bg-transparent hover:border-accent";
+
 export function BarMetric({
   label,
   value,
@@ -17,10 +20,11 @@ export function BarMetric({
   const n =
     value != null && !Number.isNaN(Number(value)) ? Math.min(9, Math.max(1, Math.round(Number(value)))) : null;
   const band = bandNine(n, higherIsBetter);
+  const bandColor = { low: "text-success", mid: "text-warning", high: "text-danger", "": "" }[band] ?? "";
   return (
-    <div className="bar-metric">
-      <span className="name">{label}</span>
-      <div className="bars" role="group" aria-label={label}>
+    <div className="grid grid-cols-[120px_1fr_auto] items-center gap-stack pb-[2px]">
+      <span className="text-control font-medium text-text">{label}</span>
+      <div className="grid grid-cols-9 gap-[2px]" role="group" aria-label={label}>
         {Array.from({ length: 9 }, (_, i) => {
           const slot = i + 1;
           const filled = n != null && slot <= n;
@@ -35,11 +39,14 @@ export function BarMetric({
               : slot <= 6
                 ? "mid"
                 : "high";
+          const fill = filled
+            ? { low: "bg-success", mid: "bg-warning", high: "bg-danger" }[slotBand]
+            : "bg-[color-mix(in_srgb,white_4%,var(--card))] hover:bg-[color-mix(in_srgb,white_10%,var(--card))]";
           return (
             <button
               key={slot}
               type="button"
-              className={["bar", filled ? "filled" : "", filled ? slotBand : ""].filter(Boolean).join(" ")}
+              className={`h-[10px] min-h-[10px] p-0 border-0 rounded-[2px] shadow-none cursor-pointer transition-[background] duration-[120ms] appearance-none ${fill}`}
               aria-label={`${label} ${slot} of 9`}
               aria-pressed={n === slot}
               onClick={() => {
@@ -50,7 +57,7 @@ export function BarMetric({
           );
         })}
       </div>
-      <span className={["val", band].filter(Boolean).join(" ")}>{formatMetricDisplay(value, fractionDigits)}</span>
+      <span className={`font-bold text-sm font-mono text-text min-w-[38px] text-right tabular-nums tracking-[0.01em] ${bandColor}`}>{formatMetricDisplay(value, fractionDigits)}</span>
     </div>
   );
 }
@@ -58,17 +65,17 @@ export function BarMetric({
 export function CoffeeStepper({ value, onChange }: { value: number | null; onChange: (next: number | null) => void }) {
   const n = value != null && !Number.isNaN(Number(value)) ? Math.min(50, Math.max(0, Math.floor(Number(value)))) : 0;
   return (
-    <div className="bar-metric bar-metric-stepper">
-      <span className="name">Coffee</span>
-      <span aria-hidden="true" className="bar-metric-spacer" />
-      <div className="stepper-group">
-        <button type="button" aria-label="Decrease coffee count" onClick={() => onChange(Math.max(0, n - 1))}>
+    <div className="grid grid-cols-[120px_1fr_auto] items-center gap-stack pb-[2px]">
+      <span className="text-control font-medium text-text">Coffee</span>
+      <span aria-hidden="true" className="h-[10px] min-h-[10px] bg-[color-mix(in_srgb,white_4%,var(--card))] rounded-[2px]" />
+      <div className="inline-flex items-center gap-inline">
+        <button type="button" className={STEPPER_BTN} aria-label="Decrease coffee count" onClick={() => onChange(Math.max(0, n - 1))}>
           −
         </button>
-        <span className="val" aria-live="polite">
+        <span className="text-center font-bold text-sm font-mono text-text min-w-[18px] tabular-nums" aria-live="polite">
           {value != null ? n : "—"}
         </span>
-        <button type="button" aria-label="Increase coffee count" onClick={() => onChange(Math.min(50, n + 1))}>
+        <button type="button" className={STEPPER_BTN} aria-label="Increase coffee count" onClick={() => onChange(Math.min(50, n + 1))}>
           +
         </button>
       </div>
@@ -86,9 +93,9 @@ export function EmptyState({
   compact?: boolean;
 }) {
   return (
-    <div className={compact ? "empty-state empty-state-compact" : "empty-state"}>
-      <p className="empty-state-title">{title}</p>
-      <p className="empty-state-copy">{description}</p>
+    <div className={compact ? "grid gap-inline m-0" : "grid gap-inline my-stack"}>
+      <p className="text-control font-semibold text-text m-0">{title}</p>
+      <p className="max-w-[60ch] text-control text-muted leading-normal m-0">{description}</p>
     </div>
   );
 }
