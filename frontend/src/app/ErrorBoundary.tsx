@@ -7,10 +7,10 @@ function logError(error: unknown, info: { componentStack?: string | null }, cont
 
 function RootFallback({ resetErrorBoundary }: FallbackProps) {
   return (
-    <main className="screen auth-screen">
-      <section className="auth-card stack" role="alert">
+    <main className="grid place-items-center min-h-screen p-0 max-[720px]:p-stack">
+      <section className="w-[min(560px,94vw)] bg-card border border-border rounded-lg p-stack shadow-[var(--shadow)] grid gap-stack" role="alert">
         <h1>Something went wrong</h1>
-        <p className="hint">
+        <p className="text-muted text-control">
           The app hit an unexpected error and couldn&apos;t continue. Reloading
           usually clears it.
         </p>
@@ -27,9 +27,9 @@ function RootFallback({ resetErrorBoundary }: FallbackProps) {
 
 function SectionFallback({ resetErrorBoundary }: FallbackProps) {
   return (
-    <div className="empty-state" role="alert">
-      <p className="empty-state-title">This section ran into a problem</p>
-      <p className="empty-state-copy">
+    <div className="grid gap-inline my-stack" role="alert">
+      <p className="text-control font-semibold text-text m-0">This section ran into a problem</p>
+      <p className="max-w-[60ch] text-control text-muted leading-normal m-0">
         Something went wrong while loading this view. The rest of the app is
         still available.
       </p>
