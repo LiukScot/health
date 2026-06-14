@@ -5,13 +5,45 @@ import { apiEnvelopeSchema, apiFetch } from "../lib";
 import type { InlineMessage, MoodFieldKey, PainFieldKey } from "./core";
 import { csvToList, listToCsv, mergeOptions } from "./core";
 
+// Pill primitive shared by toggle/add/edit chips. Shape carries no color so
+// idle/active color utilities don't collide on source order.
+const CHIP_SHAPE =
+  "inline-flex items-center gap-inline px-stack py-tight min-h-page rounded-full text-hint leading-none border-0 shadow-none transition-[color,background] duration-150 ease-[ease]";
+const CHIP_IDLE = "text-muted bg-[color-mix(in_srgb,white_5%,var(--card))]";
+const CHIP_IDLE_HOVER = "hover:text-text hover:bg-[color-mix(in_srgb,white_9%,var(--card))]";
+const CHIP_ACTIVE = "text-accent bg-[color-mix(in_srgb,var(--accent)_10%,transparent)]";
+const REMOVE_BTN =
+  "inline-flex items-center justify-center w-[18px] h-[18px] min-h-[18px] p-0 rounded-full text-micro font-bold leading-none text-muted bg-[color-mix(in_srgb,var(--bg)_60%,transparent)] border-0 shadow-none flex-none cursor-pointer [@media(hover:hover)]:hover:text-danger [@media(hover:hover)]:hover:bg-[color-mix(in_srgb,var(--danger)_15%,transparent)]";
+const ADDER_BTN =
+  "border-0 bg-transparent px-stack py-tight min-h-[24px] rounded-full text-xs font-semibold font-body shadow-none cursor-pointer transition-[color,background] duration-150 ease-[ease]";
+
+type SectionHeadVariant = "default" | "dashboard" | "ds" | "tags";
+const SECTION_HEAD: Record<SectionHeadVariant, string> = {
+  default: "flex justify-between gap-stack pb-tight mt-block",
+  dashboard: "flex justify-between gap-stack pb-inline mt-block",
+  ds: "flex flex-col gap-[2px] pb-tight mt-block",
+  tags: "flex justify-between gap-stack mb-0",
+};
+const SECTION_TITLE: Record<SectionHeadVariant, string> = {
+  default: "text-nano font-bold tracking-[0.16em] uppercase text-muted",
+  dashboard: "text-control font-bold tracking-[0.16em] uppercase text-accent",
+  ds: "text-nano font-bold tracking-[0.16em] uppercase text-muted",
+  tags: "text-nano font-bold tracking-[0.16em] uppercase text-muted",
+};
+const SECTION_ASIDE: Record<SectionHeadVariant, string> = {
+  default: "text-micro text-muted-soft tabular-nums",
+  dashboard: "text-micro text-muted-soft tabular-nums",
+  ds: "text-micro text-muted-soft tabular-nums",
+  tags: "text-xs text-muted-soft",
+};
+
 export function InlineFeedback({ message, className }: { message: InlineMessage | null; className?: string }) {
   if (!message) {
     return null;
   }
 
-  const toneClass = `is-${message.tone}`;
-  const classes = ["feedback-message", toneClass, className].filter(Boolean).join(" ");
+  const toneColor = { error: "text-danger", success: "text-success", warning: "text-[#ffd38a]", info: "text-muted" }[message.tone] ?? "text-muted";
+  const classes = ["m-0 text-control leading-[1.4]", toneColor, className].filter(Boolean).join(" ");
   const ariaLive = message.tone === "error" ? "assertive" : "polite";
 
   return (
@@ -46,9 +78,9 @@ export function AnimatedEditingLabel({
   }
 
   return (
-    <span className="animated-editing-stack">
-      <span className="animated-editing-label">{editingLabel + ".".repeat(dotsCount)}</span>
-      <span className="animated-editing-sizer" aria-hidden="true">{editingLabel}...</span>
+    <span className="grid">
+      <span className="[grid-area:1/1]">{editingLabel + ".".repeat(dotsCount)}</span>
+      <span className="[grid-area:1/1] invisible" aria-hidden="true">{editingLabel}...</span>
     </span>
   );
 }
@@ -199,9 +231,9 @@ export function MultiSelectField({ label, fieldKey, value, options, onChange, do
   };
 
   return (
-    <div className={editOptionsMode ? "multi-select-field editing-options" : "multi-select-field"}>
-      {hideLabel ? null : <span className="section-heading">{label}</span>}
-      <div className="multi-option-list" role="group" aria-label={label}>
+    <div className="grid gap-inline content-start">
+      {hideLabel ? null : <span className="flex flex-wrap mt-stack mb-stack pl-stack border-l-[3px] border-accent text-sm font-semibold text-accent leading-[1.2]">{label}</span>}
+      <div className="flex flex-wrap gap-inline content-start mt-[5px] mb-[5px] order-1" role="group" aria-label={label}>
         {allOptions.map((option) => {
           const optionKey = option.toLowerCase();
           const isSelected = selectedSet.has(optionKey);
@@ -209,20 +241,20 @@ export function MultiSelectField({ label, fieldKey, value, options, onChange, do
 
           if (isConfirmingRemoval) {
             return (
-              <div key={option} className="multi-option-confirmation" role="group" aria-label={`Confirm removal of ${option}`}>
-                <span className="multi-option-confirm-label">Remove {option}?</span>
-                <div className="multi-option-confirm-actions">
+              <div key={option} className="inline-flex items-center gap-inline flex-wrap px-stack py-inline border border-[color-mix(in_srgb,var(--danger)_50%,transparent)] rounded-full bg-[color-mix(in_srgb,var(--danger)_8%,transparent)]" role="group" aria-label={`Confirm removal of ${option}`}>
+                <span className="whitespace-nowrap text-text text-control">Remove {option}?</span>
+                <div className="inline-flex items-center gap-inline">
                   <button
                     type="button"
                     ref={confirmRemoveRef}
-                    className="danger multi-option-confirm-button"
+                    className="danger min-h-[30px] px-stack py-tight text-xs shadow-none"
                     onClick={() => {
                       void permanentlyRemoveOption(option);
                     }}
                   >
                     Remove
                   </button>
-                  <button type="button" className="multi-option-cancel" onClick={() => setPendingRemovalKey(null)}>
+                  <button type="button" className="min-h-[30px] px-stack py-tight text-xs shadow-none" onClick={() => setPendingRemovalKey(null)}>
                     Cancel
                   </button>
                 </div>
@@ -231,13 +263,13 @@ export function MultiSelectField({ label, fieldKey, value, options, onChange, do
           }
 
           return (
-            <div key={option} className="multi-option-item">
+            <div key={option} className="inline-flex items-center">
               {editOptionsMode ? (
-                <div className={isSelected ? "multi-option-chip active" : "multi-option-chip"}>
-                  <span className="multi-option-label">{option}</span>
+                <div className={`${CHIP_SHAPE} ${isSelected ? CHIP_ACTIVE : CHIP_IDLE} cursor-default`}>
+                  <span className="whitespace-nowrap">{option}</span>
                   <button
                     type="button"
-                    className="multi-option-remove"
+                    className={REMOVE_BTN}
                     aria-label={`Remove ${option} from suggestions`}
                     onClick={() => setPendingRemovalKey(optionKey)}
                   >
@@ -247,24 +279,25 @@ export function MultiSelectField({ label, fieldKey, value, options, onChange, do
               ) : (
                 <button
                   type="button"
-                  className={isSelected ? "multi-option-chip active" : "multi-option-chip"}
+                  className={`${CHIP_SHAPE} ${isSelected ? CHIP_ACTIVE : `${CHIP_IDLE} ${CHIP_IDLE_HOVER}`}`}
                   onClick={() => toggleOption(option)}
                   aria-pressed={isSelected}
                 >
-                  <span className="multi-option-label">{option}</span>
+                  <span className="whitespace-nowrap">{option}</span>
                 </button>
               )}
             </div>
           );
         })}
       </div>
-      <div className="multi-option-actions">
+      <div className="flex flex-wrap items-center gap-inline mt-tight">
         {addingOption ? (
-          <div className="multi-option-adder">
+          <div className="inline-flex items-center gap-inline pl-stack pr-tight py-[2px] border border-[color-mix(in_srgb,var(--accent)_40%,transparent)] rounded-full bg-[color-mix(in_srgb,var(--accent)_6%,transparent)] min-h-page">
             <input
               ref={addInputRef}
               autoFocus
               type="text"
+              className="flex-[1_1_140px] min-w-[120px] max-w-[18rem] w-auto border-0 bg-transparent p-0 text-text text-control font-medium font-body shadow-none outline-none focus:bg-transparent focus:shadow-none placeholder:text-muted-soft"
               placeholder={`New ${label.toLowerCase()}`}
               value={customValue}
               onChange={(event) => setCustomValue(event.target.value)}
@@ -283,7 +316,7 @@ export function MultiSelectField({ label, fieldKey, value, options, onChange, do
             />
             <button
               type="button"
-              className={`multi-option-adder-confirm${addSuccess ? " is-success" : ""}`}
+              className={`${ADDER_BTN} ${addSuccess ? "text-success bg-[color-mix(in_srgb,var(--success)_16%,transparent)]" : "text-accent hover:text-text"}`}
               aria-label="Save option"
               onClick={commitCustomValue}
             >
@@ -291,7 +324,7 @@ export function MultiSelectField({ label, fieldKey, value, options, onChange, do
             </button>
             <button
               type="button"
-              className="multi-option-adder-cancel"
+              className={`${ADDER_BTN} text-muted-soft hover:text-text`}
               aria-label="Cancel"
               onClick={() => {
                 setAddingOption(false);
@@ -305,7 +338,7 @@ export function MultiSelectField({ label, fieldKey, value, options, onChange, do
           <>
             <button
               type="button"
-              className="multi-option-chip multi-option-chip-add"
+              className={`${CHIP_SHAPE} text-muted-soft bg-[color-mix(in_srgb,white_5%,var(--card))] font-medium enabled:hover:text-text enabled:hover:bg-[color-mix(in_srgb,white_9%,var(--card))] disabled:opacity-40 disabled:cursor-not-allowed`}
               onClick={() => setAddingOption(true)}
               disabled={editOptionsMode}
             >
@@ -313,7 +346,7 @@ export function MultiSelectField({ label, fieldKey, value, options, onChange, do
             </button>
             <button
               type="button"
-              className={`multi-option-edit-link${editOptionsMode ? " active is-editing" : ""}`}
+              className={`border-0 rounded-full px-stack py-tight min-h-page text-hint font-medium leading-none shadow-none cursor-pointer transition-[color,background] duration-150 ease-[ease] ${editOptionsMode ? "text-accent bg-[color-mix(in_srgb,var(--accent)_10%,transparent)]" : "text-muted-soft bg-[color-mix(in_srgb,white_5%,var(--card))] hover:text-text hover:bg-[color-mix(in_srgb,white_9%,var(--card))]"}`}
               aria-pressed={editOptionsMode}
               onClick={() => setEditMode(!editOptionsMode)}
             >
@@ -328,12 +361,13 @@ export function MultiSelectField({ label, fieldKey, value, options, onChange, do
 
 /** Small titled divider used to group sub-sections across pages. When `ruled`,
  * a hairline fills the space after the title. */
-export function SectionHead({ title, aside, ruled = false }: { title: string; aside?: ReactNode; ruled?: boolean }) {
+export function SectionHead({ title, aside, ruled = false, variant = "default" }: { title: string; aside?: ReactNode; ruled?: boolean; variant?: SectionHeadVariant }) {
+  const align = ruled ? "items-center" : variant === "ds" ? "items-start" : "items-baseline";
   return (
-    <div className={ruled ? "section-head section-head--ruled" : "section-head"}>
-      <span className="section-title">{title}</span>
-      {ruled ? <span className="section-head-rule" aria-hidden="true" /> : null}
-      {aside != null ? <span className="section-aside">{aside}</span> : null}
+    <div className={`${SECTION_HEAD[variant]} ${align}`}>
+      <span className={SECTION_TITLE[variant]}>{title}</span>
+      {ruled ? <span className="flex-1 h-px bg-border" aria-hidden="true" /> : null}
+      {aside != null ? <span className={SECTION_ASIDE[variant]}>{aside}</span> : null}
     </div>
   );
 }

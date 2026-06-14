@@ -19,6 +19,7 @@
   /* Typography. 12/14/16px map 1:1 to Tailwind's built-in text-xs/sm/base,
      so only the off-scale sizes get a named token here. A named token (not
      an arbitrary text-[11px]) keeps the exact design size. */
+  --text-nano: 10px; /* uppercase eyebrow/section caps */
   --text-micro: 11px; /* micro labels, badges, field-line caps */
   --text-hint: 12.5px; /* hints, therapy callouts */
   --text-control: 13px; /* compact date/select control text */

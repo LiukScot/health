@@ -13,7 +13,7 @@ describe("<InlineFeedback />", () => {
     const node = screen.getByText("Saved.");
     expect(node).toHaveAttribute("role", "status");
     expect(node).toHaveAttribute("aria-live", "polite");
-    expect(node).toHaveClass("is-success");
+    expect(node).toHaveClass("text-success");
   });
 
   test("renders error tone as alert with aria-live assertive", () => {
