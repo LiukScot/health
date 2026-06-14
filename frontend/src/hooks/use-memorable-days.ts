@@ -39,11 +39,12 @@ export function useMemorableDays(enabled: boolean) {
   });
   const [selectedDate, setSelectedDate] = useState(todayKey());
 
+  const today = todayKey();
   const memorableDaysQuery = useQuery({
-    queryKey: ["memorable-days"],
+    queryKey: ["memorable-days", today],
     enabled,
     queryFn: async () =>
-      apiFetch("/api/v1/memorable-days", { method: "GET" }, (raw) => memorableDayListSchema.parse(raw).data),
+      apiFetch(`/api/v1/memorable-days?today=${today}`, { method: "GET" }, (raw) => memorableDayListSchema.parse(raw).data),
   });
 
   const mutationParser = (raw: unknown) => apiEnvelopeSchema(z.object({ ok: z.boolean().optional(), id: z.number().optional() })).parse(raw).data;

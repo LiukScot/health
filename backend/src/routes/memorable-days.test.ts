@@ -112,6 +112,20 @@ describe("GET /memorable-days", () => {
     expect(body.data[0].title).toBe("Birth");
   });
 
+  test("today param drives the occurrence label", async () => {
+    const { app, cookie } = await setup();
+    await app.request("/memorable-days", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", cookie },
+      body: JSON.stringify({ ...validBody, date: "2026-04-15", repeatMode: "monthly" }),
+    });
+    const res = await app.request("/memorable-days?today=2026-06-15", { headers: { cookie } });
+    const body = await res.json();
+    const item = body.data.find((d: { title: string }) => d.title === validBody.title);
+    expect(item.occurrenceCount).toBe(2);
+    expect(item.occurrenceLabel).toBe("2 months since Summer trip");
+  });
+
   test("isolates entries across users (IDOR)", async () => {
     const { ctx, app, cookie } = await setup();
     const created = await app.request("/memorable-days", {
