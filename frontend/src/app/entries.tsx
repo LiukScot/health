@@ -24,7 +24,7 @@ export const DELETE_CONFIRM = "text-[#ff3333] bg-[rgba(255,51,51,0.18)] font-ext
 
 export function EntriesHeading({ children, className = "" }: { children: ReactNode; className?: string }) {
   return (
-    <h2 className={`text-control text-muted uppercase tracking-[0.16em] font-bold mt-page mb-stack ${className}`}>
+    <h2 className={`text-control text-accent uppercase tracking-[0.16em] font-bold mt-page mb-stack ${className}`}>
       {children}
     </h2>
   );
