@@ -5,7 +5,7 @@ import { toDateKey, type InlineMessage, type MemorableDay } from "./core";
 import { emojiCatalog, emojiCategoryLabels, type EmojiCategory, type EmojiRecord } from "./emoji-catalog";
 import { getErrorMessage } from "../lib";
 import { memorableDayPayloadSchema, matchesMemorableDate, type useMemorableDays } from "../hooks/use-memorable-days";
-import { DateField } from "./DateField";
+import { DateInput } from "../components/ui/DateInput";
 import { Select } from "../components/ui/select";
 import { Button, buttonClass } from "../components/ui/Button";
 import { FieldLine, FIELD_LINE_LABEL } from "../components/ui/FieldLine";
@@ -514,7 +514,7 @@ export function MemorableDaysSection({ memorable }: Props) {
             <div className="grid grid-cols-[168px_88px] gap-stack items-start justify-start">
               <label className="grid gap-inline content-start min-w-0">
                 <span className={FIELD_LINE_LABEL}>Date</span>
-                <DateField value={draft.date} onChange={(value) => setDraft((current) => current ? { ...current, date: value } : current)} ariaLabel="Date" />
+                <DateInput value={draft.date} onChange={(value) => setDraft((current) => current ? { ...current, date: value } : current)} ariaLabel="Date" />
               </label>
               <label className="grid gap-inline content-start w-[88px] min-w-[88px] justify-self-end self-start">
                 <span className={FIELD_LINE_LABEL}>Emoji</span>

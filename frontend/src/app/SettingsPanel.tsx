@@ -7,7 +7,7 @@ import { getErrorMessage } from "../lib";
 import { InlineFeedback, SectionHead } from "./shared";
 import { McpAccessSection } from "./McpAccessSection";
 import { MedicinePreselectionSection } from "./MedicinePreselectionSection";
-import { DateField } from "./DateField";
+import { DateInput } from "../components/ui/DateInput";
 import { Button, buttonClass } from "../components/ui/Button";
 import { FieldLine } from "../components/ui/FieldLine";
 import { TAG_TAB_BTN } from "./entries";
@@ -48,7 +48,7 @@ function BirthdayBlock({
     <div className="grid gap-stack">
       <SectionHead title="Birthday" ruled />
       <label className="grid gap-inline content-start">
-        <DateField value={value} onChange={handleChange} ariaLabel="Birthday" placeholder="Select birthday" />
+        <DateInput value={value} onChange={handleChange} ariaLabel="Birthday" />
       </label>
       <p className="text-muted text-control">Why: this becomes a locked birthday item in Memorable days.{birthdayPending ? " Saving…" : ""}</p>
     </div>

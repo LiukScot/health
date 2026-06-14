@@ -15,7 +15,7 @@ type SelectProps = {
 };
 
 /**
- * Accessible select hand-rolled to mirror DateField (trigger button + popover).
+ * Accessible select hand-rolled as a trigger button + popover listbox.
  * Radix Select was dropped: @radix-ui/react-select@2.3.0 hits an infinite
  * render loop with React 19.2.5 ("Maximum update depth exceeded" in
  * SelectItemText), crashing the form at runtime with no upstream fix.
