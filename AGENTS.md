@@ -56,8 +56,6 @@ before any of the rules below.
 ## 3. Code organization
 
 - Keep files under ~500 lines. Split by concern, not line count.
-- Three similar lines is fine. Abstract on the fourth instance, not
-  the second.
 - No helpers, factories, or wrappers for hypothetical future needs.
   Add them when there are at least three concrete callers.
 
