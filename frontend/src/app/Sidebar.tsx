@@ -1,5 +1,16 @@
 import { navLabels, type NavItem } from "./core";
 
+// .sidebar / .sidebar-close-btn / .mobile-menu-btn keep their class names: the
+// shell's focus-trap + swipe handlers query them. Styling moves to utilities;
+// collapse/mobile state is driven by props (desktop collapse gated behind
+// min-[721px], the mobile drawer behind max-[720px]).
+const NAV_ITEM =
+  "flex items-center gap-stack w-full p-stack border border-transparent rounded-sm bg-transparent font-[inherit] text-sm font-semibold cursor-pointer transition-all whitespace-nowrap overflow-hidden shadow-none [&>svg]:flex-shrink-0 [&>svg]:w-5 [&>svg]:h-5 max-[720px]:p-[14px_12px] max-[720px]:text-base max-[720px]:[&>svg]:w-[22px] max-[720px]:[&>svg]:h-[22px]";
+const NAV_ITEM_IDLE = "text-muted hover:text-text hover:bg-card-strong";
+const NAV_ITEM_ACTIVE = "text-accent bg-[color-mix(in_srgb,var(--accent)_10%,transparent)]";
+const NAV_ITEM_SOFT_IDLE = "text-muted bg-card-soft hover:text-text hover:bg-[color-mix(in_srgb,var(--text)_4%,var(--card-soft))]";
+const NAV_LABEL = "opacity-100 transition-opacity";
+
 const navIcons: Record<string, React.ReactNode> = {
   dashboard: (
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
@@ -48,46 +59,46 @@ export function Sidebar({ nav, onNav, collapsed, onToggle, onCloseMobile, mobile
 
   return (
     <aside
-      className="sidebar"
+      className={`sidebar sticky top-0 h-screen flex flex-col bg-bg border-r border-border px-inline py-stack gap-inline z-10 max-[720px]:fixed max-[720px]:inset-0 max-[720px]:w-full max-[720px]:h-[100dvh] max-[720px]:p-[14px_18px] max-[720px]:z-[100] max-[720px]:transition-transform max-[720px]:duration-[250ms] max-[720px]:ease-[ease] ${mobileOpen ? "max-[720px]:[transform:translateX(0)]" : "max-[720px]:[transform:translateX(-100%)]"}`}
       aria-label="Main navigation"
       {...(mobileOpen ? { role: "dialog", "aria-modal": true } : {})}
     >
-      <div className="sidebar-brand">
-        <svg className="sidebar-heart" viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="var(--accent)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <div className={`flex items-center gap-stack pt-tight px-inline pb-stack border-b border-border mb-inline min-h-[48px] overflow-hidden ${collapsed ? "min-[721px]:justify-center min-[721px]:gap-0 min-[721px]:px-0" : ""}`}>
+        <svg className={`flex-shrink-0 transition-all duration-200 ${collapsed ? "min-[721px]:w-0 min-[721px]:opacity-0 min-[721px]:overflow-hidden" : ""}`} viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="var(--accent)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
           <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
         </svg>
-        <span className="sidebar-title">Health</span>
-        <button className="sidebar-collapse-btn" onClick={onToggle} aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}>
+        <span className={`text-[20px] font-bold tracking-[-0.02em] whitespace-nowrap flex-1 min-w-0 overflow-hidden opacity-100 transition-opacity duration-200 ${collapsed ? "min-[721px]:opacity-0 min-[721px]:flex-[0]" : ""}`}>Health</span>
+        <button className="flex-shrink-0 flex items-center justify-center w-[32px] h-[32px] p-0 border-0 rounded-[8px] bg-transparent text-muted cursor-pointer transition-all shadow-none hover:text-text [&>svg]:w-5 [&>svg]:h-5 max-[720px]:hidden" onClick={onToggle} aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}>
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" /><line x1="9" y1="3" x2="9" y2="21" /></svg>
         </button>
-        <button className="sidebar-close-btn" onClick={onCloseMobile} aria-label="Close menu">
+        <button className="sidebar-close-btn hidden max-[720px]:flex items-center justify-center flex-shrink-0 w-[36px] h-[36px] p-0 border-0 rounded-[8px] bg-transparent text-muted cursor-pointer shadow-none hover:text-text [&>svg]:w-5 [&>svg]:h-5" onClick={onCloseMobile} aria-label="Close menu">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
         </button>
       </div>
 
-      <nav className="sidebar-nav sidebar-nav--main" aria-label="Sections">
+      <nav className="flex flex-col gap-tight flex-1 min-h-0" aria-label="Sections">
         {items.map((item) => (
           <button
             key={item}
-            className={`sidebar-item${nav === item ? " active" : ""}`}
+            className={`${NAV_ITEM} ${nav === item ? NAV_ITEM_ACTIVE : NAV_ITEM_IDLE}`}
             onClick={() => onNav(item)}
             title={collapsed ? navLabels[item] : undefined}
           >
             {navIcons[item]}
-            <span className="sidebar-item-label">{navLabels[item]}</span>
+            <span className={`${NAV_LABEL} ${collapsed ? "min-[721px]:opacity-0 min-[721px]:w-0" : ""}`}>{navLabels[item]}</span>
           </button>
         ))}
       </nav>
 
-      <div className="sidebar-footer">
+      <div className="flex-shrink-0 pt-block mt-inline border-t border-border">
         <button
           type="button"
-          className={`sidebar-item sidebar-item--card-soft${nav === dsItem ? " active" : ""}`}
+          className={`${NAV_ITEM} ${nav === dsItem ? NAV_ITEM_ACTIVE : NAV_ITEM_SOFT_IDLE}`}
           onClick={() => onNav(dsItem)}
           title={collapsed ? navLabels[dsItem] : undefined}
         >
           {navIcons[dsItem]}
-          <span className="sidebar-item-label">{navLabels[dsItem]}</span>
+          <span className={`${NAV_LABEL} ${collapsed ? "min-[721px]:opacity-0 min-[721px]:w-0" : ""}`}>{navLabels[dsItem]}</span>
         </button>
       </div>
     </aside>

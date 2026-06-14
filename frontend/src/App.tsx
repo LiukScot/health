@@ -269,7 +269,7 @@ function App() {
 
   return (
     <>
-    <div className={`shell${sidebarCollapsed ? " collapsed" : ""}${mobileSidebarOpen ? " mobile-open" : ""}`}>
+    <div className={`grid grid-cols-[220px_1fr] min-h-screen transition-[grid-template-columns] duration-[250ms] ease-[ease] max-[720px]:grid-cols-1 ${sidebarCollapsed ? "min-[721px]:grid-cols-[62px_1fr]" : ""} ${mobileSidebarOpen ? "max-[720px]:h-[100dvh] max-[720px]:overflow-hidden" : ""}`}>
       <Sidebar
         nav={nav}
         onNav={(item) => { setNav(item); setMobileSidebarOpen(false); }}
@@ -279,10 +279,10 @@ function App() {
         mobileOpen={mobileSidebarOpen}
       />
 
-      <main className="screen app-main">
+      <main className={`max-w-[1500px] w-full overflow-y-auto [padding:clamp(var(--spacing-stack),3vw,var(--spacing-split))_clamp(var(--spacing-stack),3vw,var(--spacing-split))_var(--spacing-block)] max-[720px]:p-stack ${mobileSidebarOpen ? "max-[720px]:overflow-hidden" : ""}`}>
         <button
           type="button"
-          className="mobile-menu-btn"
+          className="mobile-menu-btn hidden max-[720px]:flex max-[720px]:items-center max-[720px]:justify-center w-[40px] h-[40px] max-[720px]:mb-stack max-[720px]:ml-inline p-0 border-0 rounded-sm bg-card-soft text-muted cursor-pointer shadow-none hover:text-text hover:bg-card-strong"
           onClick={() => setMobileSidebarOpen(true)}
           aria-label="Open menu"
         >
@@ -290,7 +290,7 @@ function App() {
         </button>
 
         <SectionErrorBoundary resetKey={nav}>
-        <Suspense fallback={<p className="hint">Loading…</p>}>
+        <Suspense fallback={<p className="text-muted text-control">Loading…</p>}>
         {nav === "dashboard" && (
           <DashboardSection
             dashboardFrom={dashboard.dashboardFrom} dashboardTo={dashboard.dashboardTo}
