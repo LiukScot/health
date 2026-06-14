@@ -22,8 +22,8 @@ const WellbeingChart = lazy(() => import("./WellbeingChart"));
 const DASH_CARD =
   "grid grid-rows-[auto_auto_22px] gap-inline content-start w-full max-w-[200px] justify-self-start rounded-md p-stack bg-card-soft";
 const CARD_H3 =
-  "m-0 text-[9px] font-bold tracking-[0.12em] uppercase text-muted leading-[1.15] whitespace-nowrap overflow-hidden text-ellipsis translate-y-[2px]";
-const CARD_VALUE = "text-[18px] font-bold text-text translate-y-[2px]";
+  "m-0 text-nano font-bold tracking-[0.12em] uppercase text-muted leading-tight whitespace-nowrap overflow-hidden text-ellipsis translate-y-[2px]";
+const CARD_VALUE = "text-lg font-bold text-text translate-y-[2px]";
 const DELTA_SLOT = "min-h-[22px] flex items-end translate-y-[2px]";
 const DELTA_BASE = "inline-flex items-center rounded-full px-inline py-[2px] text-micro font-bold self-end";
 const QUICK_RANGE_BASE =
@@ -74,7 +74,7 @@ export function DashboardSection({
 }) {
   return (
     <section className="@container p-inline">
-      <h1 className="m-0 mb-stack text-[22px] font-bold tracking-[-0.02em] text-text">Dashboard</h1>
+      <h1 className="m-0 mb-stack text-[22px] font-bold tracking-tight text-text">Dashboard</h1>
 
       <div className="flex flex-wrap gap-stack items-end mb-block">
         <label className="flex flex-col gap-inline">
@@ -211,7 +211,7 @@ export function DashboardSection({
                 {dashboardInsights.map((insight) => (
                   <div key={insight.title} className="grid gap-tight">
                     <strong className="text-muted text-nano font-bold tracking-[0.16em] uppercase">{insight.title}</strong>
-                    <p className="m-0 text-text text-control leading-[1.45]">{insight.detail}</p>
+                    <p className="m-0 text-text text-control leading-normal">{insight.detail}</p>
                   </div>
                 ))}
               </div>
@@ -225,7 +225,7 @@ export function DashboardSection({
                     <article key={connection.title} className="grid gap-inline rounded-md p-stack bg-card-soft">
                       <span className="text-nano font-bold tracking-[0.16em] uppercase text-muted">{connection.title}</span>
                       <strong className="m-0 text-text text-control font-semibold">{connection.summary}</strong>
-                      <p className="m-0 text-muted text-control leading-[1.45]">{connection.detail}</p>
+                      <p className="m-0 text-muted text-control leading-normal">{connection.detail}</p>
                       <span className={`justify-self-start rounded-full px-inline py-[2px] text-micro font-bold ${CONFIDENCE_TONE[connection.confidence] ?? CONFIDENCE_TONE.weak}`}>{connection.confidence} confidence</span>
                     </article>
                   ))}

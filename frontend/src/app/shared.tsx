@@ -43,7 +43,7 @@ export function InlineFeedback({ message, className }: { message: InlineMessage 
   }
 
   const toneColor = { error: "text-danger", success: "text-success", warning: "text-warning-soft", info: "text-muted" }[message.tone] ?? "text-muted";
-  const classes = ["m-0 text-control leading-[1.4]", toneColor, className].filter(Boolean).join(" ");
+  const classes = ["m-0 text-control leading-snug", toneColor, className].filter(Boolean).join(" ");
   const ariaLive = message.tone === "error" ? "assertive" : "polite";
 
   return (
@@ -232,7 +232,7 @@ export function MultiSelectField({ label, fieldKey, value, options, onChange, do
 
   return (
     <div className="grid gap-inline content-start">
-      {hideLabel ? null : <span className="flex flex-wrap mt-stack mb-stack pl-stack border-l-[3px] border-accent text-sm font-semibold text-accent leading-[1.2]">{label}</span>}
+      {hideLabel ? null : <span className="flex flex-wrap mt-stack mb-stack pl-stack border-l-[3px] border-accent text-sm font-semibold text-accent leading-tight">{label}</span>}
       <div className="flex flex-wrap gap-inline content-start mt-[5px] mb-[5px] order-1" role="group" aria-label={label}>
         {allOptions.map((option) => {
           const optionKey = option.toLowerCase();

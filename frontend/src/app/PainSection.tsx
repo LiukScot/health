@@ -108,7 +108,7 @@ export function PainSection({
 
   return (
     <section className="@container p-inline">
-      <h1 className="m-0 mb-stack text-[22px] font-bold tracking-[-0.02em] text-text">Pain</h1>
+      <h1 className="m-0 mb-stack text-[22px] font-bold tracking-tight text-text">Pain</h1>
       <div className="grid gap-page min-[1100px]:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] min-[1100px]:gap-split min-[1100px]:items-start">
         <div className="min-w-0 max-[1099px]:border-b max-[1099px]:border-[var(--border-soft)]" ref={leftColRef}>
           <EntriesHeading className="min-[1100px]:mt-0">New entry</EntriesHeading>

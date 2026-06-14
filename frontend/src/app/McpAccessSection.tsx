@@ -6,7 +6,7 @@ import { Button } from "../components/ui/Button";
 import { FieldLine, FIELD_LINE_LABEL } from "../components/ui/FieldLine";
 import { TAG_TAB_BTN } from "./entries";
 
-const MCP_INTRO = "mt-[6px] mb-0 text-hint leading-[1.45] text-muted";
+const MCP_INTRO = "mt-[6px] mb-0 text-hint leading-normal text-muted";
 const CODE_BLOCK =
   "m-0 p-stack bg-card-soft text-text border border-[var(--border-soft)] rounded-sm font-medium text-xs font-mono leading-normal overflow-x-auto whitespace-pre";
 
@@ -159,8 +159,8 @@ export function McpAccessSection({ enabled }: { enabled: boolean }) {
           {tokens.tokens.map((t) => (
             <li key={t.id} className="flex items-center justify-between gap-stack px-[2px] py-[10px] border-b border-[var(--border-soft)] last:border-b-0">
               <div className="min-w-0 flex-1 flex flex-col gap-[2px]">
-                <div className="text-[13.5px] font-semibold font-body text-text overflow-hidden text-ellipsis whitespace-nowrap">{t.label || `Token #${t.id}`}</div>
-                <div className="text-[11.5px] text-muted tabular-nums">
+                <div className="text-sm font-semibold font-body text-text overflow-hidden text-ellipsis whitespace-nowrap">{t.label || `Token #${t.id}`}</div>
+                <div className="text-xs text-muted tabular-nums">
                   Created {t.createdAt.slice(0, 10)} · Last used {formatRelative(t.lastUsedAt)} · {formatExpiry(t.expiresAt)}
                 </div>
               </div>

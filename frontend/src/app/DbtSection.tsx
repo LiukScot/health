@@ -27,7 +27,7 @@ import {
 const DATETIME_FIELD =
   "!w-auto max-w-full justify-self-start cursor-pointer tabular-nums [&::-webkit-calendar-picker-indicator]:cursor-pointer [&::-webkit-calendar-picker-indicator]:ml-inline [&::-webkit-calendar-picker-indicator]:invert [&::-webkit-calendar-picker-indicator]:opacity-60 hover:[&::-webkit-calendar-picker-indicator]:opacity-100";
 const THERAPY_CALLOUT =
-  "m-0 px-stack py-inline bg-card-soft border-l-2 border-[color-mix(in_srgb,var(--accent)_50%,transparent)] rounded-sm text-muted text-hint leading-[1.45]";
+  "m-0 px-stack py-inline bg-card-soft border-l-2 border-[color-mix(in_srgb,var(--accent)_50%,transparent)] rounded-sm text-muted text-hint leading-normal";
 
 export function DbtSection({
   dbtForm,
@@ -125,7 +125,7 @@ export function DbtSection({
 
   return (
     <section className="@container p-inline">
-      <h1 className="m-0 mb-stack text-[22px] font-bold tracking-[-0.02em] text-text">DBT Distress Tolerance</h1>
+      <h1 className="m-0 mb-stack text-[22px] font-bold tracking-tight text-text">DBT Distress Tolerance</h1>
       <div className="grid gap-page min-[1100px]:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] min-[1100px]:gap-split min-[1100px]:items-start">
         <div className="min-w-0 max-[1099px]:border-b max-[1099px]:border-[var(--border-soft)]" ref={leftColRef}>
           <EntriesHeading className="min-[1100px]:mt-0">New entry</EntriesHeading>

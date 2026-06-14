@@ -83,7 +83,7 @@ test("renders dashboard data and supports chart toggles", async ({ page }) => {
   await expect(page.getByText("Patterns", { exact: true })).toBeVisible();
   // Tailwind composes box-shadow from (transparent) layer vars, so a flat
   // button reads as rgba(0,0,0,0)… rather than the literal "none".
-  await expect(page.getByRole("button", { name: "1 month" })).toHaveCSS("box-shadow", /none|rgba\(0, 0, 0, 0\)/);
+  await expect(page.getByRole("button", { name: "1 month" })).toHaveCSS("box-shadow", /none|rgba\(\s*0\s*,\s*0\s*,\s*0\s*,\s*0\s*\)/);
   await expect(page.locator(".dashboard-hero")).toHaveCount(0);
   await expect(page.locator(".dashboard-summary")).toHaveCount(0);
   await expect(page.locator(".dashboard-insight-card")).toHaveCount(0);

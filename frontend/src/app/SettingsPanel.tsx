@@ -141,12 +141,12 @@ function BackupBlock({
 }: Pick<SettingsSectionProps, "onExportJson" | "onImportJson" | "onExportXlsx" | "onImportXlsx">) {
   return (
     <div className="grid grid-cols-[repeat(auto-fit,minmax(320px,1fr))] gap-inline">
-      <div className="flex items-center justify-between gap-block px-[14px] py-[12px] rounded-md bg-card-strong max-[640px]:flex-col max-[640px]:items-stretch">
+      <div className="flex items-center justify-between gap-block px-[14px] py-[12px] rounded-md bg-card-strong max-sm:flex-col max-sm:items-stretch">
         <div className="flex flex-col gap-[2px] min-w-0">
           <span className="text-sm font-bold text-text">JSON</span>
           <span className="text-xs text-muted">Full database</span>
         </div>
-        <div className="flex gap-inline flex-shrink-0 max-[640px]:justify-end">
+        <div className="flex gap-inline flex-shrink-0 max-sm:justify-end">
           <Button type="button" size="sm" onClick={onExportJson}>Export</Button>
           <label className={`${buttonClass("default", "sm")} relative overflow-hidden cursor-pointer`}>
             Import
@@ -163,12 +163,12 @@ function BackupBlock({
           </label>
         </div>
       </div>
-      <div className="flex items-center justify-between gap-block px-[14px] py-[12px] rounded-md bg-card-strong max-[640px]:flex-col max-[640px]:items-stretch">
+      <div className="flex items-center justify-between gap-block px-[14px] py-[12px] rounded-md bg-card-strong max-sm:flex-col max-sm:items-stretch">
         <div className="flex flex-col gap-[2px] min-w-0">
           <span className="text-sm font-bold text-text">XLSX</span>
           <span className="text-xs text-muted">Spreadsheet</span>
         </div>
-        <div className="flex gap-inline flex-shrink-0 max-[640px]:justify-end">
+        <div className="flex gap-inline flex-shrink-0 max-sm:justify-end">
           <Button type="button" size="sm" onClick={onExportXlsx}>Export</Button>
           <label className={`${buttonClass("default", "sm")} relative overflow-hidden cursor-pointer`}>
             Import
@@ -199,11 +199,11 @@ function DangerBlock({
 }: Pick<SettingsSectionProps, "purgeConfirmArmed" | "purgePending" | "purgeError" | "onPurgeArm" | "onPurgeConfirm" | "onPurgeCancel">) {
   return (
     <div className="flex flex-col gap-stack">
-      <p className="m-0 px-stack py-inline bg-[color-mix(in_srgb,var(--danger)_7%,var(--card))] border-l-2 border-[color-mix(in_srgb,var(--danger)_55%,transparent)] rounded-sm text-muted text-hint leading-[1.45]">
+      <p className="m-0 px-stack py-inline bg-[color-mix(in_srgb,var(--danger)_7%,var(--card))] border-l-2 border-[color-mix(in_srgb,var(--danger)_55%,transparent)] rounded-sm text-muted text-hint leading-normal">
         Permanently deletes all diary entries, pain logs, CBT/DBT records, and stored preferences for this account. This cannot be undone.
       </p>
       {purgeConfirmArmed ? (
-        <div className="mt-stack p-stack border border-[color-mix(in_srgb,var(--danger)_40%,var(--border))] rounded-[12px] bg-[color-mix(in_srgb,var(--danger)_8%,var(--card))] grid gap-stack" role="group" aria-label="Confirm purge all data">
+        <div className="mt-stack p-stack border border-[color-mix(in_srgb,var(--danger)_40%,var(--border))] rounded-md bg-[color-mix(in_srgb,var(--danger)_8%,var(--card))] grid gap-stack" role="group" aria-label="Confirm purge all data">
           <InlineFeedback
             message={{
               tone: "warning",

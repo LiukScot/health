@@ -51,7 +51,7 @@ export function SettingsSection({
   };
   return (
     <section className="@container p-0">
-      <h1 className="m-0 mb-stack text-[22px] font-bold tracking-[-0.02em] text-text">Settings</h1>
+      <h1 className="m-0 mb-stack text-[22px] font-bold tracking-tight text-text">Settings</h1>
       <SettingsPanel {...variantProps} />
     </section>
   );

@@ -4,7 +4,7 @@ import { Button } from "../components/ui/Button";
 import { FieldLine } from "../components/ui/FieldLine";
 import { SectionHead } from "./shared";
 import { NAV_ITEM, NAV_ITEM_ACTIVE, NAV_ITEM_IDLE } from "./Sidebar";
-import { MEMO_DAY_CELL, MEMO_LIST_ITEM } from "./memorable-days";
+import { DAY_NUMBER, EMOJI_TRIGGER, MEMO_DAY_CELL, MEMO_LIST_ITEM } from "./memorable-days";
 import {
   DetailGroup,
   EntriesHeading,
@@ -19,9 +19,6 @@ import {
   TagTabs,
 } from "./entries";
 
-const DAY_NUMBER = "bg-transparent border-0 shadow-none min-h-0 p-0 font-[inherit] text-[inherit] cursor-pointer leading-none";
-const EMOJI_TRIGGER =
-  "min-w-0 min-h-0 p-0 rounded-none inline-flex items-center justify-center bg-transparent border border-transparent text-text shadow-none cursor-pointer focus-visible:outline-none focus-visible:shadow-[0_0_0_2px_color-mix(in_srgb,var(--accent)_28%,transparent)]";
 
 const DESIGN_COLOR_TOKENS: { name: string; varName: string; role: string }[] = [
   { name: "Background", varName: "--bg", role: "App canvas" },
@@ -71,7 +68,7 @@ export function DesignSystemSection() {
 
   return (
     <section className="@container p-inline">
-      <h1 className="m-0 mb-stack text-[22px] font-bold tracking-[-0.02em] text-text">Design System</h1>
+      <h1 className="m-0 mb-stack text-[22px] font-bold tracking-tight text-text">Design System</h1>
       <p className="text-muted text-control mt-inline mb-block max-w-[72ch] [&_code]:px-[6px] [&_code]:py-[1px] [&_code]:rounded-[6px] [&_code]:bg-card-soft [&_code]:text-text">
         Living reference for tokens, primitives, and patterns used across Diary, Pain, therapy forms, and Memorable days.
         Examples use the same classes as production &mdash; edit <code>styles.css</code> and this page tracks it.
@@ -144,7 +141,7 @@ export function DesignSystemSection() {
             <div className="max-w-[320px]">
               <p className="mt-stack mb-inline text-control font-semibold text-text">Field-line (label ↔ control)</p>
               <FieldLine label="Example" type="text" defaultValue="Spacing demo" aria-label="Field-line spacing demo" />
-              <p className="mt-[10px] text-micro text-muted-soft leading-[1.45] max-w-[42ch] [&_code]:text-muted">
+              <p className="mt-[10px] text-micro text-muted-soft leading-normal max-w-[42ch] [&_code]:text-muted">
                 <code>.field-line</code> stacks an uppercase micro-label over a borderless tinted control, with{" "}
                 <strong>gap-inline</strong> between them — the same primitive the production forms use.
               </p>
@@ -190,7 +187,7 @@ export function DesignSystemSection() {
 
           <section className="flex flex-col gap-stack">
             <SectionHead title="Sidebar nav" aside=".sidebar-item" variant="ds" />
-            <p className="m-0 text-micro text-muted-soft leading-[1.4] [&_code]:text-muted">
+            <p className="m-0 text-micro text-muted-soft leading-snug [&_code]:text-muted">
               Uses production classes. Default → hover <code>card-strong</code>; <code>active</code> → accent tint.
             </p>
             <div className="max-w-[220px] flex flex-col gap-stack">
@@ -280,7 +277,7 @@ export function DesignSystemSection() {
                       </span>
                       {cell.marker ? (
                         <span className="flex flex-col gap-inline">
-                          <span className="text-xs leading-[1.35] text-muted whitespace-nowrap overflow-hidden text-ellipsis">{cell.marker}</span>
+                          <span className="text-xs leading-snug text-muted whitespace-nowrap overflow-hidden text-ellipsis">{cell.marker}</span>
                         </span>
                       ) : null}
                     </div>
@@ -291,7 +288,7 @@ export function DesignSystemSection() {
                 <span className="text-[22px] leading-none">🎂</span>
                 <span className="flex-1 flex flex-col gap-tight items-start">
                   <span className="w-full flex items-baseline justify-between gap-stack">
-                    <strong className="text-[15px] min-w-0 text-text">Sample day</strong>
+                    <strong className="text-base min-w-0 text-text">Sample day</strong>
                     <span className="text-muted text-control flex-shrink-0 text-right">05-15</span>
                   </span>
                   <span className="text-micro text-muted-soft">yearly</span>

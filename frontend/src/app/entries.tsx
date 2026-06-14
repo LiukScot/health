@@ -10,14 +10,14 @@ export const ENTRY_ROW =
 export const ENTRY_SUMMARY =
   "group/sum list-none grid grid-cols-[auto_auto_1fr_auto_auto] items-center gap-stack px-[2px] py-stack cursor-pointer border-0 rounded-none shadow-none bg-transparent min-h-0 [&::-webkit-details-marker]:hidden";
 export const ENTRY_DATE =
-  "font-medium text-xs font-mono text-muted min-w-[110px] tabular-nums tracking-[0.02em] group-hover/sum:text-text";
+  "font-medium text-xs font-mono text-muted min-w-[110px] tabular-nums tracking-wide group-hover/sum:text-text";
 export const ENTRY_PREVIEW =
   "text-control text-muted overflow-hidden text-ellipsis whitespace-nowrap group-hover/sum:text-text";
 export const ENTRY_CHEVRON =
   "text-muted-soft transition-transform duration-200 ease-[ease] text-nano group-open/row:rotate-90";
 export const ENTRY_EXPANDED =
   "px-[2px] pt-inline pb-stack grid grid-cols-[repeat(auto-fit,minmax(160px,1fr))] gap-stack";
-export const DETAIL_ACTIONS = "[grid-column:1/-1] flex gap-tight justify-end mt-[calc(-1*var(--spacing-tight))]";
+export const DETAIL_ACTIONS = "[grid-column:1/-1] flex gap-tight justify-end -mt-tight";
 export const DETAIL_ACTION_BTN =
   "px-inline py-tight text-xs font-medium text-muted bg-transparent border-0 rounded-[6px] shadow-none cursor-pointer font-[inherit] transition-[color,background] duration-150 ease-[ease] hover:text-text hover:bg-[color-mix(in_srgb,var(--text)_8%,transparent)]";
 export const DELETE_CONFIRM = "text-danger-strong bg-danger-strong/18 font-extrabold";
@@ -137,7 +137,7 @@ export function TagList({ items }: { items: string[] }) {
 export function DetailGroup({ label, children }: { label: ReactNode; children: ReactNode }) {
   return (
     <div className="grid gap-tight">
-      <span className="text-micro text-muted uppercase tracking-[0.05em]">{label}</span>
+      <span className="text-micro text-muted uppercase tracking-wider">{label}</span>
       <span className="text-control flex flex-wrap gap-tight text-text">{children}</span>
     </div>
   );

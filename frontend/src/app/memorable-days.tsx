@@ -23,6 +23,11 @@ const EMOJI_TAB =
   "min-h-0 px-[4px] py-0 rounded-none border border-transparent bg-transparent shadow-none text-micro font-bold tracking-[0.08em] uppercase cursor-pointer focus-visible:outline-none focus-visible:shadow-[0_0_0_2px_color-mix(in_srgb,var(--accent)_28%,transparent)]";
 const EMOJI_BTN =
   "min-h-0 p-[2px] rounded-none border border-transparent bg-transparent shadow-none inline-flex items-center justify-center text-[22px] leading-none cursor-pointer focus-visible:outline-none focus-visible:shadow-[0_0_0_2px_color-mix(in_srgb,var(--accent)_28%,transparent)]";
+// Exported so the Design System demo reuses the exact production contracts.
+export const DAY_NUMBER =
+  "bg-transparent border-0 shadow-none min-h-0 p-0 font-[inherit] text-[inherit] cursor-pointer leading-none";
+export const EMOJI_TRIGGER =
+  "min-w-0 min-h-0 p-0 rounded-none inline-flex items-center justify-center bg-transparent border border-transparent text-text shadow-none cursor-pointer focus-visible:outline-none focus-visible:shadow-[0_0_0_2px_color-mix(in_srgb,var(--accent)_28%,transparent)]";
 
 type Props = {
   memorable: ReturnType<typeof useMemorableDays>;
@@ -395,7 +400,7 @@ export function MemorableDaysSection({ memorable }: Props) {
     <section className="@container p-inline relative">
       <div>
         <div>
-          <h1 className="m-0 mb-stack text-[22px] font-bold tracking-[-0.02em] text-text">Memorable days</h1>
+          <h1 className="m-0 mb-stack text-[22px] font-bold tracking-tight text-text">Memorable days</h1>
           <SectionHead title="Calendar" variant="dashboard" />
         </div>
       </div>
@@ -447,7 +452,7 @@ export function MemorableDaysSection({ memorable }: Props) {
                   <span className="flex items-center justify-between">
                     <button
                       type="button"
-                      className="bg-transparent border-0 shadow-none min-h-0 p-0 font-[inherit] text-[inherit] cursor-pointer leading-none"
+                      className={DAY_NUMBER}
                       aria-label={items.length > 0 ? `View events on ${dayKey}` : `${day.getDate()}`}
                       onClick={() => {
                         memorable.setSelectedDate(dayKey);
@@ -459,12 +464,12 @@ export function MemorableDaysSection({ memorable }: Props) {
                   </span>
                   <span className="flex flex-col gap-inline">
                     {items.slice(0, 2).map((item) => (
-                      <span key={`${item.source}-${item.id}-${item.date}`} className="text-xs leading-[1.35] text-muted whitespace-nowrap overflow-hidden text-ellipsis">
+                      <span key={`${item.source}-${item.id}-${item.date}`} className="text-xs leading-snug text-muted whitespace-nowrap overflow-hidden text-ellipsis">
                         {item.emoji || "•"} {item.title}
                       </span>
                     ))}
                     {items.length > 2 ? (
-                      <span className="text-micro font-semibold text-accent leading-[1.35] opacity-75">+{items.length - 2} more</span>
+                      <span className="text-micro font-semibold text-accent leading-snug opacity-75">+{items.length - 2} more</span>
                     ) : null}
                   </span>
                 </div>
@@ -495,7 +500,7 @@ export function MemorableDaysSection({ memorable }: Props) {
                   <span className="text-[22px] leading-none">{item.emoji || "✨"}</span>
                   <span className="flex-1 flex flex-col gap-tight items-start">
                     <span className="w-full flex items-baseline justify-between gap-stack">
-                      <strong className="text-[15px] min-w-0 text-text">{item.title}</strong>
+                      <strong className="text-base min-w-0 text-text">{item.title}</strong>
                       <span className="text-muted text-control flex-shrink-0 text-right">{item.date}</span>
                     </span>
                     <span className="text-micro text-muted-soft">{item.locked ? "Locked from Settings" : item.repeatMode}</span>
@@ -521,7 +526,7 @@ export function MemorableDaysSection({ memorable }: Props) {
                 <div ref={emojiPickerRef} className="relative w-full min-w-0">
                   <button
                     type="button"
-                    className="min-w-0 min-h-0 p-0 rounded-none inline-flex items-center justify-center bg-transparent border border-transparent text-text shadow-none cursor-pointer focus-visible:outline-none focus-visible:shadow-[0_0_0_2px_color-mix(in_srgb,var(--accent)_28%,transparent)]"
+                    className={EMOJI_TRIGGER}
                     aria-label={`Emoji ${draft.emoji || "✨"}`}
                     aria-haspopup="dialog"
                     aria-expanded={emojiPickerOpen}
@@ -544,7 +549,7 @@ export function MemorableDaysSection({ memorable }: Props) {
                       id="emoji-picker-panel"
                       role="dialog"
                       aria-label="Emoji picker"
-                      className="absolute top-[calc(100%+var(--spacing-inline))] right-0 w-[min(420px,calc(100vw-32px))] max-w-[min(420px,calc(100vw-32px))] max-h-[min(520px,calc(100vh-180px))] flex flex-col gap-stack p-stack bg-card border border-border rounded-md shadow-[var(--shadow)] z-30"
+                      className="absolute top-full mt-inline right-0 w-[min(420px,calc(100vw-32px))] max-w-[min(420px,calc(100vw-32px))] max-h-[min(520px,calc(100vh-180px))] flex flex-col gap-stack p-stack bg-card border border-border rounded-md shadow-[var(--shadow)] z-30"
                       onMouseDown={(event) => event.stopPropagation()}
                     >
                       <label className="grid gap-inline content-start m-0">
@@ -674,7 +679,7 @@ export function MemorableDaysSection({ memorable }: Props) {
                     openEdit(item);
                   }}
                 >
-                  <span className="text-[20px] flex-shrink-0">{item.emoji || "✨"}</span>
+                  <span className="text-xl flex-shrink-0">{item.emoji || "✨"}</span>
                   <span className="flex flex-col gap-[2px]">
                     <strong className="text-text">{item.title}</strong>
                     <span className="text-micro text-muted-soft">{item.repeatMode}</span>
