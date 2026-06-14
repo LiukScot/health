@@ -43,6 +43,15 @@ describe("matchesMemorableDate", () => {
     // and on Feb 29 itself in a leap year
     expect(matchesMemorableDate("2024-02-29", "yearly", "2028-02-29")).toBe(true);
   });
+
+  test("yearly Feb 29 and Feb 28 anchors fire as distinct events on Feb 28", () => {
+    // A clamped Feb 29 anchor and a real Feb 28 anchor both match Feb 28 in a
+    // non-leap year — each fires once for its own anchor, not merged.
+    expect(matchesMemorableDate("2024-02-29", "yearly", "2025-02-28")).toBe(true);
+    expect(matchesMemorableDate("2024-02-28", "yearly", "2025-02-28")).toBe(true);
+    // The Feb 29 anchor must not also fire on Feb 27.
+    expect(matchesMemorableDate("2024-02-29", "yearly", "2025-02-27")).toBe(false);
+  });
 });
 
 describe("countMemorableOccurrences", () => {
