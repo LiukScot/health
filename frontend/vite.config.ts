@@ -5,6 +5,12 @@ import tailwindcss from "@tailwindcss/vite";
 
 export default defineConfig({
   plugins: [tailwindcss(), react()],
+  build: {
+    // Sections, the wellbeing chart, and the emoji-heavy memorable-days view are
+    // already React.lazy-split; the only chunk over 500 kB is memorable-days,
+    // whose bulk is the intrinsic emojibase dataset loaded on demand.
+    chunkSizeWarningLimit: 650,
+  },
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),
