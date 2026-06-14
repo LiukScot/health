@@ -12,7 +12,7 @@ import { FieldLine, FIELD_LINE_LABEL } from "../components/ui/FieldLine";
 import { EntriesHeading } from "./entries";
 
 const MEMO_BACKDROP =
-  "fixed inset-0 bg-[rgba(7,7,10,0.6)] [backdrop-filter:blur(6px)] grid place-items-center p-block z-40";
+  "fixed inset-0 bg-scrim [backdrop-filter:blur(6px)] grid place-items-center p-block z-40";
 const MEMO_MODAL = "w-[min(520px,100%)] p-block flex flex-col gap-stack bg-card border-0 rounded-md shadow-none";
 export const MEMO_DAY_CELL =
   "min-h-[108px] p-stack rounded-md bg-card-soft text-text text-left flex flex-col gap-inline relative transition-[background,color] duration-150 ease-[ease] hover:bg-[color-mix(in_srgb,var(--text)_4%,var(--card-soft))]";

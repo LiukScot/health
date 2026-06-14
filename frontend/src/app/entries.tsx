@@ -20,7 +20,7 @@ export const ENTRY_EXPANDED =
 export const DETAIL_ACTIONS = "[grid-column:1/-1] flex gap-tight justify-end mt-[calc(-1*var(--spacing-tight))]";
 export const DETAIL_ACTION_BTN =
   "px-inline py-tight text-xs font-medium text-muted bg-transparent border-0 rounded-[6px] shadow-none cursor-pointer font-[inherit] transition-[color,background] duration-150 ease-[ease] hover:text-text hover:bg-[color-mix(in_srgb,var(--text)_8%,transparent)]";
-export const DELETE_CONFIRM = "text-[#ff3333] bg-[rgba(255,51,51,0.18)] font-extrabold";
+export const DELETE_CONFIRM = "text-danger-strong bg-danger-strong/18 font-extrabold";
 
 export function EntriesHeading({ children, className = "" }: { children: ReactNode; className?: string }) {
   return (
@@ -145,8 +145,8 @@ export function DetailGroup({ label, children }: { label: ReactNode; children: R
 
 type PainBadgeVariant = "low" | "mid" | "high" | "muted";
 const PAIN_BADGE: Record<PainBadgeVariant, string> = {
-  low: "bg-success text-[#0a2018]",
-  mid: "bg-warning text-[#2a1a00]",
+  low: "bg-success text-success-fg",
+  mid: "bg-warning text-warning-fg",
   high: "bg-danger text-white",
   muted: "bg-[color-mix(in_srgb,var(--card)_50%,var(--border))] text-muted",
 };

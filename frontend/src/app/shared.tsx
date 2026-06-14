@@ -42,7 +42,7 @@ export function InlineFeedback({ message, className }: { message: InlineMessage 
     return null;
   }
 
-  const toneColor = { error: "text-danger", success: "text-success", warning: "text-[#ffd38a]", info: "text-muted" }[message.tone] ?? "text-muted";
+  const toneColor = { error: "text-danger", success: "text-success", warning: "text-warning-soft", info: "text-muted" }[message.tone] ?? "text-muted";
   const classes = ["m-0 text-control leading-[1.4]", toneColor, className].filter(Boolean).join(" ");
   const ariaLive = message.tone === "error" ? "assertive" : "polite";
 

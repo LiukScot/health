@@ -53,6 +53,16 @@
   --color-danger: var(--danger);
   --color-success: var(--success);
   --color-warning: var(--warning);
+
+  /* Fixed accents that don't follow --bg/--card (theme-constant by design):
+     a stronger delete-confirm red, the softer warning text hue, dark
+     foregrounds for text on the success/warning badge fills, and the modal
+     scrim. Defined as literals (no :root forward) since they never re-theme. */
+  --color-danger-strong: #ff3333;
+  --color-warning-soft: #ffd38a;
+  --color-success-fg: #0a2018;
+  --color-warning-fg: #2a1a00;
+  --color-scrim: rgba(7, 7, 10, 0.6);
 }
 
 /*
