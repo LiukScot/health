@@ -168,9 +168,9 @@ export function DbtSection({
               </p>
               {editingDbt ? (
                 <div className="flex gap-inline flex-wrap">
-                  <button type="button" onClick={onCancelEdit}>
+                  <Button type="button" onClick={onCancelEdit}>
                     Cancel edit
-                  </button>
+                  </Button>
                 </div>
               ) : null}
             </div>

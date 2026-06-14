@@ -151,9 +151,9 @@ export function CbtSection({
               ))}
               {editingCbt ? (
                 <div className="flex gap-inline flex-wrap">
-                  <button type="button" onClick={onCancelEdit}>
+                  <Button type="button" onClick={onCancelEdit}>
                     Cancel edit
-                  </button>
+                  </Button>
                 </div>
               ) : null}
             </div>

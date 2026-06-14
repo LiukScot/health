@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 import { ErrorBoundary, type FallbackProps } from "react-error-boundary";
+import { Button } from "../components/ui/Button";
 
 function logError(error: unknown, info: { componentStack?: string | null }, context: string) {
   console.error(`[error-boundary:${context}]`, error, info.componentStack ?? "");
@@ -14,12 +15,12 @@ function RootFallback({ resetErrorBoundary }: FallbackProps) {
           The app hit an unexpected error and couldn&apos;t continue. Reloading
           usually clears it.
         </p>
-        <button type="button" className="active" onClick={() => window.location.reload()}>
+        <Button type="button" variant="primary" onClick={() => window.location.reload()}>
           Reload
-        </button>
-        <button type="button" onClick={resetErrorBoundary}>
+        </Button>
+        <Button type="button" onClick={resetErrorBoundary}>
           Try again
-        </button>
+        </Button>
       </section>
     </main>
   );
@@ -34,9 +35,9 @@ function SectionFallback({ resetErrorBoundary }: FallbackProps) {
         still available.
       </p>
       <div>
-        <button type="button" onClick={resetErrorBoundary}>
+        <Button type="button" onClick={resetErrorBoundary}>
           Try again
-        </button>
+        </Button>
       </div>
     </div>
   );
