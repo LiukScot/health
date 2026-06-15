@@ -247,14 +247,14 @@ export function MultiSelectField({ label, fieldKey, value, options, onChange, do
                   <button
                     type="button"
                     ref={confirmRemoveRef}
-                    className="danger min-h-[30px] px-stack py-tight text-xs shadow-none"
+                    className="danger min-h-page px-stack py-tight text-xs shadow-none"
                     onClick={() => {
                       void permanentlyRemoveOption(option);
                     }}
                   >
                     Remove
                   </button>
-                  <button type="button" className="min-h-[30px] px-stack py-tight text-xs shadow-none" onClick={() => setPendingRemovalKey(null)}>
+                  <button type="button" className="min-h-page px-stack py-tight text-xs shadow-none" onClick={() => setPendingRemovalKey(null)}>
                     Cancel
                   </button>
                 </div>

@@ -99,8 +99,9 @@ export function McpAccessSection({ enabled }: { enabled: boolean }) {
   const handleCopy = async (text: string) => {
     try {
       await navigator.clipboard.writeText(text);
-    } catch {
+    } catch (error) {
       // Best-effort copy; on failure the user can still select the snippet.
+      console.error("[mcp-access] clipboard copy failed", error);
     }
   };
 
@@ -130,7 +131,7 @@ export function McpAccessSection({ enabled }: { enabled: boolean }) {
           />
           <pre className={CODE_BLOCK}>{tokens.justCreated.plaintext}</pre>
           <div className="flex gap-stack items-center flex-wrap mt-stack">
-            <Button type="button" variant="primary" onClick={() => handleCopy(tokens.justCreated!.plaintext)}>
+            <Button type="button" variant="primary" onClick={() => void handleCopy(tokens.justCreated!.plaintext)}>
               Copy token
             </Button>
             <Button type="button" onClick={() => handleTest(tokens.justCreated!.id)}>
