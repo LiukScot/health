@@ -8,7 +8,7 @@ import { TAG_TAB_BTN } from "./entries";
 
 const MCP_INTRO = "mt-[6px] mb-0 text-hint leading-normal text-muted";
 const CODE_BLOCK =
-  "m-0 p-stack bg-card-soft text-text border border-[var(--border-soft)] rounded-sm font-medium text-xs font-mono leading-normal overflow-x-auto whitespace-pre";
+  "m-0 p-3 bg-card-soft text-text border border-[var(--border-soft)] rounded-sm font-medium text-xs font-mono leading-normal overflow-x-auto whitespace-pre";
 
 const EXPIRY_OPTIONS: { value: ExpiryChoice; label: string }[] = [
   { value: "never", label: "Never" },
@@ -122,7 +122,7 @@ export function McpAccessSection({ enabled }: { enabled: boolean }) {
       </p>
 
       {tokens.justCreated ? (
-        <div className="flex flex-col gap-inline mt-[8px] p-stack bg-[color-mix(in_srgb,var(--warning)_10%,var(--card))] border border-[color-mix(in_srgb,var(--warning)_40%,var(--border))] rounded-sm">
+        <div className="flex flex-col gap-2 mt-[8px] p-3 bg-[color-mix(in_srgb,var(--warning)_10%,var(--card))] border border-[color-mix(in_srgb,var(--warning)_40%,var(--border))] rounded-sm">
           <InlineFeedback
             message={{
               tone: "warning",
@@ -130,7 +130,7 @@ export function McpAccessSection({ enabled }: { enabled: boolean }) {
             }}
           />
           <pre className={CODE_BLOCK}>{tokens.justCreated.plaintext}</pre>
-          <div className="flex gap-stack items-center flex-wrap mt-stack">
+          <div className="flex gap-3 items-center flex-wrap mt-3">
             <Button type="button" variant="primary" onClick={() => void handleCopy(tokens.justCreated!.plaintext)}>
               Copy token
             </Button>
@@ -158,7 +158,7 @@ export function McpAccessSection({ enabled }: { enabled: boolean }) {
       ) : (
         <ul className="list-none p-0 mt-[4px] mb-0 flex flex-col">
           {tokens.tokens.map((t) => (
-            <li key={t.id} className="flex items-center justify-between gap-stack px-[2px] py-[10px] border-b border-[var(--border-soft)] last:border-b-0">
+            <li key={t.id} className="flex items-center justify-between gap-3 px-[2px] py-[10px] border-b border-[var(--border-soft)] last:border-b-0">
               <div className="min-w-0 flex-1 flex flex-col gap-[2px]">
                 <div className="text-sm font-semibold font-body text-text overflow-hidden text-ellipsis whitespace-nowrap">{t.label || `Token #${t.id}`}</div>
                 <div className="text-xs text-muted tabular-nums">
@@ -189,7 +189,7 @@ export function McpAccessSection({ enabled }: { enabled: boolean }) {
             placeholder="e.g. Claude Desktop MacBook"
             maxLength={100}
           />
-          <div className="grid gap-inline content-start">
+          <div className="grid gap-2 content-start">
             <span className={FIELD_LINE_LABEL}>Expiry</span>
             <Select
               ariaLabel="Expiry"
@@ -201,7 +201,7 @@ export function McpAccessSection({ enabled }: { enabled: boolean }) {
               options={EXPIRY_OPTIONS}
             />
           </div>
-          <div className="flex justify-end gap-inline pt-[4px]">
+          <div className="flex justify-end gap-2 pt-[4px]">
             <Button type="button" variant="primary" onClick={handleCreate} disabled={tokens.createPending}>
               {tokens.createPending ? "Creating…" : "Create token"}
             </Button>
@@ -211,7 +211,7 @@ export function McpAccessSection({ enabled }: { enabled: boolean }) {
           </div>
         </div>
       ) : (
-        <div className="flex justify-end pt-inline">
+        <div className="flex justify-end pt-2">
           <Button type="button" onClick={() => setShowCreateForm(true)}>
             + Create new token
           </Button>
@@ -221,7 +221,7 @@ export function McpAccessSection({ enabled }: { enabled: boolean }) {
       <InlineFeedback message={tokens.feedback} />
 
       <SectionHead title="How to connect" />
-      <nav className="flex flex-wrap gap-y-tight gap-x-block mt-[4px]" role="tablist" aria-label="MCP client instructions">
+      <nav className="flex flex-wrap gap-y-1 gap-x-5 mt-[4px]" role="tablist" aria-label="MCP client instructions">
         {(["generic", "claude-desktop", "claude-code", "curl"] as const).map((tab) => (
           <button
             key={tab}
@@ -276,10 +276,10 @@ function McpClientInstructions({
   }
 
   return (
-    <div className="flex flex-col gap-inline mt-[4px]">
+    <div className="flex flex-col gap-2 mt-[4px]">
       <p className={MCP_INTRO}>{description}</p>
       <pre className={CODE_BLOCK}>{snippet}</pre>
-      <div className="flex justify-end pt-inline">
+      <div className="flex justify-end pt-2">
         <Button type="button" onClick={() => onCopy(snippet)}>
           Copy
         </Button>

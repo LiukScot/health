@@ -1,18 +1,14 @@
 @import "tailwindcss";
 
 /*
- * Tailwind v4 design tokens (#159). These generate the utilities the whole
- * app is built from (p-stack, gap-inline, text-control, rounded-md, font-body).
- * The former hand-rolled --layout-* spacing tokens were fully migrated to this
- * --spacing-* scale, which is now the single source of truth for spacing.
+ * Tailwind v4 design tokens. These generate the utilities the whole app is
+ * built from (text-control, rounded-md, font-body, mobile:). Spacing uses
+ * Tailwind's built-in numeric scale (p-3, gap-2, …) off the base --spacing,
+ * so no named spacing tokens live here.
  */
 @theme {
-  --spacing-tight: 4px;
-  --spacing-inline: 8px;
-  --spacing-stack: 12px;
-  --spacing-block: 20px;
-  --spacing-page: 30px;
-  --spacing-split: 48px;
+  /* Single named breakpoint for the mobile/desktop split (mobile:, max-mobile:). */
+  --breakpoint-mobile: 720px;
 
   /* Typography. 12/14/16px map 1:1 to Tailwind's built-in text-xs/sm/base,
      so only the off-scale sizes get a named token here. A named token (not

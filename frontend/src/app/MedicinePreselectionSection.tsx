@@ -55,7 +55,7 @@ export function MedicinePreselectionSection({ enabled }: { enabled: boolean }) {
   };
 
   return (
-    <div className="grid gap-stack">
+    <div className="grid gap-3">
       <SectionHead title="Medicine preselection" ruled />
       <p className="text-muted text-control">Choose which medicines start already selected when you log a new pain entry.</p>
       {optionsQuery.isLoading ? (

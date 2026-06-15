@@ -9,7 +9,7 @@ const COMMON =
   "font-semibold font-body border-0 rounded-full cursor-pointer shadow-none transition-[background,color] duration-150 ease-[ease] focus-visible:outline-none focus-visible:shadow-[0_0_0_2px_color-mix(in_srgb,var(--accent)_38%,transparent)]";
 
 const SIZE: Record<ButtonSize, string> = {
-  md: "px-block py-stack min-h-[40px] text-sm",
+  md: "px-5 py-3 min-h-[40px] text-sm",
   sm: "inline-flex items-center justify-center px-[14px] py-[6px] min-h-[34px] text-control",
 };
 

@@ -8,21 +8,21 @@ import { csvToList, listToCsv, mergeOptions } from "./core";
 // Pill primitive shared by toggle/add/edit chips. Shape carries no color so
 // idle/active color utilities don't collide on source order.
 const CHIP_SHAPE =
-  "inline-flex items-center gap-inline px-stack py-tight min-h-page rounded-full text-hint leading-none border-0 shadow-none transition-[color,background] duration-150 ease-[ease]";
+  "inline-flex items-center gap-2 px-3 py-1 min-h-8 rounded-full text-hint leading-none border-0 shadow-none transition-[color,background] duration-150 ease-[ease]";
 const CHIP_IDLE = "text-muted bg-[color-mix(in_srgb,white_5%,var(--card))]";
 const CHIP_IDLE_HOVER = "hover:text-text hover:bg-[color-mix(in_srgb,white_9%,var(--card))]";
 const CHIP_ACTIVE = "text-accent bg-[color-mix(in_srgb,var(--accent)_10%,transparent)]";
 const REMOVE_BTN =
   "inline-flex items-center justify-center w-[18px] h-[18px] min-h-[18px] p-0 rounded-full text-micro font-bold leading-none text-muted bg-[color-mix(in_srgb,var(--bg)_60%,transparent)] border-0 shadow-none flex-none cursor-pointer [@media(hover:hover)]:hover:text-danger [@media(hover:hover)]:hover:bg-[color-mix(in_srgb,var(--danger)_15%,transparent)]";
 const ADDER_BTN =
-  "border-0 bg-transparent px-stack py-tight min-h-[24px] rounded-full text-xs font-semibold font-body shadow-none cursor-pointer transition-[color,background] duration-150 ease-[ease]";
+  "border-0 bg-transparent px-3 py-1 min-h-[24px] rounded-full text-xs font-semibold font-body shadow-none cursor-pointer transition-[color,background] duration-150 ease-[ease]";
 
 type SectionHeadVariant = "default" | "dashboard" | "ds" | "tags";
 const SECTION_HEAD: Record<SectionHeadVariant, string> = {
-  default: "flex justify-between gap-stack pb-tight mt-block",
-  dashboard: "flex justify-between gap-stack pb-inline mt-block",
-  ds: "flex flex-col gap-[2px] pb-tight mt-block",
-  tags: "flex justify-between gap-stack mb-0",
+  default: "flex justify-between gap-3 pb-1 mt-5",
+  dashboard: "flex justify-between gap-3 pb-2 mt-5",
+  ds: "flex flex-col gap-[2px] pb-1 mt-5",
+  tags: "flex justify-between gap-3 mb-0",
 };
 const SECTION_TITLE: Record<SectionHeadVariant, string> = {
   default: "text-nano font-bold tracking-[0.16em] uppercase text-muted",
@@ -231,9 +231,9 @@ export function MultiSelectField({ label, fieldKey, value, options, onChange, do
   };
 
   return (
-    <div className="grid gap-inline content-start">
-      {hideLabel ? null : <span className="flex flex-wrap mt-stack mb-stack pl-stack border-l-[3px] border-accent text-sm font-semibold text-accent leading-tight">{label}</span>}
-      <div className="flex flex-wrap gap-inline content-start mt-[5px] mb-[5px] order-1" role="group" aria-label={label}>
+    <div className="grid gap-2 content-start">
+      {hideLabel ? null : <span className="flex flex-wrap mt-3 mb-3 pl-3 border-l-[3px] border-accent text-sm font-semibold text-accent leading-tight">{label}</span>}
+      <div className="flex flex-wrap gap-2 content-start mt-[5px] mb-[5px] order-1" role="group" aria-label={label}>
         {allOptions.map((option) => {
           const optionKey = option.toLowerCase();
           const isSelected = selectedSet.has(optionKey);
@@ -241,20 +241,20 @@ export function MultiSelectField({ label, fieldKey, value, options, onChange, do
 
           if (isConfirmingRemoval) {
             return (
-              <div key={option} className="inline-flex items-center gap-inline flex-wrap px-stack py-inline border border-[color-mix(in_srgb,var(--danger)_50%,transparent)] rounded-full bg-[color-mix(in_srgb,var(--danger)_8%,transparent)]" role="group" aria-label={`Confirm removal of ${option}`}>
+              <div key={option} className="inline-flex items-center gap-2 flex-wrap px-3 py-2 border border-[color-mix(in_srgb,var(--danger)_50%,transparent)] rounded-full bg-[color-mix(in_srgb,var(--danger)_8%,transparent)]" role="group" aria-label={`Confirm removal of ${option}`}>
                 <span className="whitespace-nowrap text-text text-control">Remove {option}?</span>
-                <div className="inline-flex items-center gap-inline">
+                <div className="inline-flex items-center gap-2">
                   <button
                     type="button"
                     ref={confirmRemoveRef}
-                    className="danger min-h-page px-stack py-tight text-xs shadow-none"
+                    className="danger min-h-8 px-3 py-1 text-xs shadow-none"
                     onClick={() => {
                       void permanentlyRemoveOption(option);
                     }}
                   >
                     Remove
                   </button>
-                  <button type="button" className="min-h-page px-stack py-tight text-xs shadow-none" onClick={() => setPendingRemovalKey(null)}>
+                  <button type="button" className="min-h-8 px-3 py-1 text-xs shadow-none" onClick={() => setPendingRemovalKey(null)}>
                     Cancel
                   </button>
                 </div>
@@ -290,9 +290,9 @@ export function MultiSelectField({ label, fieldKey, value, options, onChange, do
           );
         })}
       </div>
-      <div className="flex flex-wrap items-center gap-inline mt-tight">
+      <div className="flex flex-wrap items-center gap-2 mt-1">
         {addingOption ? (
-          <div className="inline-flex items-center gap-inline pl-stack pr-tight py-[2px] border border-[color-mix(in_srgb,var(--accent)_40%,transparent)] rounded-full bg-[color-mix(in_srgb,var(--accent)_6%,transparent)] min-h-page">
+          <div className="inline-flex items-center gap-2 pl-3 pr-1 py-[2px] border border-[color-mix(in_srgb,var(--accent)_40%,transparent)] rounded-full bg-[color-mix(in_srgb,var(--accent)_6%,transparent)] min-h-8">
             <input
               ref={addInputRef}
               autoFocus
@@ -346,7 +346,7 @@ export function MultiSelectField({ label, fieldKey, value, options, onChange, do
             </button>
             <button
               type="button"
-              className={`border-0 rounded-full px-stack py-tight min-h-page text-hint font-medium leading-none shadow-none cursor-pointer transition-[color,background] duration-150 ease-[ease] ${editOptionsMode ? "text-accent bg-[color-mix(in_srgb,var(--accent)_10%,transparent)]" : "text-muted-soft bg-[color-mix(in_srgb,white_5%,var(--card))] hover:text-text hover:bg-[color-mix(in_srgb,white_9%,var(--card))]"}`}
+              className={`border-0 rounded-full px-3 py-1 min-h-8 text-hint font-medium leading-none shadow-none cursor-pointer transition-[color,background] duration-150 ease-[ease] ${editOptionsMode ? "text-accent bg-[color-mix(in_srgb,var(--accent)_10%,transparent)]" : "text-muted-soft bg-[color-mix(in_srgb,white_5%,var(--card))] hover:text-text hover:bg-[color-mix(in_srgb,white_9%,var(--card))]"}`}
               aria-pressed={editOptionsMode}
               onClick={() => setEditMode(!editOptionsMode)}
             >

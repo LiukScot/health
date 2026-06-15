@@ -2,9 +2,9 @@ import type { UseFormReturn } from "react-hook-form";
 import type { UseMutationResult } from "@tanstack/react-query";
 import { Button } from "../components/ui/Button";
 
-const LOGIN_LABEL = "grid gap-tight content-start text-muted text-control";
+const LOGIN_LABEL = "grid gap-1 content-start text-muted text-control";
 const LOGIN_INPUT =
-  "w-full max-w-full p-stack bg-card-strong text-text border border-border rounded-sm outline-none text-base shadow-[var(--shadow-sm)] transition-[border-color,background] duration-200 ease-[ease] focus:border-accent focus:bg-[color-mix(in_srgb,var(--accent)_8%,transparent)] focus-visible:outline-none focus-visible:border-accent focus-visible:shadow-[0_0_0_2px_color-mix(in_srgb,var(--accent)_38%,transparent),var(--shadow-sm)]";
+  "w-full max-w-full p-3 bg-card-strong text-text border border-border rounded-sm outline-none text-base shadow-[var(--shadow-sm)] transition-[border-color,background] duration-200 ease-[ease] focus:border-accent focus:bg-[color-mix(in_srgb,var(--accent)_8%,transparent)] focus-visible:outline-none focus-visible:border-accent focus-visible:shadow-[0_0_0_2px_color-mix(in_srgb,var(--accent)_38%,transparent),var(--shadow-sm)]";
 
 type LoginScreenProps = {
   loginForm: UseFormReturn<{ email: string; password: string }>;
@@ -13,11 +13,11 @@ type LoginScreenProps = {
 
 export function LoginScreen({ loginForm, loginMutation }: LoginScreenProps) {
   return (
-    <main className="grid place-items-center min-h-screen p-0 max-[720px]:p-stack">
-      <section className="w-[min(560px,94vw)] bg-card border border-border rounded-lg p-stack shadow-[var(--shadow)]">
+    <main className="grid place-items-center min-h-screen p-0 max-mobile:p-3">
+      <section className="w-[min(560px,94vw)] bg-card border border-border rounded-lg p-3 shadow-[var(--shadow)]">
         <h1>Health</h1>
         <p>Sign in to access your private health workspace.</p>
-        <form noValidate onSubmit={loginForm.handleSubmit((values) => loginMutation.mutate(values))} className="grid gap-stack">
+        <form noValidate onSubmit={loginForm.handleSubmit((values) => loginMutation.mutate(values))} className="grid gap-3">
           <label className={LOGIN_LABEL}>
             Email
             <input

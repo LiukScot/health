@@ -22,7 +22,7 @@ export function BarMetric({
   const band = bandNine(n, higherIsBetter);
   const bandColor = { low: "text-success", mid: "text-warning", high: "text-danger", "": "" }[band] ?? "";
   return (
-    <div className="grid grid-cols-[120px_1fr_auto] items-center gap-stack pb-[2px]">
+    <div className="grid grid-cols-[120px_1fr_auto] items-center gap-3 pb-[2px]">
       <span className="text-control font-medium text-text">{label}</span>
       <div className="grid grid-cols-9 gap-[2px]" role="group" aria-label={label}>
         {Array.from({ length: 9 }, (_, i) => {
@@ -65,10 +65,10 @@ export function BarMetric({
 export function CoffeeStepper({ value, onChange }: { value: number | null; onChange: (next: number | null) => void }) {
   const n = value != null && !Number.isNaN(Number(value)) ? Math.min(50, Math.max(0, Math.floor(Number(value)))) : 0;
   return (
-    <div className="grid grid-cols-[120px_1fr_auto] items-center gap-stack pb-[2px]">
+    <div className="grid grid-cols-[120px_1fr_auto] items-center gap-3 pb-[2px]">
       <span className="text-control font-medium text-text">Coffee</span>
       <span aria-hidden="true" className="h-2.5 min-h-2.5 bg-[color-mix(in_srgb,white_4%,var(--card))] rounded-xs" />
-      <div className="inline-flex items-center gap-inline">
+      <div className="inline-flex items-center gap-2">
         <button type="button" className={STEPPER_BTN} aria-label="Decrease coffee count" onClick={() => onChange(Math.max(0, n - 1))}>
           −
         </button>
@@ -93,7 +93,7 @@ export function EmptyState({
   compact?: boolean;
 }) {
   return (
-    <div className={compact ? "grid gap-inline m-0" : "grid gap-inline my-stack"}>
+    <div className={compact ? "grid gap-2 m-0" : "grid gap-2 my-3"}>
       <p className="text-control font-semibold text-text m-0">{title}</p>
       <p className="max-w-[60ch] text-control text-muted leading-normal m-0">{description}</p>
     </div>

@@ -34,7 +34,7 @@ import {
 } from "./entries";
 
 const DATETIME_FIELD =
-  "!w-auto max-w-full justify-self-start cursor-pointer tabular-nums [&::-webkit-calendar-picker-indicator]:cursor-pointer [&::-webkit-calendar-picker-indicator]:ml-inline [&::-webkit-calendar-picker-indicator]:invert [&::-webkit-calendar-picker-indicator]:opacity-60 hover:[&::-webkit-calendar-picker-indicator]:opacity-100";
+  "!w-auto max-w-full justify-self-start cursor-pointer tabular-nums [&::-webkit-calendar-picker-indicator]:cursor-pointer [&::-webkit-calendar-picker-indicator]:ml-2 [&::-webkit-calendar-picker-indicator]:invert [&::-webkit-calendar-picker-indicator]:opacity-60 hover:[&::-webkit-calendar-picker-indicator]:opacity-100";
 
 export function DiarySection({
   diaryForm,
@@ -84,13 +84,13 @@ export function DiarySection({
   } = useDiaryColumnCap(diaryEntries, isLoading);
 
   return (
-    <section className="@container p-inline">
-      <h1 className="m-0 mb-stack text-[22px] font-bold tracking-tight text-text">Diary</h1>
-      <div className="grid gap-page min-[1100px]:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] min-[1100px]:gap-split min-[1100px]:items-start">
+    <section className="@container p-2">
+      <h1 className="m-0 mb-3 text-[22px] font-bold tracking-tight text-text">Diary</h1>
+      <div className="grid gap-8 min-[1100px]:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] min-[1100px]:gap-12 min-[1100px]:items-start">
         <div className="min-w-0 max-[1099px]:border-b max-[1099px]:border-[var(--border-soft)]" ref={leftColRef}>
           <EntriesHeading className="min-[1100px]:mt-0">New entry</EntriesHeading>
-          <form className="mb-inline" onSubmit={diaryForm.handleSubmit(onSubmit)}>
-            <div className="grid gap-stack content-start min-w-0">
+          <form className="mb-2" onSubmit={diaryForm.handleSubmit(onSubmit)}>
+            <div className="grid gap-3 content-start min-w-0">
               <div className="sr-only" aria-hidden="true">
                 <input type="hidden" {...diaryForm.register("moodLevel", { valueAsNumber: true })} />
                 <input type="hidden" {...diaryForm.register("depressionLevel", { valueAsNumber: true })} />
@@ -107,7 +107,7 @@ export function DiarySection({
                   el.showPicker?.();
                 }}
               />
-              <div className="grid gap-inline content-start">
+              <div className="grid gap-2 content-start">
                 <span className={FIELD_LINE_LABEL}>Values</span>
               </div>
               <BarMetric
@@ -144,7 +144,7 @@ export function DiarySection({
                 aria-label="Gratitude"
               />
               {editingDiary ? (
-                <div className="flex gap-inline flex-wrap">
+                <div className="flex gap-2 flex-wrap">
                   <Button type="button" onClick={onCancelEdit}>
                     Cancel edit
                   </Button>
@@ -152,11 +152,11 @@ export function DiarySection({
               ) : null}
             </div>
 
-            <div className="grid gap-block min-w-0 pt-block">
-              <div className="grid gap-stack">
+            <div className="grid gap-5 min-w-0 pt-5">
+              <div className="grid gap-3">
                 <SectionHead title="Emotions" variant="tags" />
                 <TagTabs tabs={moodTabs} active={moodTab} onSelect={setMoodTab} ariaLabel="Mood categories" />
-                <div className="grid gap-stack">
+                <div className="grid gap-3">
                   {moodTab === "positive" ? (
                     <MultiSelectField
                       hideLabel
@@ -192,8 +192,8 @@ export function DiarySection({
                   ) : null}
                 </div>
               </div>
-              <div className="flex justify-end pt-inline">
-                <Button type="submit" variant={diaryMutationState.isSuccess ? "success" : "primary"} className="mb-block">
+              <div className="flex justify-end pt-2">
+                <Button type="submit" variant={diaryMutationState.isSuccess ? "success" : "primary"} className="mb-5">
                   {diaryMutationState.isSuccess ? "✓ Saved" : editingDiary ? "Update entry" : "Save entry"}
                 </Button>
               </div>

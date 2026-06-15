@@ -25,9 +25,9 @@ import {
 } from "./entries";
 
 const DATETIME_FIELD =
-  "!w-auto max-w-full justify-self-start cursor-pointer tabular-nums [&::-webkit-calendar-picker-indicator]:cursor-pointer [&::-webkit-calendar-picker-indicator]:ml-inline [&::-webkit-calendar-picker-indicator]:invert [&::-webkit-calendar-picker-indicator]:opacity-60 hover:[&::-webkit-calendar-picker-indicator]:opacity-100";
+  "!w-auto max-w-full justify-self-start cursor-pointer tabular-nums [&::-webkit-calendar-picker-indicator]:cursor-pointer [&::-webkit-calendar-picker-indicator]:ml-2 [&::-webkit-calendar-picker-indicator]:invert [&::-webkit-calendar-picker-indicator]:opacity-60 hover:[&::-webkit-calendar-picker-indicator]:opacity-100";
 const THERAPY_CALLOUT =
-  "m-0 px-stack py-inline bg-card-soft border-l-2 border-[color-mix(in_srgb,var(--accent)_50%,transparent)] rounded-sm text-muted text-hint leading-normal";
+  "m-0 px-3 py-2 bg-card-soft border-l-2 border-[color-mix(in_srgb,var(--accent)_50%,transparent)] rounded-sm text-muted text-hint leading-normal";
 
 export function DbtSection({
   dbtForm,
@@ -124,13 +124,13 @@ export function DbtSection({
   ];
 
   return (
-    <section className="@container p-inline">
-      <h1 className="m-0 mb-stack text-[22px] font-bold tracking-tight text-text">DBT Distress Tolerance</h1>
-      <div className="grid gap-page min-[1100px]:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] min-[1100px]:gap-split min-[1100px]:items-start">
+    <section className="@container p-2">
+      <h1 className="m-0 mb-3 text-[22px] font-bold tracking-tight text-text">DBT Distress Tolerance</h1>
+      <div className="grid gap-8 min-[1100px]:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] min-[1100px]:gap-12 min-[1100px]:items-start">
         <div className="min-w-0 max-[1099px]:border-b max-[1099px]:border-[var(--border-soft)]" ref={leftColRef}>
           <EntriesHeading className="min-[1100px]:mt-0">New entry</EntriesHeading>
-          <form className="mb-inline" onSubmit={dbtForm.handleSubmit(onSubmit)}>
-            <div className="grid gap-stack content-start min-w-0">
+          <form className="mb-2" onSubmit={dbtForm.handleSubmit(onSubmit)}>
+            <div className="grid gap-3 content-start min-w-0">
               <FieldLine
                 label="Date & time"
                 type="datetime-local"
@@ -143,7 +143,7 @@ export function DbtSection({
                 }}
               />
               {dbtGroups.map((g) => (
-                <div key={g.title} className="flex flex-col gap-stack">
+                <div key={g.title} className="flex flex-col gap-3">
                   <SectionHead title={g.title} variant="ds" />
                   {g.callouts?.map((c) => (
                     <p key={c} className={THERAPY_CALLOUT}>{c}</p>
@@ -163,19 +163,19 @@ export function DbtSection({
                   ))}
                 </div>
               ))}
-              <p className={`${THERAPY_CALLOUT} mt-stack`}>
+              <p className={`${THERAPY_CALLOUT} mt-3`}>
                 When the emotion comes back, that's ok. Emotions come and go — watch it again, float with the wave.
               </p>
               {editingDbt ? (
-                <div className="flex gap-inline flex-wrap">
+                <div className="flex gap-2 flex-wrap">
                   <Button type="button" onClick={onCancelEdit}>
                     Cancel edit
                   </Button>
                 </div>
               ) : null}
             </div>
-            <div className="flex justify-end pt-inline">
-              <Button type="submit" variant={dbtMutationState.isSuccess ? "success" : "primary"} className="mb-block">
+            <div className="flex justify-end pt-2">
+              <Button type="submit" variant={dbtMutationState.isSuccess ? "success" : "primary"} className="mb-5">
                 {dbtMutationState.isSuccess ? "✓ Saved" : editingDbt ? "Update entry" : "Save entry"}
               </Button>
             </div>
