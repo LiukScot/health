@@ -297,7 +297,7 @@ export function MultiSelectField({ label, fieldKey, value, options, onChange, do
               ref={addInputRef}
               autoFocus
               type="text"
-              className="flex-[1_1_140px] min-w-[120px] max-w-[18rem] w-auto border-0 bg-transparent p-0 text-text text-control font-medium font-body shadow-none outline-none focus:bg-transparent focus:shadow-none placeholder:text-muted-soft"
+              className="flex-[1_1_140px] min-w-30 max-w-72 w-auto border-0 bg-transparent p-0 text-text text-control font-medium font-body shadow-none outline-none focus:bg-transparent focus:shadow-none placeholder:text-muted-soft"
               placeholder={`New ${label.toLowerCase()}`}
               value={customValue}
               onChange={(event) => setCustomValue(event.target.value)}

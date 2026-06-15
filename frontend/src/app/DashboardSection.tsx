@@ -22,10 +22,10 @@ const WellbeingChart = lazy(() => import("./WellbeingChart"));
 const DASH_CARD =
   "grid grid-rows-[auto_auto_22px] gap-inline content-start w-full max-w-[200px] justify-self-start rounded-md p-stack bg-card-soft";
 const CARD_H3 =
-  "m-0 text-nano font-bold tracking-[0.12em] uppercase text-muted leading-tight whitespace-nowrap overflow-hidden text-ellipsis translate-y-[2px]";
-const CARD_VALUE = "text-lg font-bold text-text translate-y-[2px]";
-const DELTA_SLOT = "min-h-[22px] flex items-end translate-y-[2px]";
-const DELTA_BASE = "inline-flex items-center rounded-full px-inline py-[2px] text-micro font-bold self-end";
+  "m-0 text-nano font-bold tracking-[0.12em] uppercase text-muted leading-tight whitespace-nowrap overflow-hidden text-ellipsis translate-y-0.5";
+const CARD_VALUE = "text-lg font-bold text-text translate-y-0.5";
+const DELTA_SLOT = "min-h-6 flex items-end translate-y-0.5";
+const DELTA_BASE = "inline-flex items-center rounded-full px-inline py-0.5 text-micro font-bold self-end";
 const QUICK_RANGE_BASE =
   "px-stack py-tight text-xs font-semibold font-body border-0 rounded-full cursor-pointer transition-[color,background] duration-150 ease-[ease] shadow-none";
 const QUICK_RANGE_IDLE =
@@ -226,7 +226,7 @@ export function DashboardSection({
                       <span className="text-nano font-bold tracking-[0.16em] uppercase text-muted">{connection.title}</span>
                       <strong className="m-0 text-text text-control font-semibold">{connection.summary}</strong>
                       <p className="m-0 text-muted text-control leading-normal">{connection.detail}</p>
-                      <span className={`justify-self-start rounded-full px-inline py-[2px] text-micro font-bold ${CONFIDENCE_TONE[connection.confidence] ?? CONFIDENCE_TONE.weak}`}>{connection.confidence} confidence</span>
+                      <span className={`justify-self-start rounded-full px-inline py-0.5 text-micro font-bold ${CONFIDENCE_TONE[connection.confidence] ?? CONFIDENCE_TONE.weak}`}>{connection.confidence} confidence</span>
                     </article>
                   ))}
                 </div>
