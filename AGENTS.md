@@ -1,3 +1,13 @@
+<!-- ─────────────────────────────────────────────────────────────────── -->
+<!--  ✍️ PERSONAL — repo-specific rules. Edit freely; sync never touches this. -->
+<!-- ─────────────────────────────────────────────────────────────────── -->
+
+<!-- @@DOTFILES-SYNC@@ ──────────────────────────────────────────────────────── -->
+<!--  🔒 SYNCED — managed by dotfiles. Do NOT edit below; it gets overwritten. -->
+<!-- ─────────────────────────────────────────────────────────────────── -->
+
+version: 4
+
 # Agent instructions
 
 These rules apply to every code change in this repository.
