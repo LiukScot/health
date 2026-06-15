@@ -23,7 +23,7 @@ test("creates, edits, and deletes a CBT thought-record entry", async ({ page }) 
 
   await page.getByRole("button", { name: /Save entry/i }).click();
 
-  const entryRow = page.locator(".entry-row").filter({ hasText: situation });
+  const entryRow = page.locator("details").filter({ hasText: situation });
   await expect(entryRow).toBeVisible();
   await entryRow.click();
   await expect(entryRow.getByText("I always fail.")).toBeVisible();
@@ -32,12 +32,12 @@ test("creates, edits, and deletes a CBT thought-record entry", async ({ page }) 
   await page.getByLabel("Situation").fill(updatedSituation);
   await page.getByRole("button", { name: /Update entry/i }).click();
 
-  const updatedRow = page.locator(".entry-row").filter({ hasText: updatedSituation });
+  const updatedRow = page.locator("details").filter({ hasText: updatedSituation });
   await expect(updatedRow).toBeVisible();
   await updatedRow.click();
 
   await updatedRow.getByRole("button", { name: "Delete" }).click();
   await updatedRow.getByRole("button", { name: "Delete?" }).click();
 
-  await expect(page.locator(".entry-row").filter({ hasText: updatedSituation })).toHaveCount(0);
+  await expect(page.locator("details").filter({ hasText: updatedSituation })).toHaveCount(0);
 });

@@ -55,11 +55,11 @@ export function MedicinePreselectionSection({ enabled }: { enabled: boolean }) {
   };
 
   return (
-    <div className="stack">
+    <div className="grid gap-stack">
       <SectionHead title="Medicine preselection" ruled />
-      <p className="hint">Choose which medicines start already selected when you log a new pain entry.</p>
+      <p className="text-muted text-control">Choose which medicines start already selected when you log a new pain entry.</p>
       {optionsQuery.isLoading ? (
-        <p className="hint">Loading…</p>
+        <p className="text-muted text-control">Loading…</p>
       ) : (
         <MultiSelectField hideLabel label="Medicines" fieldKey="medicines" value={value} options={medicines} onChange={handleChange} />
       )}

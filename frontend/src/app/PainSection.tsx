@@ -9,10 +9,33 @@ import {
 import {
   AnimatedEditingLabel,
   MultiSelectField,
+  SectionHead,
   useDiaryColumnCap,
 } from "./shared";
 import { BarMetric, CoffeeStepper, EmptyState } from "./screen-helpers";
 import { bandNine, painPreview, formatEntrySummaryDate } from "./screen-format";
+import { Button } from "../components/ui/Button";
+import { FieldLine, FIELD_LINE_LABEL } from "../components/ui/FieldLine";
+import {
+  DELETE_CONFIRM,
+  DETAIL_ACTIONS,
+  DETAIL_ACTION_BTN,
+  DetailGroup,
+  EntriesHeading,
+  ENTRY_CHEVRON,
+  ENTRY_DATE,
+  ENTRY_EXPANDED,
+  ENTRY_PREVIEW,
+  ENTRY_ROW,
+  ENTRY_SUMMARY,
+  PainBadge,
+  PastEntriesColumn,
+  TagList,
+  TagTabs,
+} from "./entries";
+
+const DATETIME_FIELD =
+  "!w-auto max-w-full justify-self-start cursor-pointer tabular-nums [&::-webkit-calendar-picker-indicator]:cursor-pointer [&::-webkit-calendar-picker-indicator]:ml-inline [&::-webkit-calendar-picker-indicator]:invert [&::-webkit-calendar-picker-indicator]:opacity-60 hover:[&::-webkit-calendar-picker-indicator]:opacity-100";
 
 const PAIN_TABS: { id: PainFieldKey; label: string }[] = [
   { id: "area", label: "Area" },
@@ -73,319 +96,167 @@ export function PainSection({
     overflow: pastEntriesOverflow,
   } = useDiaryColumnCap(painEntries, isLoading);
 
+  const tabLabel = PAIN_TABS.find((t) => t.id === painTab)?.label ?? "";
+  const painDetails: { label: string; key: PainFieldKey }[] = [
+    { label: "Area", key: "area" },
+    { label: "Symptoms", key: "symptoms" },
+    { label: "Activities", key: "activities" },
+    { label: "Medicines", key: "medicines" },
+    { label: "Habits", key: "habits" },
+    { label: "Other", key: "other" },
+  ];
+
   return (
-    <section className="panel">
-      <h1 className="panel-title">Pain</h1>
-      <div className="panel-split panel-split--diary">
-        <div className="panel-col" ref={leftColRef}>
-        <h2 className="entries-heading">New entry</h2>
-        <form className="dense-form-grid pain-dense-form" onSubmit={painForm.handleSubmit(onSubmit)}>
-        <div className="core-col">
-          <div className="dense-form-hidden-fields" aria-hidden="true">
-            <input type="hidden" {...painForm.register("painLevel", { valueAsNumber: true })} />
-            <input type="hidden" {...painForm.register("fatigueLevel", { valueAsNumber: true })} />
-            <input type="hidden" {...painForm.register("coffeeCount", { valueAsNumber: true })} />
-          </div>
-          <label className="field field-line">
-            <span className="field-line-label">Date &amp; time</span>
-            <input
-              type="datetime-local"
-              {...painForm.register("dateTime")}
-              aria-label="Date/time"
-              onClick={(e) => {
-                const el = e.currentTarget as HTMLInputElement & { showPicker?: () => void };
-                el.showPicker?.();
-              }}
-            />
-          </label>
-          <div className="field field-line metric-group-label">
-            <span className="field-line-label">Values</span>
-          </div>
-          <BarMetric
-            label="Pain level"
-            value={painLevel ?? null}
-            onChange={(next) => painForm.setValue("painLevel", next, { shouldDirty: true })}
-          />
-          <BarMetric
-            label="Fatigue"
-            value={fatigueLevel ?? null}
-            onChange={(next) => painForm.setValue("fatigueLevel", next, { shouldDirty: true })}
-          />
-          <CoffeeStepper value={coffeeCount ?? null} onChange={(next) => painForm.setValue("coffeeCount", next, { shouldDirty: true })} />
-          <label className="field field-line">
-            <span className="field-line-label">Note</span>
-            <textarea
-              {...painForm.register("note")}
-              placeholder="Anything worth remembering about this flare…"
-              rows={2}
-              aria-label="Note"
-            />
-          </label>
-          {editingPain ? (
-            <div className="dense-form-inline-actions">
-              <button type="button" onClick={onCancelEdit}>
-                Cancel edit
-              </button>
+    <section className="@container p-inline">
+      <h1 className="m-0 mb-stack text-[22px] font-bold tracking-tight text-text">Pain</h1>
+      <div className="grid gap-page min-[1100px]:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] min-[1100px]:gap-split min-[1100px]:items-start">
+        <div className="min-w-0 max-[1099px]:border-b max-[1099px]:border-[var(--border-soft)]" ref={leftColRef}>
+          <EntriesHeading className="min-[1100px]:mt-0">New entry</EntriesHeading>
+          <form className="mb-inline" onSubmit={painForm.handleSubmit(onSubmit)}>
+            <div className="grid gap-stack content-start min-w-0">
+              <div className="sr-only" aria-hidden="true">
+                <input type="hidden" {...painForm.register("painLevel", { valueAsNumber: true })} />
+                <input type="hidden" {...painForm.register("fatigueLevel", { valueAsNumber: true })} />
+                <input type="hidden" {...painForm.register("coffeeCount", { valueAsNumber: true })} />
+              </div>
+              <FieldLine
+                label="Date & time"
+                type="datetime-local"
+                className={DATETIME_FIELD}
+                {...painForm.register("dateTime")}
+                aria-label="Date/time"
+                onClick={(e) => {
+                  const el = e.currentTarget as HTMLInputElement & { showPicker?: () => void };
+                  el.showPicker?.();
+                }}
+              />
+              <div className="grid gap-inline content-start">
+                <span className={FIELD_LINE_LABEL}>Values</span>
+              </div>
+              <BarMetric
+                label="Pain level"
+                value={painLevel ?? null}
+                onChange={(next) => painForm.setValue("painLevel", next, { shouldDirty: true })}
+              />
+              <BarMetric
+                label="Fatigue"
+                value={fatigueLevel ?? null}
+                onChange={(next) => painForm.setValue("fatigueLevel", next, { shouldDirty: true })}
+              />
+              <CoffeeStepper value={coffeeCount ?? null} onChange={(next) => painForm.setValue("coffeeCount", next, { shouldDirty: true })} />
+              <FieldLine
+                label="Note"
+                multiline
+                rows={2}
+                {...painForm.register("note")}
+                placeholder="Anything worth remembering about this flare…"
+                aria-label="Note"
+              />
+              {editingPain ? (
+                <div className="flex gap-inline flex-wrap">
+                  <Button type="button" onClick={onCancelEdit}>
+                    Cancel edit
+                  </Button>
+                </div>
+              ) : null}
             </div>
-          ) : null}
-        </div>
 
-        <div className="right-col">
-          <div className="tags-col">
-            <div className="section-head">
-              <span className="section-title">Factors</span>
-            </div>
-            <nav className="tag-tabs" role="tablist" aria-label="Pain categories">
-              {PAIN_TABS.map((tab) => (
-                <button
-                  key={tab.id}
-                  type="button"
-                  role="tab"
-                  aria-selected={painTab === tab.id}
-                  className={painTab === tab.id ? "active" : ""}
-                  onClick={() => setPainTab(tab.id)}
-                >
-                  {tab.label}{" "}
-                  <span className="count">{painTabCounts[tab.id]}</span>
-                </button>
-              ))}
-            </nav>
-            <div className="tag-panel">
-              {painTab === "area" ? (
-                <MultiSelectField
-                  hideLabel
-                  label="Area"
-                  fieldKey="area"
-                  value={watchedValues.area}
-                  options={painOptionsForTab("area")}
-                  onChange={(next) => painForm.setValue("area", next, { shouldDirty: true })}
+            <div className="grid gap-block min-w-0 pt-block">
+              <div className="grid gap-stack">
+                <SectionHead title="Factors" variant="tags" />
+                <TagTabs
+                  tabs={PAIN_TABS.map((t) => ({ id: t.id, label: t.label, count: painTabCounts[t.id] }))}
+                  active={painTab}
+                  onSelect={setPainTab}
+                  ariaLabel="Pain categories"
                 />
-              ) : null}
-              {painTab === "symptoms" ? (
-                <MultiSelectField
-                  hideLabel
-                  label="Symptoms"
-                  fieldKey="symptoms"
-                  value={watchedValues.symptoms}
-                  options={painOptionsForTab("symptoms")}
-                  onChange={(next) => painForm.setValue("symptoms", next, { shouldDirty: true })}
-                />
-              ) : null}
-              {painTab === "activities" ? (
-                <MultiSelectField
-                  hideLabel
-                  label="Activities"
-                  fieldKey="activities"
-                  value={watchedValues.activities}
-                  options={painOptionsForTab("activities")}
-                  onChange={(next) => painForm.setValue("activities", next, { shouldDirty: true })}
-                />
-              ) : null}
-              {painTab === "medicines" ? (
-                <MultiSelectField
-                  hideLabel
-                  label="Medicines"
-                  fieldKey="medicines"
-                  value={watchedValues.medicines}
-                  options={painOptionsForTab("medicines")}
-                  onChange={(next) => painForm.setValue("medicines", next, { shouldDirty: true })}
-                />
-              ) : null}
-              {painTab === "habits" ? (
-                <MultiSelectField
-                  hideLabel
-                  label="Habits"
-                  fieldKey="habits"
-                  value={watchedValues.habits}
-                  options={painOptionsForTab("habits")}
-                  onChange={(next) => painForm.setValue("habits", next, { shouldDirty: true })}
-                />
-              ) : null}
-              {painTab === "other" ? (
-                <MultiSelectField
-                  hideLabel
-                  label="Other"
-                  fieldKey="other"
-                  value={watchedValues.other}
-                  options={painOptionsForTab("other")}
-                  onChange={(next) => painForm.setValue("other", next, { shouldDirty: true })}
-                />
-              ) : null}
-            </div>
-          </div>
-          <div className="save-section">
-            <button type="submit" className={`btn btn-primary${painMutationState.isSuccess ? " is-success-pulse" : ""}`}>
-              {painMutationState.isSuccess ? "✓ Saved" : editingPain ? "Update entry" : "Save entry"}
-            </button>
-          </div>
-        </div>
-      </form>
-        </div>
-        <div className="panel-col diary-past-col" ref={pastColRef}>
-      {isLoading && <p className="hint">Loading pain entries...</p>}
-
-      <h2 className="entries-heading">Past entries</h2>
-      {painEntries.length === 0 ? (
-        <EmptyState
-          title="No pain entries yet"
-          description="Track your first session with the form above. Your pain history will show up here once you save it."
-        />
-      ) : (
-        <div className="diary-past-entries-stack">
-          <div className="diary-past-entries-body" ref={pastEntriesBodyRef}>
-            {painEntries.map((entry) => {
-          const painBand = bandNine(entry.painLevel ?? undefined);
-          return (
-            <details key={entry.id} className="entry-row">
-              <summary>
-                <span className="date">{formatEntrySummaryDate(entry.entryDate, entry.entryTime)}</span>
-                {entry.painLevel != null ? (
-                  <span className={`pain-badge sm${painBand ? ` ${painBand}` : ""}`}>{entry.painLevel}</span>
-                ) : (
-                  <span className="pain-badge sm muted">—</span>
-                )}
-                <span className="preview">{painPreview(entry)}</span>
-                <span />
-                <span className="chevron" aria-hidden="true">
-                  ▶
-                </span>
-              </summary>
-              <div className="entry-expanded">
-                <div className="detail-group">
-                  <span className="label">Pain · Fatigue · Coffee</span>
-                  <span className="value">
-                    {entry.painLevel ?? "—"} · {entry.fatigueLevel ?? "—"} · {entry.coffeeCount ?? "—"}
-                  </span>
-                </div>
-                <div className="detail-group">
-                  <span className="label">Area</span>
-                  <span className="value">
-                    {csvToList(entry.area).length ? (
-                      csvToList(entry.area).map((t) => (
-                        <span key={t} className="tag-mini">
-                          {t}
-                        </span>
-                      ))
-                    ) : (
-                      "—"
-                    )}
-                  </span>
-                </div>
-                <div className="detail-group">
-                  <span className="label">Symptoms</span>
-                  <span className="value">
-                    {csvToList(entry.symptoms).length ? (
-                      csvToList(entry.symptoms).map((t) => (
-                        <span key={t} className="tag-mini">
-                          {t}
-                        </span>
-                      ))
-                    ) : (
-                      "—"
-                    )}
-                  </span>
-                </div>
-                <div className="detail-group">
-                  <span className="label">Activities</span>
-                  <span className="value">
-                    {csvToList(entry.activities).length ? (
-                      csvToList(entry.activities).map((t) => (
-                        <span key={t} className="tag-mini">
-                          {t}
-                        </span>
-                      ))
-                    ) : (
-                      "—"
-                    )}
-                  </span>
-                </div>
-                <div className="detail-group">
-                  <span className="label">Medicines</span>
-                  <span className="value">
-                    {csvToList(entry.medicines).length ? (
-                      csvToList(entry.medicines).map((t) => (
-                        <span key={t} className="tag-mini">
-                          {t}
-                        </span>
-                      ))
-                    ) : (
-                      "—"
-                    )}
-                  </span>
-                </div>
-                <div className="detail-group">
-                  <span className="label">Habits</span>
-                  <span className="value">
-                    {csvToList(entry.habits).length ? (
-                      csvToList(entry.habits).map((t) => (
-                        <span key={t} className="tag-mini">
-                          {t}
-                        </span>
-                      ))
-                    ) : (
-                      "—"
-                    )}
-                  </span>
-                </div>
-                <div className="detail-group">
-                  <span className="label">Other</span>
-                  <span className="value">
-                    {csvToList(entry.other).length ? (
-                      csvToList(entry.other).map((t) => (
-                        <span key={t} className="tag-mini">
-                          {t}
-                        </span>
-                      ))
-                    ) : (
-                      "—"
-                    )}
-                  </span>
-                </div>
-                <div className="detail-group">
-                  <span className="label">Note</span>
-                  <span className="value">{entry.note || "—"}</span>
-                </div>
-                <div className="detail-actions">
-                  <button
-                    type="button"
-                    className={editingPain?.id === entry.id ? "active is-editing" : editingPain ? "is-editing" : undefined}
-                    onClick={() => {
-                      if (editingPain) {
-                        onCancelEdit();
-                        return;
-                      }
-                      onStartEdit(entry);
-                    }}
-                  >
-                    <AnimatedEditingLabel active={Boolean(editingPain)} />
-                  </button>
-                  <button
-                    type="button"
-                    className={confirmDeletePain === entry.id ? "btn-delete-confirm" : ""}
-                    onClick={() => onDeleteClick(entry.id)}
-                    onBlur={onDeleteBlur}
-                  >
-                    {confirmDeletePain === entry.id ? "Delete?" : "Delete"}
-                  </button>
+                <div className="grid gap-stack">
+                  <MultiSelectField
+                    hideLabel
+                    label={tabLabel}
+                    fieldKey={painTab}
+                    value={watchedValues[painTab]}
+                    options={painOptionsForTab(painTab)}
+                    onChange={(next) => painForm.setValue(painTab, next, { shouldDirty: true })}
+                  />
                 </div>
               </div>
-            </details>
-          );
-            })}
-          </div>
-          <div
-            className={`save-section diary-past-footer-slot${pastEntriesOverflow ? " diary-past-more" : ""}`}
-            aria-hidden={!pastEntriesOverflow}
-          >
-            {!isLoading && pastEntriesOverflow ? (
-              <button type="button" className="btn">
-                Show more
-              </button>
-            ) : null}
-          </div>
+              <div className="flex justify-end pt-inline">
+                <Button type="submit" variant={painMutationState.isSuccess ? "success" : "primary"} className="mb-block">
+                  {painMutationState.isSuccess ? "✓ Saved" : editingPain ? "Update entry" : "Save entry"}
+                </Button>
+              </div>
+            </div>
+          </form>
         </div>
-      )}
-        </div>
+        <PastEntriesColumn
+          title="Past entries"
+          isLoading={isLoading}
+          loadingText="Loading pain entries..."
+          isEmpty={painEntries.length === 0}
+          emptyState={
+            <EmptyState
+              title="No pain entries yet"
+              description="Track your first session with the form above. Your pain history will show up here once you save it."
+            />
+          }
+          overflow={pastEntriesOverflow}
+          colRef={pastColRef}
+          bodyRef={pastEntriesBodyRef}
+        >
+          {painEntries.map((entry) => {
+            const painBand = bandNine(entry.painLevel ?? undefined);
+            return (
+              <details key={entry.id} className={ENTRY_ROW}>
+                <summary className={ENTRY_SUMMARY}>
+                  <span className={ENTRY_DATE}>{formatEntrySummaryDate(entry.entryDate, entry.entryTime)}</span>
+                  {entry.painLevel != null ? (
+                    <PainBadge variant={painBand || "muted"} sm>{entry.painLevel}</PainBadge>
+                  ) : (
+                    <PainBadge variant="muted" sm>—</PainBadge>
+                  )}
+                  <span className={ENTRY_PREVIEW}>{painPreview(entry)}</span>
+                  <span />
+                  <span className={ENTRY_CHEVRON} aria-hidden="true">▶</span>
+                </summary>
+                <div className={ENTRY_EXPANDED}>
+                  <DetailGroup label="Pain · Fatigue · Coffee">
+                    {entry.painLevel ?? "—"} · {entry.fatigueLevel ?? "—"} · {entry.coffeeCount ?? "—"}
+                  </DetailGroup>
+                  {painDetails.map((d) => (
+                    <DetailGroup key={d.key} label={d.label}>
+                      <TagList items={csvToList(entry[d.key])} />
+                    </DetailGroup>
+                  ))}
+                  <DetailGroup label="Note">{entry.note || "—"}</DetailGroup>
+                  <div className={DETAIL_ACTIONS}>
+                    <button
+                      type="button"
+                      className={DETAIL_ACTION_BTN}
+                      onClick={() => {
+                        if (editingPain) {
+                          onCancelEdit();
+                          return;
+                        }
+                        onStartEdit(entry);
+                      }}
+                    >
+                      <AnimatedEditingLabel active={Boolean(editingPain)} />
+                    </button>
+                    <button
+                      type="button"
+                      className={`${DETAIL_ACTION_BTN} ${confirmDeletePain === entry.id ? DELETE_CONFIRM : ""}`}
+                      onClick={() => onDeleteClick(entry.id)}
+                      onBlur={onDeleteBlur}
+                    >
+                      {confirmDeletePain === entry.id ? "Delete?" : "Delete"}
+                    </button>
+                  </div>
+                </div>
+              </details>
+            );
+          })}
+        </PastEntriesColumn>
       </div>
     </section>
   );

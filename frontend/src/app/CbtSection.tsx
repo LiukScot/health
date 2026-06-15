@@ -6,6 +6,26 @@ import {
 import { AnimatedEditingLabel, SectionHead, useDiaryColumnCap } from "./shared";
 import { EmptyState } from "./screen-helpers";
 import { formatEntrySummaryDate } from "./screen-format";
+import { Button } from "../components/ui/Button";
+import { FieldLine } from "../components/ui/FieldLine";
+import {
+  DELETE_CONFIRM,
+  DETAIL_ACTIONS,
+  DETAIL_ACTION_BTN,
+  DetailGroup,
+  EntriesHeading,
+  ENTRY_CHEVRON,
+  ENTRY_DATE,
+  ENTRY_EXPANDED,
+  ENTRY_PREVIEW,
+  ENTRY_ROW,
+  ENTRY_SUMMARY,
+  PainBadge,
+  PastEntriesColumn,
+} from "./entries";
+
+const DATETIME_FIELD =
+  "!w-auto max-w-full justify-self-start cursor-pointer tabular-nums [&::-webkit-calendar-picker-indicator]:cursor-pointer [&::-webkit-calendar-picker-indicator]:ml-inline [&::-webkit-calendar-picker-indicator]:invert [&::-webkit-calendar-picker-indicator]:opacity-60 hover:[&::-webkit-calendar-picker-indicator]:opacity-100";
 
 export function CbtSection({
   cbtForm,
@@ -97,122 +117,109 @@ export function CbtSection({
   } = useDiaryColumnCap(cbtEntries, isLoading);
 
   return (
-    <section className="panel">
-      <h1 className="panel-title">CBT Thought Response</h1>
-      <div className="panel-split panel-split--diary">
-        <div className="panel-col" ref={leftColRef}>
-          <h2 className="entries-heading">New entry</h2>
-          <form className="dense-form-grid therapy-form" onSubmit={cbtForm.handleSubmit(onSubmit)}>
-            <div className="core-col">
-              <label className="field field-line">
-                <span className="field-line-label">Date &amp; time</span>
-                <input
-                  type="datetime-local"
-                  {...cbtForm.register("dateTime")}
-                  aria-label="Date/time"
-                  onClick={(e) => {
-                    const el = e.currentTarget as HTMLInputElement & { showPicker?: () => void };
-                    el.showPicker?.();
-                  }}
-                />
-              </label>
+    <section className="@container p-inline">
+      <h1 className="m-0 mb-stack text-[22px] font-bold tracking-tight text-text">CBT Thought Response</h1>
+      <div className="grid gap-page min-[1100px]:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] min-[1100px]:gap-split min-[1100px]:items-start">
+        <div className="min-w-0 max-[1099px]:border-b max-[1099px]:border-[var(--border-soft)]" ref={leftColRef}>
+          <EntriesHeading className="min-[1100px]:mt-0">New entry</EntriesHeading>
+          <form className="mb-inline" onSubmit={cbtForm.handleSubmit(onSubmit)}>
+            <div className="grid gap-stack content-start min-w-0">
+              <FieldLine
+                label="Date & time"
+                type="datetime-local"
+                className={DATETIME_FIELD}
+                {...cbtForm.register("dateTime")}
+                aria-label="Date/time"
+                onClick={(e) => {
+                  const el = e.currentTarget as HTMLInputElement & { showPicker?: () => void };
+                  el.showPicker?.();
+                }}
+              />
               <SectionHead title="Thought record" />
               {cbtFields.map((f) => (
-                <label key={f.key} className="field field-line">
-                  <span className="field-line-label">{f.label}</span>
-                  {f.multiline ? (
-                    <textarea rows={2} placeholder={f.hint} aria-label={f.label} {...cbtForm.register(f.key)} />
-                  ) : (
-                    <input type="text" placeholder={f.hint} aria-label={f.label} {...cbtForm.register(f.key)} />
-                  )}
-                </label>
+                <FieldLine
+                  key={f.key}
+                  label={f.label}
+                  multiline={f.multiline}
+                  compact={f.multiline}
+                  rows={f.multiline ? 2 : undefined}
+                  type={f.multiline ? undefined : "text"}
+                  placeholder={f.hint}
+                  aria-label={f.label}
+                  {...cbtForm.register(f.key)}
+                />
               ))}
               {editingCbt ? (
-                <div className="dense-form-inline-actions">
-                  <button type="button" onClick={onCancelEdit}>
+                <div className="flex gap-inline flex-wrap">
+                  <Button type="button" onClick={onCancelEdit}>
                     Cancel edit
-                  </button>
+                  </Button>
                 </div>
               ) : null}
             </div>
-            <div className="save-section">
-              <button type="submit" className={`btn btn-primary${cbtMutationState.isSuccess ? " is-success-pulse" : ""}`}>
+            <div className="flex justify-end pt-inline">
+              <Button type="submit" variant={cbtMutationState.isSuccess ? "success" : "primary"} className="mb-block">
                 {cbtMutationState.isSuccess ? "✓ Saved" : editingCbt ? "Update entry" : "Save entry"}
-              </button>
+              </Button>
             </div>
           </form>
         </div>
-        <div className="panel-col diary-past-col" ref={pastColRef}>
-          {isLoading && <p className="hint">Loading CBT entries...</p>}
-
-          <h2 className="entries-heading">Past entries</h2>
-          {cbtEntries.length === 0 ? (
+        <PastEntriesColumn
+          title="Past entries"
+          isLoading={isLoading}
+          loadingText="Loading CBT entries..."
+          isEmpty={cbtEntries.length === 0}
+          emptyState={
             <EmptyState
               title="No CBT entries yet"
               description="Use the prompts above to record your first thought response. Completed reflections will appear here."
             />
-          ) : (
-            <div className="diary-past-entries-stack">
-              <div className="diary-past-entries-body" ref={pastEntriesBodyRef}>
-            {cbtEntries.map((entry) => (
-          <details key={entry.id} className="entry-row">
-            <summary>
-              <span className="date">{formatEntrySummaryDate(entry.entryDate, entry.entryTime)}</span>
-              <span className="pain-badge sm muted">CBT</span>
-              <span className="preview">{entry.situation || entry.mainUnhelpfulThought || entry.productiveResponse || "—"}</span>
-              <span />
-              <span className="chevron" aria-hidden="true">▶</span>
-            </summary>
-            <div className="entry-expanded">
-              {cbtFields.map((f) => {
-                const v = entry[f.key as keyof CbtEntry] as unknown as string | null | undefined;
-                return (
-                  <div key={f.key} className="detail-group">
-                    <span className="label">{f.label}</span>
-                    <span className="value">{v || "—"}</span>
-                  </div>
-                );
-              })}
-              <div className="detail-actions">
-                <button
-                  type="button"
-                  className={editingCbt?.id === entry.id ? "active is-editing" : editingCbt ? "is-editing" : undefined}
-                  onClick={() => {
-                    if (editingCbt) {
-                      onCancelEdit();
-                      return;
-                    }
-                    onStartEdit(entry);
-                  }}
-                >
-                  <AnimatedEditingLabel active={Boolean(editingCbt)} />
-                </button>
-                <button
-                  type="button"
-                  className={confirmDeleteCbt === entry.id ? "btn-delete-confirm" : ""}
-                  onClick={() => onDeleteClick(entry.id)}
-                  onBlur={onDeleteBlur}
-                >
-                  {confirmDeleteCbt === entry.id ? "Delete?" : "Delete"}
-                </button>
-              </div>
-            </div>
-          </details>
-        ))}
-              </div>
-              <div
-                className={`save-section diary-past-footer-slot${pastEntriesOverflow ? " diary-past-more" : ""}`}
-                aria-hidden={!pastEntriesOverflow}
-              >
-                {!isLoading && pastEntriesOverflow ? (
-                  <button type="button" className="btn">
-                    Show more
+          }
+          overflow={pastEntriesOverflow}
+          colRef={pastColRef}
+          bodyRef={pastEntriesBodyRef}
+        >
+          {cbtEntries.map((entry) => (
+            <details key={entry.id} className={ENTRY_ROW}>
+              <summary className={ENTRY_SUMMARY}>
+                <span className={ENTRY_DATE}>{formatEntrySummaryDate(entry.entryDate, entry.entryTime)}</span>
+                <PainBadge variant="muted" sm>CBT</PainBadge>
+                <span className={ENTRY_PREVIEW}>{entry.situation || entry.mainUnhelpfulThought || entry.productiveResponse || "—"}</span>
+                <span />
+                <span className={ENTRY_CHEVRON} aria-hidden="true">▶</span>
+              </summary>
+              <div className={ENTRY_EXPANDED}>
+                {cbtFields.map((f) => {
+                  const v = entry[f.key as keyof CbtEntry] as unknown as string | null | undefined;
+                  return <DetailGroup key={f.key} label={f.label}>{v || "—"}</DetailGroup>;
+                })}
+                <div className={DETAIL_ACTIONS}>
+                  <button
+                    type="button"
+                    className={DETAIL_ACTION_BTN}
+                    onClick={() => {
+                      if (editingCbt) {
+                        onCancelEdit();
+                        return;
+                      }
+                      onStartEdit(entry);
+                    }}
+                  >
+                    <AnimatedEditingLabel active={Boolean(editingCbt)} />
                   </button>
-                ) : null}
+                  <button
+                    type="button"
+                    className={`${DETAIL_ACTION_BTN} ${confirmDeleteCbt === entry.id ? DELETE_CONFIRM : ""}`}
+                    onClick={() => onDeleteClick(entry.id)}
+                    onBlur={onDeleteBlur}
+                  >
+                    {confirmDeleteCbt === entry.id ? "Delete?" : "Delete"}
+                  </button>
+                </div>
               </div>
-            </div>
-          )}
-        </div>
+            </details>
+          ))}
+        </PastEntriesColumn>
       </div>
     </section>
   );

@@ -14,9 +14,28 @@ import {
 } from "./core";
 import { SectionHead } from "./shared";
 import { EmptyState } from "./screen-helpers";
-import { DateField } from "./DateField";
+import { FIELD_LINE_LABEL } from "../components/ui/FieldLine";
+import { DateInput } from "../components/ui/DateInput";
 
 const WellbeingChart = lazy(() => import("./WellbeingChart"));
+
+const DASH_CARD =
+  "grid grid-rows-[auto_auto_22px] gap-inline content-start w-full max-w-[200px] justify-self-start rounded-md p-stack bg-card-soft";
+const CARD_H3 =
+  "m-0 text-nano font-bold tracking-[0.12em] uppercase text-muted leading-tight whitespace-nowrap overflow-hidden text-ellipsis translate-y-[2px]";
+const CARD_VALUE = "text-lg font-bold text-text translate-y-[2px]";
+const DELTA_SLOT = "min-h-[22px] flex items-end translate-y-[2px]";
+const DELTA_BASE = "inline-flex items-center rounded-full px-inline py-[2px] text-micro font-bold self-end";
+const QUICK_RANGE_BASE =
+  "px-stack py-tight text-xs font-semibold font-body border-0 rounded-full cursor-pointer transition-[color,background] duration-150 ease-[ease] shadow-none";
+const QUICK_RANGE_IDLE =
+  "text-muted bg-[color-mix(in_srgb,var(--text)_5%,transparent)] hover:text-text hover:bg-[color-mix(in_srgb,var(--text)_10%,transparent)] [[data-theme=oled]_&]:bg-card-soft [[data-theme=oled]_&]:hover:bg-[color-mix(in_srgb,white_8%,var(--card-soft))]";
+const QUICK_RANGE_ACTIVE = "text-accent bg-[color-mix(in_srgb,var(--accent)_15%,transparent)]";
+const CONFIDENCE_TONE: Record<string, string> = {
+  strong: "text-success bg-[color-mix(in_srgb,var(--success)_14%,transparent)]",
+  medium: "text-warning bg-[color-mix(in_srgb,var(--warning)_14%,transparent)]",
+  weak: "text-muted bg-[color-mix(in_srgb,var(--muted)_14%,transparent)]",
+};
 
 export function DashboardSection({
   dashboardFrom,
@@ -54,24 +73,25 @@ export function DashboardSection({
   anniversaryCards: MemorableDay[];
 }) {
   return (
-    <section className="panel panel--dashboard">
-      <h1 className="panel-title">Dashboard</h1>
+    <section className="@container p-inline">
+      <h1 className="m-0 mb-stack text-[22px] font-bold tracking-tight text-text">Dashboard</h1>
 
-      <div className="dashboard-filters">
-        <label className="field field-line">
-          <span className="field-line-label">From</span>
-          <DateField value={dashboardFrom} onChange={(value) => onDateChange("from", value)} ariaLabel="From date" />
+      <div className="flex flex-wrap gap-stack items-end mb-block">
+        <label className="flex flex-col gap-inline">
+          <span className={FIELD_LINE_LABEL}>From</span>
+          <DateInput value={dashboardFrom} onChange={(v) => onDateChange("from", v)} ariaLabel="From date" />
         </label>
-        <label className="field field-line">
-          <span className="field-line-label">To</span>
-          <DateField value={dashboardTo} onChange={(value) => onDateChange("to", value)} ariaLabel="To date" />
+        <label className="flex flex-col gap-inline">
+          <span className={FIELD_LINE_LABEL}>To</span>
+          <DateInput value={dashboardTo} onChange={(v) => onDateChange("to", v)} ariaLabel="To date" />
         </label>
-        <div className="dashboard-quick-ranges">
+        <div className="flex gap-inline flex-wrap">
           {dashboardQuickRanges.map((range) => (
             <button
               type="button"
               key={range.value}
-              className={activeQuickRange === range.value ? "active" : ""}
+              aria-pressed={activeQuickRange === range.value}
+              className={`${QUICK_RANGE_BASE} ${activeQuickRange === range.value ? QUICK_RANGE_ACTIVE : QUICK_RANGE_IDLE}`}
               onClick={() => onQuickRange(range.value)}
             >
               {range.label}
@@ -81,7 +101,7 @@ export function DashboardSection({
       </div>
 
       {isLoading ? (
-        <p className="hint">Loading dashboard data...</p>
+        <p className="text-muted text-control">Loading dashboard data...</p>
       ) : (
         <>
           {!hasEntriesInRange ? (
@@ -95,19 +115,19 @@ export function DashboardSection({
 
           {anniversaryCards.length > 0 ? (
             <>
-              <SectionHead title="Anniversaries today" />
-              <div className="stats-grid stats-grid-dashboard stats-grid-memorable">
+              <SectionHead title="Anniversaries today" variant="dashboard" />
+              <div className="grid grid-cols-[repeat(auto-fit,minmax(128px,1fr))] gap-stack">
                 {anniversaryCards.map((card) => (
-                  <article key={`${card.source}-${card.id}-${card.date}`}>
-                    <h3>
-                      <span className="card-emoji" aria-hidden="true">
+                  <article key={`${card.source}-${card.id}-${card.date}`} className={DASH_CARD}>
+                    <h3 className={CARD_H3}>
+                      <span className="mr-[4px]" aria-hidden="true">
                         {card.emoji || "✨"}
                       </span>
                       {card.title}
                     </h3>
-                    <strong>{card.occurrenceLabel}</strong>
+                    <strong className={CARD_VALUE}>{card.occurrenceLabel}</strong>
                     {!card.locked && (
-                      <span className="delta-slot memorable-lock-slot">{card.repeatMode}</span>
+                      <span className={`${DELTA_SLOT} text-muted`}>{card.repeatMode}</span>
                     )}
                   </article>
                 ))}
@@ -115,25 +135,25 @@ export function DashboardSection({
             </>
           ) : null}
 
-          <SectionHead title="Averages" />
-          <div className="stats-grid stats-grid-dashboard">
+          <SectionHead title="Averages" variant="dashboard" />
+          <div data-testid="averages" className="grid grid-cols-[repeat(auto-fit,minmax(128px,1fr))] gap-stack">
             {dashboardCards.map((card) => {
               const deltaPct = calcDeltaPercent(card.value, card.previous);
               const delta = deltaPct === null ? null : formatDelta(deltaPct, Boolean(card.invertDelta));
               const absPct = deltaPct !== null ? Math.abs(deltaPct) : 0;
               const deltaStyle = delta ? getDeltaStyle(delta.className, absPct) : undefined;
               return (
-                <article key={card.label}>
-                  <h3>
-                    <span className="card-emoji" aria-hidden="true">
+                <article key={card.label} className={DASH_CARD}>
+                  <h3 className={CARD_H3}>
+                    <span className="mr-[4px]" aria-hidden="true">
                       {card.emoji}
                     </span>
                     {card.label}
                   </h3>
-                  <strong>{card.formattedValue}</strong>
-                  <span className="delta-slot" aria-hidden={delta ? undefined : true}>
+                  <strong className={CARD_VALUE}>{card.formattedValue}</strong>
+                  <span className={`${DELTA_SLOT} justify-start`} aria-hidden={delta ? undefined : true}>
                     {delta ? (
-                      <span className={`delta ${delta.className}`} style={deltaStyle}>
+                      <span className={DELTA_BASE} style={deltaStyle}>
                         {delta.text}
                       </span>
                     ) : null}
@@ -143,26 +163,28 @@ export function DashboardSection({
             })}
           </div>
 
-          <SectionHead title="Metrics over time" />
-          <div className="chart-wrap chart-wrap-wide">
-            <div className="graph-header">
-              <div className="graph-toggle-list">
+          <SectionHead title="Metrics over time" variant="dashboard" />
+          <div className="grid gap-stack p-stack rounded-md bg-card-soft mt-stack">
+            <div className="flex justify-between items-start gap-inline flex-wrap">
+              <div className="flex flex-wrap gap-inline">
                 {wellbeingSeries.map((series) => {
                   const checked = graphSelection[series.key] ?? true;
                   const hasData = series.points.length > 0;
                   return (
                     <label
                       key={series.key}
-                      className={hasData ? "series-toggle" : "series-toggle is-disabled"}
+                      data-testid="series-toggle"
+                      className={`inline-flex items-center gap-inline border-0 rounded-full px-stack py-tight bg-card-soft text-micro font-semibold leading-none shadow-none${hasData ? "" : " opacity-50"}`}
                       style={{ "--series-color": series.color } as CSSProperties}
                     >
                       <input
                         type="checkbox"
+                        className="w-auto accent-[var(--series-color,var(--accent))]"
                         checked={checked && hasData}
                         disabled={!hasData}
                         onChange={(event) => onGraphToggle(series.key, event.target.checked)}
                       />
-                      <span>{series.label}</span>
+                      <span className="text-text">{series.label}</span>
                     </label>
                   );
                 })}
@@ -170,48 +192,48 @@ export function DashboardSection({
             </div>
 
             {wellbeingChart.hasVisibleData ? (
-              <div className="chart-canvas chart-canvas-wide">
-                <Suspense fallback={<p className="hint">Loading chart…</p>}>
+              <div className="relative w-full min-h-[320px] h-[360px]">
+                <Suspense fallback={<p className="text-muted text-control">Loading chart…</p>}>
                   <WellbeingChart data={wellbeingChart.data} options={wellbeingChart.options} />
                 </Suspense>
               </div>
             ) : (
-              <p className="hint">
+              <p className="text-muted text-control">
                 {wellbeingChart.hasAnyData ? "Toggle on a metric to see it." : hasEntriesOverall ? "No chart data in this date range." : "No chart data yet. Add a diary or pain entry to get started."}
               </p>
             )}
           </div>
 
-          <div className="dashboard-pattern-grid">
-            <section className="dashboard-pattern-block">
-              <SectionHead title="At a glance" />
-              <div className="dashboard-insight-list">
+          <div className="grid grid-cols-[repeat(2,minmax(0,1fr))] gap-block items-start @max-[720px]:grid-cols-1">
+            <section className="grid gap-stack">
+              <SectionHead title="At a glance" variant="dashboard" />
+              <div data-testid="insights" className="grid gap-stack">
                 {dashboardInsights.map((insight) => (
-                  <div key={insight.title} className="dashboard-insight-row">
-                    <strong>{insight.title}</strong>
-                    <p>{insight.detail}</p>
+                  <div key={insight.title} className="grid gap-tight">
+                    <strong className="text-muted text-nano font-bold tracking-[0.16em] uppercase">{insight.title}</strong>
+                    <p className="m-0 text-text text-control leading-normal">{insight.detail}</p>
                   </div>
                 ))}
               </div>
             </section>
 
-            <section className="dashboard-pattern-block">
-              <SectionHead title="Patterns" />
+            <section className="grid gap-stack">
+              <SectionHead title="Patterns" variant="dashboard" />
               {dashboardConnections.length > 0 ? (
-                <div className="dashboard-connection-stack">
+                <div className="grid gap-stack">
                   {dashboardConnections.map((connection) => (
-                    <article key={connection.title} className="dashboard-connection-card">
-                      <span className="dashboard-connection-label">{connection.title}</span>
-                      <strong>{connection.summary}</strong>
-                      <p>{connection.detail}</p>
-                      <span className={`dashboard-confidence dashboard-confidence-${connection.confidence}`}>{connection.confidence} confidence</span>
+                    <article key={connection.title} className="grid gap-inline rounded-md p-stack bg-card-soft">
+                      <span className="text-nano font-bold tracking-[0.16em] uppercase text-muted">{connection.title}</span>
+                      <strong className="m-0 text-text text-control font-semibold">{connection.summary}</strong>
+                      <p className="m-0 text-muted text-control leading-normal">{connection.detail}</p>
+                      <span className={`justify-self-start rounded-full px-inline py-[2px] text-micro font-bold ${CONFIDENCE_TONE[connection.confidence] ?? CONFIDENCE_TONE.weak}`}>{connection.confidence} confidence</span>
                     </article>
                   ))}
                 </div>
               ) : (
-                <div className="empty-state empty-state-compact">
-                  <p className="empty-state-title">No connection signals yet</p>
-                  <p className="empty-state-copy">Log more overlapping diary and pain entries to unlock pattern cards here.</p>
+                <div className="grid gap-inline m-0">
+                  <p className="text-control font-semibold text-text m-0">No connection signals yet</p>
+                  <p className="max-w-[60ch] text-control text-muted leading-normal m-0">Log more overlapping diary and pain entries to unlock pattern cards here.</p>
                 </div>
               )}
             </section>

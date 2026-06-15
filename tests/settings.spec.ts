@@ -56,20 +56,16 @@ test("switches theme and persists it across reload", async ({ page }) => {
 test("saves birthday in settings", async ({ page }) => {
   await page.getByRole("button", { name: "Preferences" }).click();
 
-  // Birthday autosaves on selection: register the response listener before the
-  // calendar interaction that triggers the PUT, otherwise the response can land first.
+  // Birthday autosaves on change: register the response listener before filling
+  // the native date input that triggers the PUT, otherwise it can land first.
   const responsePromise = page.waitForResponse(response =>
     response.url().includes('/api/v1/preferences') && response.request().method() === 'PUT'
   );
-  await page.getByRole("button", { name: "Birthday" }).click();
-  const calendar = page.getByRole("dialog", { name: "Birthday" });
-  await calendar.getByRole("combobox").first().selectOption({ label: "June" });
-  await calendar.getByRole("combobox").last().selectOption("1995");
-  await calendar.getByRole("button", { name: /June 12(th)?,? 1995/i }).click();
+  await page.getByLabel("Birthday").fill("1995-06-12");
   await responsePromise;
 
   await page.reload();
   await page.getByRole("button", { name: "settings" }).click();
   await page.getByRole("button", { name: "Preferences" }).click();
-  await expect(page.getByRole("button", { name: "Birthday" })).toHaveText("12 Jun 1995");
+  await expect(page.getByLabel("Birthday")).toHaveValue("1995-06-12");
 });

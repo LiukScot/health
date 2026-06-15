@@ -5,8 +5,29 @@ import { toDateKey, type InlineMessage, type MemorableDay } from "./core";
 import { emojiCatalog, emojiCategoryLabels, type EmojiCategory, type EmojiRecord } from "./emoji-catalog";
 import { getErrorMessage } from "../lib";
 import { memorableDayPayloadSchema, matchesMemorableDate, type useMemorableDays } from "../hooks/use-memorable-days";
-import { DateField } from "./DateField";
+import { DateInput } from "../components/ui/DateInput";
 import { Select } from "../components/ui/select";
+import { Button, buttonClass } from "../components/ui/Button";
+import { FieldLine, FIELD_LINE_LABEL } from "../components/ui/FieldLine";
+import { EntriesHeading } from "./entries";
+
+const MEMO_BACKDROP =
+  "fixed inset-0 bg-scrim [backdrop-filter:blur(6px)] grid place-items-center p-block z-40";
+const MEMO_MODAL = "w-[min(520px,100%)] p-block flex flex-col gap-stack bg-card border-0 rounded-md shadow-none";
+export const MEMO_DAY_CELL =
+  "min-h-[108px] p-stack rounded-md bg-card-soft text-text text-left flex flex-col gap-inline relative transition-[background,color] duration-150 ease-[ease] hover:bg-[color-mix(in_srgb,var(--text)_4%,var(--card-soft))]";
+export const MEMO_LIST_ITEM =
+  "flex items-center justify-between flex-[0_0_auto] w-full gap-stack p-stack rounded-md border-0 bg-card-soft text-text shadow-none hover:bg-[color-mix(in_srgb,var(--text)_4%,var(--card-soft))]";
+const MEMO_MODAL_ACTIONS = "flex items-center gap-stack justify-end flex-wrap";
+const EMOJI_TAB =
+  "min-h-0 px-[4px] py-0 rounded-none border border-transparent bg-transparent shadow-none text-micro font-bold tracking-[0.08em] uppercase cursor-pointer focus-visible:outline-none focus-visible:shadow-[0_0_0_2px_color-mix(in_srgb,var(--accent)_28%,transparent)]";
+const EMOJI_BTN =
+  "min-h-0 p-[2px] rounded-none border border-transparent bg-transparent shadow-none inline-flex items-center justify-center text-[22px] leading-none cursor-pointer focus-visible:outline-none focus-visible:shadow-[0_0_0_2px_color-mix(in_srgb,var(--accent)_28%,transparent)]";
+// Exported so the Design System demo reuses the exact production contracts.
+export const DAY_NUMBER =
+  "bg-transparent border-0 shadow-none min-h-0 p-0 font-[inherit] text-[inherit] cursor-pointer leading-none";
+export const EMOJI_TRIGGER =
+  "min-w-0 min-h-0 p-0 rounded-none inline-flex items-center justify-center bg-transparent border border-transparent text-text shadow-none cursor-pointer focus-visible:outline-none focus-visible:shadow-[0_0_0_2px_color-mix(in_srgb,var(--accent)_28%,transparent)]";
 
 type Props = {
   memorable: ReturnType<typeof useMemorableDays>;
@@ -376,38 +397,37 @@ export function MemorableDaysSection({ memorable }: Props) {
   };
 
   return (
-    <section className="panel panel--memorable">
-      <div className="memorable-header">
+    <section className="@container p-inline relative">
+      <div>
         <div>
-          <h1 className="panel-title">Memorable days</h1>
-          <SectionHead title="Calendar" />
+          <h1 className="m-0 mb-stack text-[22px] font-bold tracking-tight text-text">Memorable days</h1>
+          <SectionHead title="Calendar" variant="dashboard" />
         </div>
       </div>
-      <button type="button" className="btn btn-primary memorable-add-btn" onClick={() => openCreate(toDateKey(new Date()))}>Add new</button>
+      <Button variant="primary" className="absolute top-page right-inline" onClick={() => openCreate(toDateKey(new Date()))}>Add new</Button>
       {feedback?.tone === "error" ? <InlineFeedback message={feedback} /> : null}
 
-      <div className="panel-split memorable-layout">
-        <section ref={leftColRef} className="panel-col memorable-calendar-panel">
-          <div className="memorable-calendar-head">
-            <button type="button" className="btn memorable-month-nav" onClick={() => memorable.setVisibleMonth(new Date(memorable.visibleMonth.getFullYear(), memorable.visibleMonth.getMonth() - 1, 1))}>
+      <div className="grid gap-split items-start grid-cols-[minmax(0,1.55fr)_minmax(280px,0.9fr)] max-[1239px]:grid-cols-1 max-[1239px]:gap-0">
+        <section ref={leftColRef} className="min-w-0 p-0 max-[1239px]:border-b max-[1239px]:border-[var(--border-soft)] max-[1239px]:pb-page">
+          <div className="flex items-center justify-between gap-inline mb-page min-w-0">
+            <Button className="flex-shrink-0 tracking-[0.01em]" onClick={() => memorable.setVisibleMonth(new Date(memorable.visibleMonth.getFullYear(), memorable.visibleMonth.getMonth() - 1, 1))}>
               Prev
-            </button>
-            <button
-              type="button"
-              className="btn memorable-month-label"
+            </Button>
+            <Button
+              className="tracking-[0.01em] min-w-0 flex-1 overflow-hidden text-ellipsis whitespace-nowrap"
               onClick={() => memorable.setVisibleMonth(new Date())}
               aria-label="Go to current month"
             >
               {new Intl.DateTimeFormat(undefined, { day: "numeric", month: "long", year: "numeric" }).format(new Date())}
-            </button>
-            <button type="button" className="btn memorable-month-nav" onClick={() => memorable.setVisibleMonth(new Date(memorable.visibleMonth.getFullYear(), memorable.visibleMonth.getMonth() + 1, 1))}>
+            </Button>
+            <Button className="flex-shrink-0 tracking-[0.01em]" onClick={() => memorable.setVisibleMonth(new Date(memorable.visibleMonth.getFullYear(), memorable.visibleMonth.getMonth() + 1, 1))}>
               Next
-            </button>
+            </Button>
           </div>
-          <div className="memorable-weekdays">
-            {weekdayLabels.map((label) => <span key={label}>{label}</span>)}
+          <div className="flex items-center gap-inline mb-inline">
+            {weekdayLabels.map((label) => <span key={label} className="flex-1 text-center text-muted text-xs font-bold uppercase">{label}</span>)}
           </div>
-          <div className="memorable-calendar-grid">
+          <div className="grid grid-cols-[repeat(7,minmax(0,1fr))] gap-inline">
             {days.map((day) => {
               const dayKey = toDateKey(day);
               const monthMatch = day.getMonth() === memorable.visibleMonth.getMonth();
@@ -421,7 +441,7 @@ export function MemorableDaysSection({ memorable }: Props) {
               return (
                 <div
                   key={dayKey}
-                  className={`memorable-day-cell${monthMatch ? "" : " is-outside"}${isToday ? " is-today" : ""}`}
+                  className={`${MEMO_DAY_CELL}${monthMatch ? "" : " opacity-[0.48]"}${isToday ? " shadow-[0_0_0_1px_color-mix(in_srgb,var(--accent)_28%,transparent)]" : ""}`}
                   onClick={(event) => {
                     if ((event.target as Element).closest("button")) return;
                     memorable.setSelectedDate(dayKey);
@@ -429,10 +449,10 @@ export function MemorableDaysSection({ memorable }: Props) {
                     else openCreate(dayKey);
                   }}
                 >
-                  <span className="memorable-day-top">
+                  <span className="flex items-center justify-between">
                     <button
                       type="button"
-                      className="memorable-day-number"
+                      className={DAY_NUMBER}
                       aria-label={items.length > 0 ? `View events on ${dayKey}` : `${day.getDate()}`}
                       onClick={() => {
                         memorable.setSelectedDate(dayKey);
@@ -442,14 +462,14 @@ export function MemorableDaysSection({ memorable }: Props) {
                       {day.getDate()}
                     </button>
                   </span>
-                  <span className="memorable-day-markers">
+                  <span className="flex flex-col gap-inline">
                     {items.slice(0, 2).map((item) => (
-                      <span key={`${item.source}-${item.id}-${item.date}`} className="memorable-day-marker">
+                      <span key={`${item.source}-${item.id}-${item.date}`} className="text-xs leading-snug text-muted whitespace-nowrap overflow-hidden text-ellipsis">
                         {item.emoji || "•"} {item.title}
                       </span>
                     ))}
                     {items.length > 2 ? (
-                      <span className="memorable-day-overflow">+{items.length - 2} more</span>
+                      <span className="text-micro font-semibold text-accent leading-snug opacity-75">+{items.length - 2} more</span>
                     ) : null}
                   </span>
                 </div>
@@ -458,32 +478,32 @@ export function MemorableDaysSection({ memorable }: Props) {
           </div>
         </section>
 
-        <section ref={rightColRef} className="panel-col memorable-list-panel">
-          <h2 className="entries-heading">All memorable days</h2>
+        <section ref={rightColRef} className="min-w-0 flex flex-col min-h-0 overflow-hidden h-[var(--split-col-height,auto)] max-h-[var(--split-col-height,none)] max-[1239px]:h-auto max-[1239px]:max-h-none max-[1239px]:pt-block max-[980px]:pt-0">
+          <EntriesHeading className="mt-0 mb-block">All memorable days</EntriesHeading>
           {memorable.isLoading ? (
-            <p className="hint">Loading memorable days...</p>
+            <p className="text-muted text-control">Loading memorable days...</p>
           ) : memorable.memorableDays.length === 0 ? (
-            <div className="empty-state">
-              <p className="empty-state-title">No memorable days yet</p>
-              <p className="empty-state-copy">Add one birthday, anniversary, or event to start the list.</p>
+            <div className="grid gap-inline my-stack">
+              <p className="text-control font-semibold text-text m-0">No memorable days yet</p>
+              <p className="max-w-[60ch] text-control text-muted leading-normal m-0">Add one birthday, anniversary, or event to start the list.</p>
             </div>
           ) : (
-            <div className="memorable-list">
+            <div className="memorable-list flex flex-col flex-[1_1_auto] min-h-0 overflow-y-auto overflow-x-hidden gap-stack [scrollbar-width:thin] [scrollbar-color:transparent_transparent] hover:[scrollbar-color:rgba(255,255,255,0.18)_transparent] focus-within:[scrollbar-color:rgba(255,255,255,0.18)_transparent] max-[1239px]:max-h-none">
               {memorable.memorableDays.map((item) => (
                 <button
                   type="button"
                   key={`${item.source}-${item.id}-${item.date}`}
-                  className="memorable-list-item"
+                  className={MEMO_LIST_ITEM}
                   onWheelCapture={onListItemWheel}
                   onClick={() => openEdit(item)}
                 >
-                  <span className="memorable-list-emoji">{item.emoji || "✨"}</span>
-                  <span className="memorable-list-body">
-                    <span className="memorable-list-topline">
-                      <strong>{item.title}</strong>
-                      <span className="memorable-list-date">{item.date}</span>
+                  <span className="text-[22px] leading-none">{item.emoji || "✨"}</span>
+                  <span className="flex-1 flex flex-col gap-tight items-start">
+                    <span className="w-full flex items-baseline justify-between gap-stack">
+                      <strong className="text-base min-w-0 text-text">{item.title}</strong>
+                      <span className="text-muted text-control flex-shrink-0 text-right">{item.date}</span>
                     </span>
-                    <span className="memorable-list-meta">{item.locked ? "Locked from Settings" : item.repeatMode}</span>
+                    <span className="text-micro text-muted-soft">{item.locked ? "Locked from Settings" : item.repeatMode}</span>
                   </span>
                 </button>
                 ))}
@@ -493,20 +513,20 @@ export function MemorableDaysSection({ memorable }: Props) {
       </div>
 
       {draft ? (
-        <div className="memorable-modal-backdrop" role="presentation" onClick={closeDraft}>
-          <div className="memorable-modal" role="dialog" aria-modal="true" aria-label={draft.id ? "Edit memorable day" : "Add memorable day"} onClick={(event) => event.stopPropagation()}>
-            <SectionHead title={draft.id ? "Edit memorable day" : "Add memorable day"} />
-            <div className="memorable-modal-top-row">
-              <label className="field field-line">
-                <span className="field-line-label">Date</span>
-                <DateField value={draft.date} onChange={(value) => setDraft((current) => current ? { ...current, date: value } : current)} ariaLabel="Date" />
+        <div className={MEMO_BACKDROP} role="presentation" onClick={closeDraft}>
+          <div className={MEMO_MODAL} role="dialog" aria-modal="true" aria-label={draft.id ? "Edit memorable day" : "Add memorable day"} onClick={(event) => event.stopPropagation()}>
+            <SectionHead title={draft.id ? "Edit memorable day" : "Add memorable day"} variant="dashboard" />
+            <div className="grid grid-cols-[168px_88px] gap-stack items-start justify-start">
+              <label className="grid gap-inline content-start min-w-0">
+                <span className={FIELD_LINE_LABEL}>Date</span>
+                <DateInput value={draft.date} onChange={(value) => setDraft((current) => current ? { ...current, date: value } : current)} ariaLabel="Date" />
               </label>
-              <label className="field field-line memorable-emoji-field">
-                <span className="field-line-label">Emoji</span>
-                <div ref={emojiPickerRef} className="memorable-emoji-picker">
+              <label className="grid gap-inline content-start w-[88px] min-w-[88px] justify-self-end self-start">
+                <span className={FIELD_LINE_LABEL}>Emoji</span>
+                <div ref={emojiPickerRef} className="relative w-full min-w-0">
                   <button
                     type="button"
-                    className="btn memorable-emoji-picker-trigger"
+                    className={EMOJI_TRIGGER}
                     aria-label={`Emoji ${draft.emoji || "✨"}`}
                     aria-haspopup="dialog"
                     aria-expanded={emojiPickerOpen}
@@ -519,7 +539,7 @@ export function MemorableDaysSection({ memorable }: Props) {
                       openEmojiPicker();
                     }}
                   >
-                    <span aria-hidden="true" className="memorable-emoji-picker-trigger-emoji">
+                    <span aria-hidden="true" className="text-[32px] leading-none">
                       {draft.emoji || "✨"}
                     </span>
                   </button>
@@ -529,14 +549,14 @@ export function MemorableDaysSection({ memorable }: Props) {
                       id="emoji-picker-panel"
                       role="dialog"
                       aria-label="Emoji picker"
-                      className="memorable-emoji-picker-panel"
+                      className="absolute top-full mt-inline right-0 w-[min(420px,calc(100vw-32px))] max-w-[min(420px,calc(100vw-32px))] max-h-[min(520px,calc(100vh-180px))] flex flex-col gap-stack p-stack bg-card border border-border rounded-md shadow-[var(--shadow)] z-30"
                       onMouseDown={(event) => event.stopPropagation()}
                     >
-                      <label className="field field-line memorable-emoji-picker-search">
-                        <span className="field-line-label">Search emoji</span>
+                      <label className="grid gap-inline content-start m-0">
+                        <span className={`${FIELD_LINE_LABEL} pt-0 pb-0`}>Search emoji</span>
                         <input
                           ref={emojiPickerSearchRef}
-                          className="memorable-emoji-picker-search-input"
+                          className="w-full bg-[color-mix(in_srgb,white_3%,var(--bg))] border-0 rounded-sm px-stack py-inline text-text text-control font-medium font-body shadow-none outline-none transition-[background,box-shadow] duration-150 ease-[ease] hover:bg-[color-mix(in_srgb,white_5%,var(--bg))] focus:bg-[color-mix(in_srgb,white_5%,var(--bg))] focus:shadow-[inset_0_0_0_1px_var(--accent)] placeholder:text-muted-soft [[data-theme=oled]_&]:bg-card-soft"
                           type="search"
                           value={emojiPickerSearch}
                           onChange={(event) => setEmojiPicker((current) => ({ ...current, search: event.target.value }))}
@@ -544,7 +564,7 @@ export function MemorableDaysSection({ memorable }: Props) {
                         />
                       </label>
 
-                      <div role="tablist" aria-label="Emoji categories" className="memorable-emoji-picker-tabs">
+                      <div role="tablist" aria-label="Emoji categories" className="flex flex-wrap gap-inline">
                         {emojiCategoryOrder.map((category) => {
                           const isActive = emojiPickerActiveCategory === category;
                           const label = emojiCategoryLabels[category];
@@ -554,7 +574,7 @@ export function MemorableDaysSection({ memorable }: Props) {
                               type="button"
                               role="tab"
                               aria-selected={isActive}
-                              className={`memorable-emoji-picker-tab${isActive ? " is-active" : ""}`}
+                              className={`${EMOJI_TAB} ${isActive ? "text-accent" : "text-muted hover:text-text"}`}
                               onClick={() => {
                                 rememberEmojiPickerScrollTop();
                                 setEmojiPicker((current) => ({ ...current, activeCategory: category }));
@@ -568,10 +588,10 @@ export function MemorableDaysSection({ memorable }: Props) {
 
                       <div
                         ref={emojiPickerScrollRef}
-                        className="memorable-emoji-picker-scroll"
+                        className="min-h-0 max-h-[320px] overflow-auto [overscroll-behavior:contain] [scrollbar-width:thin] [scrollbar-gutter:stable] pr-[2px] [scrollbar-color:transparent_transparent] hover:[scrollbar-color:rgba(255,255,255,0.18)_transparent] focus-within:[scrollbar-color:rgba(255,255,255,0.18)_transparent]"
                       >
                         {emojiPickerRecords.length > 0 ? (
-                          <div className="memorable-emoji-picker-grid">
+                          <div className="flex flex-wrap gap-inline">
                             {emojiPickerRecords.map((record) => {
                               const isSelected = draft.emoji === record.emoji;
                               return (
@@ -580,7 +600,7 @@ export function MemorableDaysSection({ memorable }: Props) {
                                   type="button"
                                   aria-label={record.name}
                                   aria-pressed={isSelected}
-                                  className={`memorable-emoji-picker-emoji${isSelected ? " is-selected" : ""}`}
+                                  className={`${EMOJI_BTN} ${isSelected ? "text-text" : ""}`}
                                   onClick={() => selectEmoji(record)}
                                 >
                                   {record.emoji}
@@ -589,7 +609,7 @@ export function MemorableDaysSection({ memorable }: Props) {
                             })}
                           </div>
                         ) : (
-                          <p className="hint memorable-emoji-picker-empty">
+                          <p className="m-0 px-[2px] pt-inline pb-[2px] text-center text-muted-soft text-control">
                             No emoji match.
                           </p>
                         )}
@@ -599,16 +619,22 @@ export function MemorableDaysSection({ memorable }: Props) {
                 </div>
               </label>
             </div>
-            <label className="field field-line">
-              <span className="field-line-label">Title</span>
-              <input type="text" value={draft.title} onChange={(event) => setDraft((current) => current ? { ...current, title: event.target.value } : current)} />
-            </label>
-            <label className="field field-line">
-              <span className="field-line-label">Description</span>
-              <textarea rows={3} value={draft.description} onChange={(event) => setDraft((current) => current ? { ...current, description: event.target.value } : current)} />
-            </label>
-            <div className="field field-line">
-              <span className="field-line-label">Repeat</span>
+            <FieldLine
+              label="Title"
+              type="text"
+              value={draft.title}
+              onChange={(event) => setDraft((current) => current ? { ...current, title: event.target.value } : current)}
+            />
+            <FieldLine
+              label="Description"
+              multiline
+              compact
+              rows={3}
+              value={draft.description}
+              onChange={(event) => setDraft((current) => current ? { ...current, description: event.target.value } : current)}
+            />
+            <div className="grid gap-inline content-start">
+              <span className={FIELD_LINE_LABEL}>Repeat</span>
               <Select
                 ariaLabel="Repeat"
                 value={draft.repeatMode}
@@ -620,17 +646,17 @@ export function MemorableDaysSection({ memorable }: Props) {
                 disabled={draft.locked}
               />
             </div>
-            {draft.locked ? <p className="hint">Edit birthday in Settings. Same truth, less duplication.</p> : null}
-            <div className="memorable-modal-actions">
-              <button type="button" className="btn btn-primary" onClick={() => void onSave()} disabled={memorable.isSaving || draft.locked}>
+            {draft.locked ? <p className="text-muted text-control">Edit birthday in Settings. Same truth, less duplication.</p> : null}
+            <div className={MEMO_MODAL_ACTIONS}>
+              <Button variant="primary" onClick={() => void onSave()} disabled={memorable.isSaving || draft.locked}>
                 Save
-              </button>
+              </Button>
               {draft.id && !draft.locked ? (
-                <button type="button" className="btn btn-danger" onClick={() => void onDelete()} disabled={memorable.isSaving}>
+                <Button variant="danger" onClick={() => void onDelete()} disabled={memorable.isSaving}>
                   Delete
-                </button>
+                </Button>
               ) : null}
-              <button type="button" className="btn memorable-modal-cancel" onClick={closeDraft}>
+              <button type="button" className={buttonClass("default", "md", "!bg-[color-mix(in_srgb,var(--text)_10%,transparent)] hover:!bg-[color-mix(in_srgb,var(--text)_16%,transparent)]")} onClick={closeDraft}>
                 Cancel
               </button>
             </div>
@@ -639,33 +665,33 @@ export function MemorableDaysSection({ memorable }: Props) {
       ) : null}
 
       {popoverDateKey ? (
-        <div className="memorable-modal-backdrop" role="presentation" onClick={() => setPopoverDateKey(null)}>
-          <div ref={popoverRef} className="memorable-modal" role="dialog" aria-modal="true" aria-label={`Events on ${popoverDateKey}`} onClick={(event) => event.stopPropagation()}>
-            <SectionHead title={popoverDateKey} />
-            <div className="memorable-day-popover-list">
+        <div className={MEMO_BACKDROP} role="presentation" onClick={() => setPopoverDateKey(null)}>
+          <div ref={popoverRef} className={MEMO_MODAL} role="dialog" aria-modal="true" aria-label={`Events on ${popoverDateKey}`} onClick={(event) => event.stopPropagation()}>
+            <SectionHead title={popoverDateKey} variant="dashboard" />
+            <div className="flex flex-col gap-inline m-0 mb-inline">
               {popoverItems.map((item) => (
                 <button
                   key={`${item.source}-${item.id}-${item.date}`}
                   type="button"
-                  className="memorable-day-popover-item"
+                  className="flex items-center gap-stack bg-card-soft border-0 shadow-none min-h-0 p-[var(--spacing-inline)_var(--spacing-stack)] rounded-md text-text text-left cursor-pointer w-full transition-[background] duration-150 ease-[ease] hover:bg-[color-mix(in_srgb,var(--accent)_10%,transparent)]"
                   onClick={() => {
                     setPopoverDateKey(null);
                     openEdit(item);
                   }}
                 >
-                  <span className="memorable-day-popover-emoji">{item.emoji || "✨"}</span>
-                  <span className="memorable-day-popover-body">
-                    <strong>{item.title}</strong>
-                    <span className="memorable-list-meta">{item.repeatMode}</span>
+                  <span className="text-xl flex-shrink-0">{item.emoji || "✨"}</span>
+                  <span className="flex flex-col gap-[2px]">
+                    <strong className="text-text">{item.title}</strong>
+                    <span className="text-micro text-muted-soft">{item.repeatMode}</span>
                   </span>
                 </button>
               ))}
             </div>
-            <div className="memorable-modal-actions">
-              <button type="button" className="btn btn-primary" onClick={() => { setPopoverDateKey(null); openCreate(popoverDateKey); }}>
+            <div className={MEMO_MODAL_ACTIONS}>
+              <Button variant="primary" onClick={() => { setPopoverDateKey(null); openCreate(popoverDateKey); }}>
                 Add new
-              </button>
-              <button type="button" className="btn memorable-modal-cancel" onClick={() => setPopoverDateKey(null)}>
+              </Button>
+              <button type="button" className={buttonClass("default", "md", "!bg-[color-mix(in_srgb,var(--text)_10%,transparent)] hover:!bg-[color-mix(in_srgb,var(--text)_16%,transparent)]")} onClick={() => setPopoverDateKey(null)}>
                 Close
               </button>
             </div>

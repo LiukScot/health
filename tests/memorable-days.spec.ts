@@ -14,8 +14,8 @@ test("desktop shows calendar and list, create/edit/delete works", async ({ page 
   await page.getByRole("button", { name: "Memorable days" }).click();
 
   await expect(page.getByRole("heading", { level: 1, name: "Memorable days" })).toBeVisible();
-  await expect(page.locator(".memorable-calendar-panel")).toBeVisible();
-  await expect(page.locator(".memorable-list-panel")).toBeVisible();
+  await expect(page.getByRole("button", { name: "Prev" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "All memorable days" })).toBeVisible();
 
   await page.getByRole("button", { name: "Add new" }).click();
   await expect(page.getByRole("button", { name: "Emoji" })).toBeVisible();
@@ -29,14 +29,14 @@ test("desktop shows calendar and list, create/edit/delete works", async ({ page 
   await expect(page.getByRole("searchbox", { name: "Search emoji" })).toHaveValue("ring");
   await page.getByRole("button", { name: "Emoji" }).click();
   await page.getByRole("button", { name: "Save" }).click();
-  await expect(page.locator(".feedback-message.is-error")).toHaveText("Title is required.");
+  await expect(page.getByText("Title is required.")).toBeVisible();
   await page.getByLabel("Title").fill("Wedding");
   await page.getByLabel("Description").fill("civil ceremony");
   await page.getByRole("button", { name: "Repeat" }).click();
   await page.getByRole("option", { name: "Monthly" }).click();
   await page.getByRole("button", { name: "Save" }).click();
 
-  const weddingListItem = page.locator(".memorable-list-item").filter({ hasText: "Wedding" });
+  const weddingListItem = page.getByRole("button").filter({ hasText: "Wedding" });
   await expect(weddingListItem).toBeVisible();
   await weddingListItem.click();
   await page.getByLabel("Description").fill("updated note");
@@ -47,5 +47,5 @@ test("desktop shows calendar and list, create/edit/delete works", async ({ page 
   await expect(page.getByRole("dialog")).toHaveCount(0);
   await weddingListItem.click();
   await page.getByRole("button", { name: "Delete" }).click();
-  await expect(page.locator(".memorable-list-item").filter({ hasText: "Wedding" })).toHaveCount(0);
+  await expect(page.getByRole("button").filter({ hasText: "Wedding" })).toHaveCount(0);
 });

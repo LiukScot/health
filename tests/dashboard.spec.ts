@@ -77,21 +77,23 @@ test("renders dashboard data and supports chart toggles", async ({ page }) => {
   await expect(page.getByText("Overview", { exact: true })).toHaveCount(0);
   await expect(page.getByText("current vs previous range")).toHaveCount(0);
   await expect(page.locator(".dashboard-panel-split")).toHaveCount(0);
-  const statsGrid = page.locator(".stats-grid-dashboard");
+  const statsGrid = page.getByTestId("averages");
   await expect(statsGrid.locator("article").filter({ hasText: "Journal entries" }).locator("strong")).toHaveText("4");
   await expect(statsGrid.locator("article").filter({ hasText: "Pain entries" }).locator("strong")).toHaveText("4");
   await expect(page.getByText("Patterns", { exact: true })).toBeVisible();
-  await expect(page.getByRole("button", { name: "1 month" })).toHaveCSS("box-shadow", "none");
+  // Tailwind composes box-shadow from (transparent) layer vars, so a flat
+  // button reads as rgba(0,0,0,0)… rather than the literal "none".
+  await expect(page.getByRole("button", { name: "1 month" })).toHaveCSS("box-shadow", /none|rgba\(\s*0\s*,\s*0\s*,\s*0\s*,\s*0\s*\)/);
   await expect(page.locator(".dashboard-hero")).toHaveCount(0);
   await expect(page.locator(".dashboard-summary")).toHaveCount(0);
   await expect(page.locator(".dashboard-insight-card")).toHaveCount(0);
-  await expect(page.locator(".dashboard-insight-list")).toBeVisible();
+  await expect(page.getByTestId("insights")).toBeVisible();
   await expect(statsGrid.locator("article").first()).toHaveCSS("border-top-width", "0px");
   await expect(statsGrid.locator("article").first()).toHaveCSS("box-shadow", "none");
   await expect(statsGrid.locator("article").first()).toHaveCSS("background-color", "rgb(30, 30, 34)");
-  await expect(page.locator(".series-toggle").first()).toHaveCSS("border-top-width", "0px");
-  await expect(page.getByRole("button", { name: "From date" })).toHaveCSS("font-size", "13px");
-  await expect(page.getByRole("button", { name: "From date" })).toHaveCSS("font-weight", "500");
+  await expect(page.getByTestId("series-toggle").first()).toHaveCSS("border-top-width", "0px");
+  await expect(page.getByLabel("From date")).toHaveCSS("font-size", "13px");
+  await expect(page.getByLabel("From date")).toHaveCSS("font-weight", "500");
   await page.setViewportSize({ width: 850, height: 1000 });
   const firstCardBox = await statsGrid.locator("article").nth(0).boundingBox();
   expect(firstCardBox?.width ?? 0).toBeLessThanOrEqual(176);
@@ -101,8 +103,8 @@ test("renders dashboard data and supports chart toggles", async ({ page }) => {
   expect(painValueBox?.y).toBe(moodValueBox?.y);
 
   // Wait for chart canvas to render dynamically
-  await page.waitForSelector(".chart-canvas canvas", { timeout: 5000 });
-  await expect(page.locator(".chart-canvas canvas")).toBeVisible();
+  await page.waitForSelector("canvas", { timeout: 5000 });
+  await expect(page.locator("canvas")).toBeVisible();
 
   // Uncheck all metrics by text label (using parent locator to find input)
   await page.getByText("Pain", { exact: true }).locator("..").locator("input[type='checkbox']").uncheck();
@@ -115,18 +117,18 @@ test("renders dashboard data and supports chart toggles", async ({ page }) => {
 
   // Check mood again
   await page.getByText("Mood", { exact: true }).locator("..").locator("input[type='checkbox']").check();
-  await page.waitForSelector(".chart-canvas canvas", { timeout: 5000 });
-  await expect(page.locator(".chart-canvas canvas")).toBeVisible();
+  await page.waitForSelector("canvas", { timeout: 5000 });
+  await expect(page.locator("canvas")).toBeVisible();
 
   await page.getByRole("button", { name: "1 week" }).click();
-  await expect(page.getByRole("button", { name: "1 week" })).toHaveClass(/active/);
+  await expect(page.getByRole("button", { name: "1 week" })).toHaveAttribute("aria-pressed", "true");
 });
 
 test("shows anniversary cards above averages", async ({ page, request }) => {
   const now = new Date();
-  const yyyy = now.getUTCFullYear() - 2;
-  const mm = String(now.getUTCMonth() + 1).padStart(2, "0");
-  const dd = String(now.getUTCDate()).padStart(2, "0");
+  const yyyy = now.getFullYear() - 2;
+  const mm = String(now.getMonth() + 1).padStart(2, "0");
+  const dd = String(now.getDate()).padStart(2, "0");
   await seedMemorableDay(request, {
     date: `${yyyy}-${mm}-${dd}`,
     title: "Wedding",
