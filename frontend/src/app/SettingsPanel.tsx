@@ -235,7 +235,7 @@ function AccountIdentity({ auth }: Pick<SettingsSectionProps, "auth">) {
   const email = auth.user?.email ?? "—";
   const name = auth.user?.name?.trim();
   return (
-    <div className="flex items-center gap-3 p-3 bg-card border border-[var(--border-soft)] rounded-sm">
+    <div className="flex items-center gap-3 p-3 bg-card border border-border rounded-sm">
       <div className="w-[36px] h-[36px] rounded-full grid place-items-center text-sm font-bold font-body text-accent bg-[color-mix(in_srgb,var(--accent)_14%,transparent)] border border-[color-mix(in_srgb,var(--accent)_35%,transparent)]" aria-hidden="true">
         {(name || email).slice(0, 1).toUpperCase()}
       </div>

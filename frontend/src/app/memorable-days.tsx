@@ -22,7 +22,7 @@ const MEMO_MODAL_ACTIONS = "flex items-center gap-3 justify-end flex-wrap";
 const EMOJI_TAB =
   "min-h-0 px-[4px] py-0 rounded-none border border-transparent bg-transparent shadow-none text-micro font-bold tracking-[0.08em] uppercase cursor-pointer focus-visible:outline-none focus-visible:shadow-[0_0_0_2px_color-mix(in_srgb,var(--accent)_28%,transparent)]";
 const EMOJI_BTN =
-  "min-h-0 p-[2px] rounded-none border border-transparent bg-transparent shadow-none inline-flex items-center justify-center text-[22px] leading-none cursor-pointer focus-visible:outline-none focus-visible:shadow-[0_0_0_2px_color-mix(in_srgb,var(--accent)_28%,transparent)]";
+  "min-h-0 p-[2px] rounded-none border border-transparent bg-transparent shadow-none inline-flex items-center justify-center text-title leading-none cursor-pointer focus-visible:outline-none focus-visible:shadow-[0_0_0_2px_color-mix(in_srgb,var(--accent)_28%,transparent)]";
 // Exported so the Design System demo reuses the exact production contracts.
 export const DAY_NUMBER =
   "bg-transparent border-0 shadow-none min-h-0 p-0 font-[inherit] text-[inherit] cursor-pointer leading-none";
@@ -400,15 +400,15 @@ export function MemorableDaysSection({ memorable }: Props) {
     <section className="@container p-2 relative">
       <div>
         <div>
-          <h1 className="m-0 mb-3 text-[22px] font-bold tracking-tight text-text">Memorable days</h1>
+          <h1 className="m-0 mb-3 text-title font-bold tracking-tight text-text">Memorable days</h1>
           <SectionHead title="Calendar" variant="dashboard" />
         </div>
       </div>
       <Button variant="primary" className="absolute top-8 right-2" onClick={() => openCreate(toDateKey(new Date()))}>Add new</Button>
       {feedback?.tone === "error" ? <InlineFeedback message={feedback} /> : null}
 
-      <div className="grid gap-12 items-start grid-cols-[minmax(0,1.55fr)_minmax(280px,0.9fr)] max-[1239px]:grid-cols-1 max-[1239px]:gap-0">
-        <section ref={leftColRef} className="min-w-0 p-0 max-[1239px]:border-b max-[1239px]:border-[var(--border-soft)] max-[1239px]:pb-8">
+      <div className="grid gap-12 items-start grid-cols-[minmax(0,1.55fr)_minmax(280px,0.9fr)] max-xwide:grid-cols-1 max-xwide:gap-0">
+        <section ref={leftColRef} className="min-w-0 p-0 max-xwide:border-b max-xwide:border-border max-xwide:pb-8">
           <div className="flex items-center justify-between gap-2 mb-8 min-w-0">
             <Button className="flex-shrink-0 tracking-[0.01em]" onClick={() => memorable.setVisibleMonth(new Date(memorable.visibleMonth.getFullYear(), memorable.visibleMonth.getMonth() - 1, 1))}>
               Prev
@@ -478,7 +478,7 @@ export function MemorableDaysSection({ memorable }: Props) {
           </div>
         </section>
 
-        <section ref={rightColRef} className="min-w-0 flex flex-col min-h-0 overflow-hidden h-[var(--split-col-height,auto)] max-h-[var(--split-col-height,none)] max-[1239px]:h-auto max-[1239px]:max-h-none max-[1239px]:pt-5 max-[980px]:pt-0">
+        <section ref={rightColRef} className="min-w-0 flex flex-col min-h-0 overflow-hidden h-[var(--split-col-height,auto)] max-h-[var(--split-col-height,none)] max-xwide:h-auto max-xwide:max-h-none max-xwide:pt-5 max-[980px]:pt-0">
           <EntriesHeading className="mt-0 mb-5">All memorable days</EntriesHeading>
           {memorable.isLoading ? (
             <p className="text-muted text-control">Loading memorable days...</p>
@@ -488,7 +488,7 @@ export function MemorableDaysSection({ memorable }: Props) {
               <p className="max-w-[60ch] text-control text-muted leading-normal m-0">Add one birthday, anniversary, or event to start the list.</p>
             </div>
           ) : (
-            <div className="memorable-list flex flex-col flex-[1_1_auto] min-h-0 overflow-y-auto overflow-x-hidden gap-3 [scrollbar-width:thin] [scrollbar-color:transparent_transparent] hover:[scrollbar-color:rgba(255,255,255,0.18)_transparent] focus-within:[scrollbar-color:rgba(255,255,255,0.18)_transparent] max-[1239px]:max-h-none">
+            <div className="memorable-list flex flex-col flex-[1_1_auto] min-h-0 overflow-y-auto overflow-x-hidden gap-3 [scrollbar-width:thin] [scrollbar-color:transparent_transparent] hover:[scrollbar-color:rgba(255,255,255,0.18)_transparent] focus-within:[scrollbar-color:rgba(255,255,255,0.18)_transparent] max-xwide:max-h-none">
               {memorable.memorableDays.map((item) => (
                 <button
                   type="button"
@@ -497,7 +497,7 @@ export function MemorableDaysSection({ memorable }: Props) {
                   onWheelCapture={onListItemWheel}
                   onClick={() => openEdit(item)}
                 >
-                  <span className="text-[22px] leading-none">{item.emoji || "✨"}</span>
+                  <span className="text-title leading-none">{item.emoji || "✨"}</span>
                   <span className="flex-1 flex flex-col gap-1 items-start">
                     <span className="w-full flex items-baseline justify-between gap-3">
                       <strong className="text-base min-w-0 text-text">{item.title}</strong>

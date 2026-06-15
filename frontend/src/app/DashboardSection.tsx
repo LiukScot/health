@@ -74,7 +74,7 @@ export function DashboardSection({
 }) {
   return (
     <section className="@container p-2">
-      <h1 className="m-0 mb-3 text-[22px] font-bold tracking-tight text-text">Dashboard</h1>
+      <h1 className="m-0 mb-3 text-title font-bold tracking-tight text-text">Dashboard</h1>
 
       <div className="flex flex-wrap gap-3 items-end mb-5">
         <label className="flex flex-col gap-2">

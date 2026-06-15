@@ -7,8 +7,11 @@
  * so no named spacing tokens live here.
  */
 @theme {
-  /* Single named breakpoint for the mobile/desktop split (mobile:, max-mobile:). */
+  /* Named breakpoints: mobile/desktop split (mobile:), the two-column split
+     (wide:), and the content cap (xwide:). max-* variants are auto-derived. */
   --breakpoint-mobile: 720px;
+  --breakpoint-wide: 1100px;
+  --breakpoint-xwide: 1240px;
 
   /* Typography. 12/14/16px map 1:1 to Tailwind's built-in text-xs/sm/base,
      so only the off-scale sizes get a named token here. A named token (not
@@ -17,6 +20,7 @@
   --text-micro: 11px; /* micro labels, badges, field-line caps */
   --text-hint: 12.5px; /* hints, therapy callouts */
   --text-control: 13px; /* compact date/select control text */
+  --text-title: 22px; /* page h1 */
 
   /* Radius — single-sourced here (formerly duplicated in :root). */
   --radius-sm: 10px;
@@ -78,7 +82,6 @@
   --muted: #a1a1ad;
   --muted-soft: #6d6d78;
   --border: #48484f;
-  --border-soft: #48484f;
   --accent: #ff5e8a;
   --danger: #ff5a7f;
   --success: #6fe1b0;

@@ -8,7 +8,7 @@ import { TAG_TAB_BTN } from "./entries";
 
 const MCP_INTRO = "mt-[6px] mb-0 text-hint leading-normal text-muted";
 const CODE_BLOCK =
-  "m-0 p-3 bg-card-soft text-text border border-[var(--border-soft)] rounded-sm font-medium text-xs font-mono leading-normal overflow-x-auto whitespace-pre";
+  "m-0 p-3 bg-card-soft text-text border border-border rounded-sm font-medium text-xs font-mono leading-normal overflow-x-auto whitespace-pre";
 
 const EXPIRY_OPTIONS: { value: ExpiryChoice; label: string }[] = [
   { value: "never", label: "Never" },
@@ -158,7 +158,7 @@ export function McpAccessSection({ enabled }: { enabled: boolean }) {
       ) : (
         <ul className="list-none p-0 mt-[4px] mb-0 flex flex-col">
           {tokens.tokens.map((t) => (
-            <li key={t.id} className="flex items-center justify-between gap-3 px-[2px] py-[10px] border-b border-[var(--border-soft)] last:border-b-0">
+            <li key={t.id} className="flex items-center justify-between gap-3 px-[2px] py-[10px] border-b border-border last:border-b-0">
               <div className="min-w-0 flex-1 flex flex-col gap-[2px]">
                 <div className="text-sm font-semibold font-body text-text overflow-hidden text-ellipsis whitespace-nowrap">{t.label || `Token #${t.id}`}</div>
                 <div className="text-xs text-muted tabular-nums">

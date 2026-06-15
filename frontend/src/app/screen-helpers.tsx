@@ -1,7 +1,7 @@
 import { bandNine, formatMetricDisplay } from "./screen-format";
 
 const STEPPER_BTN =
-  "w-6 h-6 min-h-6 p-0 text-sm text-muted bg-transparent border border-[var(--border-soft)] rounded-full shadow-none cursor-pointer transition-[color,border-color] duration-150 ease-[ease] hover:text-accent hover:bg-transparent hover:border-accent";
+  "w-6 h-6 min-h-6 p-0 text-sm text-muted bg-transparent border border-border rounded-full shadow-none cursor-pointer transition-[color,border-color] duration-150 ease-[ease] hover:text-accent hover:bg-transparent hover:border-accent";
 
 export function BarMetric({
   label,

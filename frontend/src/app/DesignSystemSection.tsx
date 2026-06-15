@@ -28,8 +28,7 @@ const DESIGN_COLOR_TOKENS: { name: string; varName: string; role: string }[] = [
   { name: "Text", varName: "--text", role: "Primary text" },
   { name: "Muted", varName: "--muted", role: "Secondary text" },
   { name: "Muted soft", varName: "--muted-soft", role: "Tertiary text" },
-  { name: "Border", varName: "--border", role: "Dividers" },
-  { name: "Border soft", varName: "--border-soft", role: "Hairlines" },
+  { name: "Border", varName: "--border", role: "Dividers, hairlines" },
   { name: "Accent", varName: "--accent", role: "Primary action" },
   { name: "Success", varName: "--success", role: "Positive state" },
   { name: "Warning", varName: "--warning", role: "Mid state" },
@@ -52,13 +51,13 @@ export function DesignSystemSection() {
 
   return (
     <section className="@container p-2">
-      <h1 className="m-0 mb-3 text-[22px] font-bold tracking-tight text-text">Design System</h1>
+      <h1 className="m-0 mb-3 text-title font-bold tracking-tight text-text">Design System</h1>
       <p className="text-muted text-control mt-2 mb-5 max-w-[72ch] [&_code]:px-[6px] [&_code]:py-[1px] [&_code]:rounded-[6px] [&_code]:bg-card-soft [&_code]:text-text">
         Living reference for tokens, primitives, and patterns used across Diary, Pain, therapy forms, and Memorable days.
         Examples use the same classes as production &mdash; edit <code>styles.css</code> and this page tracks it.
       </p>
 
-      <div className="grid gap-8 mt-8 items-start min-[1100px]:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] min-[1100px]:gap-12">
+      <div className="grid gap-8 mt-8 items-start wide:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] wide:gap-12">
         <div className="block min-w-0 [&>section+section]:mt-3">
           <EntriesHeading className="mt-0 mb-5">Foundations</EntriesHeading>
 
@@ -119,7 +118,7 @@ export function DesignSystemSection() {
           </section>
         </div>
 
-        <div className="block min-w-0 [&>section+section]:mt-3 min-[1100px]:border-l min-[1100px]:border-[var(--border-soft)] min-[1100px]:pl-12">
+        <div className="block min-w-0 [&>section+section]:mt-3 wide:border-l wide:border-border wide:pl-12">
           <EntriesHeading className="mt-0 mb-5">Components</EntriesHeading>
 
           <section className="flex flex-col gap-3">
@@ -232,7 +231,7 @@ export function DesignSystemSection() {
                 </div>
               </div>
               <button type="button" className={MEMO_LIST_ITEM}>
-                <span className="text-[22px] leading-none">🎂</span>
+                <span className="text-title leading-none">🎂</span>
                 <span className="flex-1 flex flex-col gap-1 items-start">
                   <span className="w-full flex items-baseline justify-between gap-3">
                     <strong className="text-base min-w-0 text-text">Sample day</strong>

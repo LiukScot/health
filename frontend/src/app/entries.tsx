@@ -6,7 +6,7 @@ import { Button } from "../components/ui/Button";
 // + class constants the screens compose, rather than one rigid component.
 
 export const ENTRY_ROW =
-  "group/row border-0 border-b border-[var(--border-soft)] rounded-none m-0 overflow-hidden bg-transparent transition-[background] duration-150 ease-[ease]";
+  "group/row border-0 border-b border-border rounded-none m-0 overflow-hidden bg-transparent transition-[background] duration-150 ease-[ease]";
 export const ENTRY_SUMMARY =
   "group/sum list-none grid grid-cols-[auto_auto_1fr_auto_auto] items-center gap-3 px-[2px] py-3 cursor-pointer border-0 rounded-none shadow-none bg-transparent min-h-0 [&::-webkit-details-marker]:hidden";
 export const ENTRY_DATE =
@@ -58,23 +58,23 @@ export function PastEntriesColumn({
   return (
     <div
       ref={colRef}
-      className="min-w-0 min-[1100px]:border-l min-[1100px]:border-[var(--border-soft)] min-[1100px]:pl-12 min-[1100px]:flex min-[1100px]:flex-col min-[1100px]:min-h-[var(--diary-past-col-max-h,0)] min-[1100px]:max-h-[var(--diary-past-col-max-h,none)]"
+      className="min-w-0 wide:border-l wide:border-border wide:pl-12 wide:flex wide:flex-col wide:min-h-[var(--diary-past-col-max-h,0)] wide:max-h-[var(--diary-past-col-max-h,none)]"
     >
       {isLoading && <p className="text-muted text-control">{loadingText}</p>}
-      <EntriesHeading className="min-[1100px]:mt-0">{title}</EntriesHeading>
+      <EntriesHeading className="wide:mt-0">{title}</EntriesHeading>
       {isEmpty ? (
         emptyState
       ) : (
-        <div className="min-[1100px]:flex min-[1100px]:flex-col min-[1100px]:flex-1 min-[1100px]:min-h-0">
+        <div className="wide:flex wide:flex-col wide:flex-1 wide:min-h-0">
           <div
             ref={bodyRef}
-            className="min-[1100px]:flex-1 min-[1100px]:min-h-0 min-[1100px]:overflow-hidden min-[1100px]:[mask-image:linear-gradient(to_bottom,#000_calc(100%-20px),transparent)]"
+            className="wide:flex-1 wide:min-h-0 wide:overflow-hidden wide:[mask-image:linear-gradient(to_bottom,#000_calc(100%-20px),transparent)]"
           >
             {children}
           </div>
           <div
             aria-hidden={!overflow}
-            className="flex justify-end items-center pt-2 min-[1100px]:flex-shrink-0 min-[1100px]:box-border min-[1100px]:min-h-[calc(8px+40px+20px)]"
+            className="flex justify-end items-center pt-2 wide:flex-shrink-0 wide:box-border wide:min-h-[calc(8px+40px+20px)]"
           >
             {!isLoading && overflow ? <Button className="mb-5">Show more</Button> : null}
           </div>

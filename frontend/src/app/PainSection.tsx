@@ -108,10 +108,10 @@ export function PainSection({
 
   return (
     <section className="@container p-2">
-      <h1 className="m-0 mb-3 text-[22px] font-bold tracking-tight text-text">Pain</h1>
-      <div className="grid gap-8 min-[1100px]:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] min-[1100px]:gap-12 min-[1100px]:items-start">
-        <div className="min-w-0 max-[1099px]:border-b max-[1099px]:border-[var(--border-soft)]" ref={leftColRef}>
-          <EntriesHeading className="min-[1100px]:mt-0">New entry</EntriesHeading>
+      <h1 className="m-0 mb-3 text-title font-bold tracking-tight text-text">Pain</h1>
+      <div className="grid gap-8 wide:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] wide:gap-12 wide:items-start">
+        <div className="min-w-0 max-wide:border-b max-wide:border-border" ref={leftColRef}>
+          <EntriesHeading className="wide:mt-0">New entry</EntriesHeading>
           <form className="mb-2" onSubmit={painForm.handleSubmit(onSubmit)}>
             <div className="grid gap-3 content-start min-w-0">
               <div className="sr-only" aria-hidden="true">
