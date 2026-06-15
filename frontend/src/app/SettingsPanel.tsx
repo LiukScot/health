@@ -65,7 +65,7 @@ function ThemeBlock() {
           const selected = t.id === theme;
           const dotShadow = selected
             ? "shadow-[0_0_0_2px_var(--accent)]"
-            : "shadow-[var(--shadow-sm)] group-hover/sw:shadow-[0_0_0_2px_color-mix(in_srgb,var(--accent)_40%,transparent)]";
+            : "shadow-[var(--shadow-sm)] group-hover/sw:shadow-[0_0_0_2px_var(--ring)]";
           return (
             <button
               key={t.id}

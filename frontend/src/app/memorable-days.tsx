@@ -20,14 +20,14 @@ export const MEMO_LIST_ITEM =
   "flex items-center justify-between flex-[0_0_auto] w-full gap-3 p-3 rounded-md border-0 bg-card-soft text-text shadow-none hover:bg-[color-mix(in_srgb,var(--text)_4%,var(--card-soft))]";
 const MEMO_MODAL_ACTIONS = "flex items-center gap-3 justify-end flex-wrap";
 const EMOJI_TAB =
-  "min-h-0 px-[4px] py-0 rounded-none border border-transparent bg-transparent shadow-none text-micro font-bold tracking-[0.08em] uppercase cursor-pointer focus-visible:outline-none focus-visible:shadow-[0_0_0_2px_color-mix(in_srgb,var(--accent)_28%,transparent)]";
+  "min-h-0 px-[4px] py-0 rounded-none border border-transparent bg-transparent shadow-none text-micro font-bold tracking-[0.08em] uppercase cursor-pointer focus-visible:outline-none focus-visible:shadow-[0_0_0_2px_var(--ring)]";
 const EMOJI_BTN =
-  "min-h-0 p-[2px] rounded-none border border-transparent bg-transparent shadow-none inline-flex items-center justify-center text-title leading-none cursor-pointer focus-visible:outline-none focus-visible:shadow-[0_0_0_2px_color-mix(in_srgb,var(--accent)_28%,transparent)]";
+  "min-h-0 p-[2px] rounded-none border border-transparent bg-transparent shadow-none inline-flex items-center justify-center text-title leading-none cursor-pointer focus-visible:outline-none focus-visible:shadow-[0_0_0_2px_var(--ring)]";
 // Exported so the Design System demo reuses the exact production contracts.
 export const DAY_NUMBER =
   "bg-transparent border-0 shadow-none min-h-0 p-0 font-[inherit] text-[inherit] cursor-pointer leading-none";
 export const EMOJI_TRIGGER =
-  "min-w-0 min-h-0 p-0 rounded-none inline-flex items-center justify-center bg-transparent border border-transparent text-text shadow-none cursor-pointer focus-visible:outline-none focus-visible:shadow-[0_0_0_2px_color-mix(in_srgb,var(--accent)_28%,transparent)]";
+  "min-w-0 min-h-0 p-0 rounded-none inline-flex items-center justify-center bg-transparent border border-transparent text-text shadow-none cursor-pointer focus-visible:outline-none focus-visible:shadow-[0_0_0_2px_var(--ring)]";
 
 type Props = {
   memorable: ReturnType<typeof useMemorableDays>;

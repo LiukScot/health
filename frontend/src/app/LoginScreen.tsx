@@ -4,7 +4,7 @@ import { Button } from "../components/ui/Button";
 
 const LOGIN_LABEL = "grid gap-1 content-start text-muted text-control";
 const LOGIN_INPUT =
-  "w-full max-w-full p-3 bg-card-strong text-text border border-border rounded-sm outline-none text-base shadow-[var(--shadow-sm)] transition-[border-color,background] duration-200 ease-[ease] focus:border-accent focus:bg-[color-mix(in_srgb,var(--accent)_8%,transparent)] focus-visible:outline-none focus-visible:border-accent focus-visible:shadow-[0_0_0_2px_color-mix(in_srgb,var(--accent)_38%,transparent),var(--shadow-sm)]";
+  "w-full max-w-full p-3 bg-card-strong text-text border border-border rounded-sm outline-none text-base shadow-[var(--shadow-sm)] transition-[border-color,background] duration-200 ease-[ease] focus:border-accent focus:bg-[color-mix(in_srgb,var(--accent)_8%,transparent)] focus-visible:outline-none focus-visible:border-accent focus-visible:shadow-[0_0_0_2px_var(--ring),var(--shadow-sm)]";
 
 type LoginScreenProps = {
   loginForm: UseFormReturn<{ email: string; password: string }>;

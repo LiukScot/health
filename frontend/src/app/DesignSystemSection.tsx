@@ -116,6 +116,27 @@ export function DesignSystemSection() {
               <PainBadge variant="muted" sm>&mdash;</PainBadge>
             </div>
           </section>
+
+          <section className="flex flex-col gap-3">
+            <SectionHead title="Elevation" aside="Shadows + focus ring" variant="ds" />
+            <ul className="list-none m-0 p-0 flex flex-wrap gap-5">
+              <li className="flex flex-col items-center gap-2 text-micro text-muted">
+                <span className="w-[72px] h-[48px] rounded-md bg-card-strong shadow-[var(--shadow-sm)]" />
+                <code>--shadow-sm</code>
+              </li>
+              <li className="flex flex-col items-center gap-2 text-micro text-muted">
+                <span className="w-[72px] h-[48px] rounded-md bg-card-strong shadow-[var(--shadow)]" />
+                <code>--shadow</code>
+              </li>
+              <li className="flex flex-col items-center gap-2 text-micro text-muted">
+                <span className="w-[72px] h-[48px] rounded-md bg-card-strong shadow-[0_0_0_2px_var(--ring)]" />
+                <code>--ring</code>
+              </li>
+            </ul>
+            <p className="m-0 text-micro text-muted-soft leading-snug [&_code]:text-muted">
+              Keyboard focus uses <code>focus-visible:shadow-[0_0_0_2px_var(--ring)]</code> across buttons, inputs, and pills.
+            </p>
+          </section>
         </div>
 
         <div className="block min-w-0 [&>section+section]:mt-3 wide:border-l wide:border-border wide:pl-12">

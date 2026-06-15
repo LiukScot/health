@@ -6,7 +6,7 @@ export type ButtonSize = "md" | "sm";
 // Pill button (former .btn / .btn-primary / .btn-danger / .is-success-pulse).
 // Shape carries no color so per-variant color/hover never collide on source order.
 const COMMON =
-  "font-semibold font-body border-0 rounded-full cursor-pointer shadow-none transition-[background,color] duration-150 ease-[ease] focus-visible:outline-none focus-visible:shadow-[0_0_0_2px_color-mix(in_srgb,var(--accent)_38%,transparent)]";
+  "font-semibold font-body border-0 rounded-full cursor-pointer shadow-none transition-[background,color] duration-150 ease-[ease] focus-visible:outline-none focus-visible:shadow-[0_0_0_2px_var(--ring)]";
 
 const SIZE: Record<ButtonSize, string> = {
   md: "px-5 py-3 min-h-[40px] text-sm",
