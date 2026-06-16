@@ -46,7 +46,7 @@ function BirthdayBlock({
 
   return (
     <div className="grid gap-3">
-      <SectionHead title="Birthday" ruled />
+      <SectionHead title="Birthday" />
       <label className="grid gap-2 content-start">
         <DateInput value={value} onChange={handleChange} ariaLabel="Birthday" />
       </label>
@@ -59,7 +59,7 @@ function ThemeBlock() {
   const { theme, setTheme } = useTheme();
   return (
     <div className="grid gap-3">
-      <SectionHead title="Theme" ruled />
+      <SectionHead title="Theme" />
       <div className="flex flex-wrap gap-5" role="group" aria-label="Theme">
         {THEMES.map((t) => {
           const selected = t.id === theme;

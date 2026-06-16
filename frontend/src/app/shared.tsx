@@ -359,14 +359,12 @@ export function MultiSelectField({ label, fieldKey, value, options, onChange, do
   );
 }
 
-/** Small titled divider used to group sub-sections across pages. When `ruled`,
- * a hairline fills the space after the title. */
-export function SectionHead({ title, aside, ruled = false, variant = "default" }: { title: string; aside?: ReactNode; ruled?: boolean; variant?: SectionHeadVariant }) {
-  const align = ruled ? "items-center" : variant === "ds" ? "items-start" : "items-baseline";
+/** Small titled divider used to group sub-sections across pages. */
+export function SectionHead({ title, aside, variant = "default" }: { title: string; aside?: ReactNode; variant?: SectionHeadVariant }) {
+  const align = variant === "ds" ? "items-start" : "items-baseline";
   return (
     <div className={`${SECTION_HEAD[variant]} ${align}`}>
       <span className={SECTION_TITLE[variant]}>{title}</span>
-      {ruled ? <span className="flex-1 h-px bg-border" aria-hidden="true" /> : null}
       {aside != null ? <span className={SECTION_ASIDE[variant]}>{aside}</span> : null}
     </div>
   );
