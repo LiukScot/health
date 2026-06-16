@@ -1,18 +1,17 @@
 @import "tailwindcss";
 
 /*
- * Tailwind v4 design tokens (#159). These generate the utilities the whole
- * app is built from (p-stack, gap-inline, text-control, rounded-md, font-body).
- * The former hand-rolled --layout-* spacing tokens were fully migrated to this
- * --spacing-* scale, which is now the single source of truth for spacing.
+ * Tailwind v4 design tokens. These generate the utilities the whole app is
+ * built from (text-control, rounded-md, font-body, mobile:). Spacing uses
+ * Tailwind's built-in numeric scale (p-3, gap-2, …) off the base --spacing,
+ * so no named spacing tokens live here.
  */
 @theme {
-  --spacing-tight: 4px;
-  --spacing-inline: 8px;
-  --spacing-stack: 12px;
-  --spacing-block: 20px;
-  --spacing-page: 30px;
-  --spacing-split: 48px;
+  /* Named breakpoints: mobile/desktop split (mobile:), the two-column split
+     (wide:), and the content cap (xwide:). max-* variants are auto-derived. */
+  --breakpoint-mobile: 720px;
+  --breakpoint-wide: 1100px;
+  --breakpoint-xwide: 1240px;
 
   /* Typography. 12/14/16px map 1:1 to Tailwind's built-in text-xs/sm/base,
      so only the off-scale sizes get a named token here. A named token (not
@@ -21,6 +20,7 @@
   --text-micro: 11px; /* micro labels, badges, field-line caps */
   --text-hint: 12.5px; /* hints, therapy callouts */
   --text-control: 13px; /* compact date/select control text */
+  --text-title: 22px; /* page h1 */
 
   /* Radius — single-sourced here (formerly duplicated in :root). */
   --radius-sm: 10px;
@@ -82,13 +82,15 @@
   --muted: #a1a1ad;
   --muted-soft: #6d6d78;
   --border: #48484f;
-  --border-soft: #48484f;
   --accent: #ff5e8a;
   --danger: #ff5a7f;
   --success: #6fe1b0;
   --warning: #f5a623;
   --shadow: 0 16px 40px rgba(0, 0, 0, 0.45);
   --shadow-sm: 0 2px 6px rgba(0, 0, 0, 0.25);
+  /* Keyboard focus ring — single source for the accent halo on focus-visible
+     (shadow-[0_0_0_2px_var(--ring)]). Unifies the former 28%/38% one-offs. */
+  --ring: color-mix(in srgb, var(--accent) 38%, transparent);
 }
 
 /* Theme variants — base :root above is the default "dark" theme. */
@@ -119,4 +121,15 @@ body {
   background: var(--bg);
 }
 
+}
+
+/* Accessibility: honor the OS "reduce motion" setting. Unlayered + !important
+   so it overrides the utility transitions/animations on every element. */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }

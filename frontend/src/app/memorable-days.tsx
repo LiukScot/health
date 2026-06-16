@@ -12,22 +12,22 @@ import { FieldLine, FIELD_LINE_LABEL } from "../components/ui/FieldLine";
 import { EntriesHeading } from "./entries";
 
 const MEMO_BACKDROP =
-  "fixed inset-0 bg-scrim [backdrop-filter:blur(6px)] grid place-items-center p-block z-40";
-const MEMO_MODAL = "w-[min(520px,100%)] p-block flex flex-col gap-stack bg-card border-0 rounded-md shadow-none";
+  "fixed inset-0 bg-scrim [backdrop-filter:blur(6px)] grid place-items-center p-5 z-40";
+const MEMO_MODAL = "w-[min(520px,100%)] p-5 flex flex-col gap-3 bg-card border-0 rounded-md shadow-none";
 export const MEMO_DAY_CELL =
-  "min-h-[108px] p-stack rounded-md bg-card-soft text-text text-left flex flex-col gap-inline relative transition-[background,color] duration-150 ease-[ease] hover:bg-[color-mix(in_srgb,var(--text)_4%,var(--card-soft))]";
+  "min-h-[108px] p-3 rounded-md bg-card-soft text-text text-left flex flex-col gap-2 relative transition-[background,color] duration-150 ease-[ease] hover:bg-[color-mix(in_srgb,var(--text)_4%,var(--card-soft))]";
 export const MEMO_LIST_ITEM =
-  "flex items-center justify-between flex-[0_0_auto] w-full gap-stack p-stack rounded-md border-0 bg-card-soft text-text shadow-none hover:bg-[color-mix(in_srgb,var(--text)_4%,var(--card-soft))]";
-const MEMO_MODAL_ACTIONS = "flex items-center gap-stack justify-end flex-wrap";
+  "flex items-center justify-between flex-[0_0_auto] w-full gap-3 p-3 rounded-md border-0 bg-card-soft text-text shadow-none hover:bg-[color-mix(in_srgb,var(--text)_4%,var(--card-soft))]";
+const MEMO_MODAL_ACTIONS = "flex items-center gap-3 justify-end flex-wrap";
 const EMOJI_TAB =
-  "min-h-0 px-[4px] py-0 rounded-none border border-transparent bg-transparent shadow-none text-micro font-bold tracking-[0.08em] uppercase cursor-pointer focus-visible:outline-none focus-visible:shadow-[0_0_0_2px_color-mix(in_srgb,var(--accent)_28%,transparent)]";
+  "min-h-0 px-[4px] py-0 rounded-none border border-transparent bg-transparent shadow-none text-micro font-bold tracking-[0.08em] uppercase cursor-pointer focus-visible:outline-none focus-visible:shadow-[0_0_0_2px_var(--ring)]";
 const EMOJI_BTN =
-  "min-h-0 p-[2px] rounded-none border border-transparent bg-transparent shadow-none inline-flex items-center justify-center text-[22px] leading-none cursor-pointer focus-visible:outline-none focus-visible:shadow-[0_0_0_2px_color-mix(in_srgb,var(--accent)_28%,transparent)]";
+  "min-h-0 p-[2px] rounded-none border border-transparent bg-transparent shadow-none inline-flex items-center justify-center text-title leading-none cursor-pointer focus-visible:outline-none focus-visible:shadow-[0_0_0_2px_var(--ring)]";
 // Exported so the Design System demo reuses the exact production contracts.
 export const DAY_NUMBER =
   "bg-transparent border-0 shadow-none min-h-0 p-0 font-[inherit] text-[inherit] cursor-pointer leading-none";
 export const EMOJI_TRIGGER =
-  "min-w-0 min-h-0 p-0 rounded-none inline-flex items-center justify-center bg-transparent border border-transparent text-text shadow-none cursor-pointer focus-visible:outline-none focus-visible:shadow-[0_0_0_2px_color-mix(in_srgb,var(--accent)_28%,transparent)]";
+  "min-w-0 min-h-0 p-0 rounded-none inline-flex items-center justify-center bg-transparent border border-transparent text-text shadow-none cursor-pointer focus-visible:outline-none focus-visible:shadow-[0_0_0_2px_var(--ring)]";
 
 type Props = {
   memorable: ReturnType<typeof useMemorableDays>;
@@ -397,19 +397,19 @@ export function MemorableDaysSection({ memorable }: Props) {
   };
 
   return (
-    <section className="@container p-inline relative">
+    <section className="@container p-2 relative">
       <div>
         <div>
-          <h1 className="m-0 mb-stack text-[22px] font-bold tracking-tight text-text">Memorable days</h1>
+          <h1 className="m-0 mb-3 text-title font-bold tracking-tight text-text">Memorable days</h1>
           <SectionHead title="Calendar" variant="dashboard" />
         </div>
       </div>
-      <Button variant="primary" className="absolute top-page right-inline" onClick={() => openCreate(toDateKey(new Date()))}>Add new</Button>
+      <Button variant="primary" className="absolute top-8 right-2" onClick={() => openCreate(toDateKey(new Date()))}>Add new</Button>
       {feedback?.tone === "error" ? <InlineFeedback message={feedback} /> : null}
 
-      <div className="grid gap-split items-start grid-cols-[minmax(0,1.55fr)_minmax(280px,0.9fr)] max-[1239px]:grid-cols-1 max-[1239px]:gap-0">
-        <section ref={leftColRef} className="min-w-0 p-0 max-[1239px]:border-b max-[1239px]:border-[var(--border-soft)] max-[1239px]:pb-page">
-          <div className="flex items-center justify-between gap-inline mb-page min-w-0">
+      <div className="grid gap-12 items-start grid-cols-[minmax(0,1.55fr)_minmax(280px,0.9fr)] max-xwide:grid-cols-1 max-xwide:gap-0">
+        <section ref={leftColRef} className="min-w-0 p-0 max-xwide:border-b max-xwide:border-border max-xwide:pb-8">
+          <div className="flex items-center justify-between gap-2 mb-8 min-w-0">
             <Button className="flex-shrink-0 tracking-[0.01em]" onClick={() => memorable.setVisibleMonth(new Date(memorable.visibleMonth.getFullYear(), memorable.visibleMonth.getMonth() - 1, 1))}>
               Prev
             </Button>
@@ -424,10 +424,10 @@ export function MemorableDaysSection({ memorable }: Props) {
               Next
             </Button>
           </div>
-          <div className="flex items-center gap-inline mb-inline">
+          <div className="flex items-center gap-2 mb-2">
             {weekdayLabels.map((label) => <span key={label} className="flex-1 text-center text-muted text-xs font-bold uppercase">{label}</span>)}
           </div>
-          <div className="grid grid-cols-[repeat(7,minmax(0,1fr))] gap-inline">
+          <div className="grid grid-cols-[repeat(7,minmax(0,1fr))] gap-2">
             {days.map((day) => {
               const dayKey = toDateKey(day);
               const monthMatch = day.getMonth() === memorable.visibleMonth.getMonth();
@@ -462,7 +462,7 @@ export function MemorableDaysSection({ memorable }: Props) {
                       {day.getDate()}
                     </button>
                   </span>
-                  <span className="flex flex-col gap-inline">
+                  <span className="flex flex-col gap-2">
                     {items.slice(0, 2).map((item) => (
                       <span key={`${item.source}-${item.id}-${item.date}`} className="text-xs leading-snug text-muted whitespace-nowrap overflow-hidden text-ellipsis">
                         {item.emoji || "•"} {item.title}
@@ -478,17 +478,17 @@ export function MemorableDaysSection({ memorable }: Props) {
           </div>
         </section>
 
-        <section ref={rightColRef} className="min-w-0 flex flex-col min-h-0 overflow-hidden h-[var(--split-col-height,auto)] max-h-[var(--split-col-height,none)] max-[1239px]:h-auto max-[1239px]:max-h-none max-[1239px]:pt-block max-[980px]:pt-0">
-          <EntriesHeading className="mt-0 mb-block">All memorable days</EntriesHeading>
+        <section ref={rightColRef} className="min-w-0 flex flex-col min-h-0 overflow-hidden h-[var(--split-col-height,auto)] max-h-[var(--split-col-height,none)] max-xwide:h-auto max-xwide:max-h-none max-xwide:pt-5 max-[980px]:pt-0">
+          <EntriesHeading className="mt-0 mb-5">All memorable days</EntriesHeading>
           {memorable.isLoading ? (
             <p className="text-muted text-control">Loading memorable days...</p>
           ) : memorable.memorableDays.length === 0 ? (
-            <div className="grid gap-inline my-stack">
+            <div className="grid gap-2 my-3">
               <p className="text-control font-semibold text-text m-0">No memorable days yet</p>
               <p className="max-w-[60ch] text-control text-muted leading-normal m-0">Add one birthday, anniversary, or event to start the list.</p>
             </div>
           ) : (
-            <div className="memorable-list flex flex-col flex-[1_1_auto] min-h-0 overflow-y-auto overflow-x-hidden gap-stack [scrollbar-width:thin] [scrollbar-color:transparent_transparent] hover:[scrollbar-color:rgba(255,255,255,0.18)_transparent] focus-within:[scrollbar-color:rgba(255,255,255,0.18)_transparent] max-[1239px]:max-h-none">
+            <div className="memorable-list flex flex-col flex-[1_1_auto] min-h-0 overflow-y-auto overflow-x-hidden gap-3 [scrollbar-width:thin] [scrollbar-color:transparent_transparent] hover:[scrollbar-color:rgba(255,255,255,0.18)_transparent] focus-within:[scrollbar-color:rgba(255,255,255,0.18)_transparent] max-xwide:max-h-none">
               {memorable.memorableDays.map((item) => (
                 <button
                   type="button"
@@ -497,9 +497,9 @@ export function MemorableDaysSection({ memorable }: Props) {
                   onWheelCapture={onListItemWheel}
                   onClick={() => openEdit(item)}
                 >
-                  <span className="text-[22px] leading-none">{item.emoji || "✨"}</span>
-                  <span className="flex-1 flex flex-col gap-tight items-start">
-                    <span className="w-full flex items-baseline justify-between gap-stack">
+                  <span className="text-title leading-none">{item.emoji || "✨"}</span>
+                  <span className="flex-1 flex flex-col gap-1 items-start">
+                    <span className="w-full flex items-baseline justify-between gap-3">
                       <strong className="text-base min-w-0 text-text">{item.title}</strong>
                       <span className="text-muted text-control flex-shrink-0 text-right">{item.date}</span>
                     </span>
@@ -516,12 +516,12 @@ export function MemorableDaysSection({ memorable }: Props) {
         <div className={MEMO_BACKDROP} role="presentation" onClick={closeDraft}>
           <div className={MEMO_MODAL} role="dialog" aria-modal="true" aria-label={draft.id ? "Edit memorable day" : "Add memorable day"} onClick={(event) => event.stopPropagation()}>
             <SectionHead title={draft.id ? "Edit memorable day" : "Add memorable day"} variant="dashboard" />
-            <div className="grid grid-cols-[168px_88px] gap-stack items-start justify-start">
-              <label className="grid gap-inline content-start min-w-0">
+            <div className="grid grid-cols-[168px_88px] gap-3 items-start justify-start">
+              <label className="grid gap-2 content-start min-w-0">
                 <span className={FIELD_LINE_LABEL}>Date</span>
                 <DateInput value={draft.date} onChange={(value) => setDraft((current) => current ? { ...current, date: value } : current)} ariaLabel="Date" />
               </label>
-              <label className="grid gap-inline content-start w-[88px] min-w-[88px] justify-self-end self-start">
+              <label className="grid gap-2 content-start w-[88px] min-w-[88px] justify-self-end self-start">
                 <span className={FIELD_LINE_LABEL}>Emoji</span>
                 <div ref={emojiPickerRef} className="relative w-full min-w-0">
                   <button
@@ -549,14 +549,16 @@ export function MemorableDaysSection({ memorable }: Props) {
                       id="emoji-picker-panel"
                       role="dialog"
                       aria-label="Emoji picker"
-                      className="absolute top-full mt-inline right-0 w-[min(420px,calc(100vw-32px))] max-w-[min(420px,calc(100vw-32px))] max-h-[min(520px,calc(100vh-180px))] flex flex-col gap-stack p-stack bg-card border border-border rounded-md shadow-[var(--shadow)] z-30"
+                      className="absolute top-full mt-2 right-0 w-[min(420px,calc(100vw-32px))] max-w-[min(420px,calc(100vw-32px))] max-h-[min(520px,calc(100vh-180px))] flex flex-col gap-3 p-3 bg-card border border-border rounded-md shadow-[var(--shadow)] z-30"
                       onMouseDown={(event) => event.stopPropagation()}
                     >
-                      <label className="grid gap-inline content-start m-0">
+                      <label className="grid gap-2 content-start m-0">
                         <span className={`${FIELD_LINE_LABEL} pt-0 pb-0`}>Search emoji</span>
                         <input
                           ref={emojiPickerSearchRef}
-                          className="w-full bg-[color-mix(in_srgb,white_3%,var(--bg))] border-0 rounded-sm px-stack py-inline text-text text-control font-medium font-body shadow-none outline-none transition-[background,box-shadow] duration-150 ease-[ease] hover:bg-[color-mix(in_srgb,white_5%,var(--bg))] focus:bg-[color-mix(in_srgb,white_5%,var(--bg))] focus:shadow-[inset_0_0_0_1px_var(--accent)] placeholder:text-muted-soft [[data-theme=oled]_&]:bg-card-soft"
+                          id="emoji-search"
+                          name="emoji-search"
+                          className="w-full bg-[color-mix(in_srgb,white_3%,var(--bg))] border-0 rounded-sm px-3 py-2 text-text text-control font-medium font-body shadow-none outline-none transition-[background,box-shadow] duration-150 ease-[ease] hover:bg-[color-mix(in_srgb,white_5%,var(--bg))] focus:bg-[color-mix(in_srgb,white_5%,var(--bg))] focus:shadow-[inset_0_0_0_1px_var(--accent)] placeholder:text-muted-soft [[data-theme=oled]_&]:bg-card-soft"
                           type="search"
                           value={emojiPickerSearch}
                           onChange={(event) => setEmojiPicker((current) => ({ ...current, search: event.target.value }))}
@@ -564,7 +566,7 @@ export function MemorableDaysSection({ memorable }: Props) {
                         />
                       </label>
 
-                      <div role="tablist" aria-label="Emoji categories" className="flex flex-wrap gap-inline">
+                      <div role="tablist" aria-label="Emoji categories" className="flex flex-wrap gap-2">
                         {emojiCategoryOrder.map((category) => {
                           const isActive = emojiPickerActiveCategory === category;
                           const label = emojiCategoryLabels[category];
@@ -591,7 +593,7 @@ export function MemorableDaysSection({ memorable }: Props) {
                         className="min-h-0 max-h-[320px] overflow-auto [overscroll-behavior:contain] [scrollbar-width:thin] [scrollbar-gutter:stable] pr-[2px] [scrollbar-color:transparent_transparent] hover:[scrollbar-color:rgba(255,255,255,0.18)_transparent] focus-within:[scrollbar-color:rgba(255,255,255,0.18)_transparent]"
                       >
                         {emojiPickerRecords.length > 0 ? (
-                          <div className="flex flex-wrap gap-inline">
+                          <div className="flex flex-wrap gap-2">
                             {emojiPickerRecords.map((record) => {
                               const isSelected = draft.emoji === record.emoji;
                               return (
@@ -609,7 +611,7 @@ export function MemorableDaysSection({ memorable }: Props) {
                             })}
                           </div>
                         ) : (
-                          <p className="m-0 px-[2px] pt-inline pb-[2px] text-center text-muted-soft text-control">
+                          <p className="m-0 px-[2px] pt-2 pb-[2px] text-center text-muted-soft text-control">
                             No emoji match.
                           </p>
                         )}
@@ -633,7 +635,7 @@ export function MemorableDaysSection({ memorable }: Props) {
               value={draft.description}
               onChange={(event) => setDraft((current) => current ? { ...current, description: event.target.value } : current)}
             />
-            <div className="grid gap-inline content-start">
+            <div className="grid gap-2 content-start">
               <span className={FIELD_LINE_LABEL}>Repeat</span>
               <Select
                 ariaLabel="Repeat"
@@ -668,12 +670,12 @@ export function MemorableDaysSection({ memorable }: Props) {
         <div className={MEMO_BACKDROP} role="presentation" onClick={() => setPopoverDateKey(null)}>
           <div ref={popoverRef} className={MEMO_MODAL} role="dialog" aria-modal="true" aria-label={`Events on ${popoverDateKey}`} onClick={(event) => event.stopPropagation()}>
             <SectionHead title={popoverDateKey} variant="dashboard" />
-            <div className="flex flex-col gap-inline m-0 mb-inline">
+            <div className="flex flex-col gap-2 m-0 mb-2">
               {popoverItems.map((item) => (
                 <button
                   key={`${item.source}-${item.id}-${item.date}`}
                   type="button"
-                  className="flex items-center gap-stack bg-card-soft border-0 shadow-none min-h-0 p-[var(--spacing-inline)_var(--spacing-stack)] rounded-md text-text text-left cursor-pointer w-full transition-[background] duration-150 ease-[ease] hover:bg-[color-mix(in_srgb,var(--accent)_10%,transparent)]"
+                  className="flex items-center gap-3 bg-card-soft border-0 shadow-none min-h-0 p-[8px_12px] rounded-md text-text text-left cursor-pointer w-full transition-[background] duration-150 ease-[ease] hover:bg-[color-mix(in_srgb,var(--accent)_10%,transparent)]"
                   onClick={() => {
                     setPopoverDateKey(null);
                     openEdit(item);

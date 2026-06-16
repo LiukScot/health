@@ -1,7 +1,7 @@
 import { bandNine, formatMetricDisplay } from "./screen-format";
 
 const STEPPER_BTN =
-  "w-[26px] h-[26px] min-h-[26px] p-0 text-sm text-muted bg-transparent border border-[var(--border-soft)] rounded-full shadow-none cursor-pointer transition-[color,border-color] duration-150 ease-[ease] hover:text-accent hover:bg-transparent hover:border-accent";
+  "w-6 h-6 min-h-6 p-0 text-sm text-muted bg-transparent border border-border rounded-full shadow-none cursor-pointer transition-[color,border-color] duration-150 ease-[ease] hover:text-accent hover:bg-transparent hover:border-accent";
 
 export function BarMetric({
   label,
@@ -22,7 +22,7 @@ export function BarMetric({
   const band = bandNine(n, higherIsBetter);
   const bandColor = { low: "text-success", mid: "text-warning", high: "text-danger", "": "" }[band] ?? "";
   return (
-    <div className="grid grid-cols-[120px_1fr_auto] items-center gap-stack pb-[2px]">
+    <div className="grid grid-cols-[120px_1fr_auto] items-center gap-3 pb-[2px]">
       <span className="text-control font-medium text-text">{label}</span>
       <div className="grid grid-cols-9 gap-[2px]" role="group" aria-label={label}>
         {Array.from({ length: 9 }, (_, i) => {
@@ -46,7 +46,7 @@ export function BarMetric({
             <button
               key={slot}
               type="button"
-              className={`h-[10px] min-h-[10px] p-0 border-0 rounded-[2px] shadow-none cursor-pointer transition-[background] duration-[120ms] appearance-none ${fill}`}
+              className={`h-2.5 min-h-2.5 p-0 border-0 rounded-xs shadow-none cursor-pointer transition-[background] duration-[120ms] appearance-none ${fill}`}
               aria-label={`${label} ${slot} of 9`}
               aria-pressed={n === slot}
               onClick={() => {
@@ -65,10 +65,10 @@ export function BarMetric({
 export function CoffeeStepper({ value, onChange }: { value: number | null; onChange: (next: number | null) => void }) {
   const n = value != null && !Number.isNaN(Number(value)) ? Math.min(50, Math.max(0, Math.floor(Number(value)))) : 0;
   return (
-    <div className="grid grid-cols-[120px_1fr_auto] items-center gap-stack pb-[2px]">
+    <div className="grid grid-cols-[120px_1fr_auto] items-center gap-3 pb-[2px]">
       <span className="text-control font-medium text-text">Coffee</span>
-      <span aria-hidden="true" className="h-[10px] min-h-[10px] bg-[color-mix(in_srgb,white_4%,var(--card))] rounded-[2px]" />
-      <div className="inline-flex items-center gap-inline">
+      <span aria-hidden="true" className="h-2.5 min-h-2.5 bg-[color-mix(in_srgb,white_4%,var(--card))] rounded-xs" />
+      <div className="inline-flex items-center gap-2">
         <button type="button" className={STEPPER_BTN} aria-label="Decrease coffee count" onClick={() => onChange(Math.max(0, n - 1))}>
           −
         </button>
@@ -93,7 +93,7 @@ export function EmptyState({
   compact?: boolean;
 }) {
   return (
-    <div className={compact ? "grid gap-inline m-0" : "grid gap-inline my-stack"}>
+    <div className={compact ? "grid gap-2 m-0" : "grid gap-2 my-3"}>
       <p className="text-control font-semibold text-text m-0">{title}</p>
       <p className="max-w-[60ch] text-control text-muted leading-normal m-0">{description}</p>
     </div>

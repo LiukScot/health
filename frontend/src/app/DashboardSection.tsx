@@ -20,14 +20,14 @@ import { DateInput } from "../components/ui/DateInput";
 const WellbeingChart = lazy(() => import("./WellbeingChart"));
 
 const DASH_CARD =
-  "grid grid-rows-[auto_auto_22px] gap-inline content-start w-full max-w-[200px] justify-self-start rounded-md p-stack bg-card-soft";
+  "grid grid-rows-[auto_auto_22px] gap-2 content-start w-full max-w-[200px] justify-self-start rounded-md p-3 bg-card-soft";
 const CARD_H3 =
-  "m-0 text-nano font-bold tracking-[0.12em] uppercase text-muted leading-tight whitespace-nowrap overflow-hidden text-ellipsis translate-y-[2px]";
-const CARD_VALUE = "text-lg font-bold text-text translate-y-[2px]";
-const DELTA_SLOT = "min-h-[22px] flex items-end translate-y-[2px]";
-const DELTA_BASE = "inline-flex items-center rounded-full px-inline py-[2px] text-micro font-bold self-end";
+  "m-0 text-nano font-bold tracking-[0.12em] uppercase text-muted leading-tight whitespace-nowrap overflow-hidden text-ellipsis translate-y-0.5";
+const CARD_VALUE = "text-lg font-bold text-text translate-y-0.5";
+const DELTA_SLOT = "min-h-6 flex items-end translate-y-0.5";
+const DELTA_BASE = "inline-flex items-center rounded-full px-2 py-0.5 text-micro font-bold self-end";
 const QUICK_RANGE_BASE =
-  "px-stack py-tight text-xs font-semibold font-body border-0 rounded-full cursor-pointer transition-[color,background] duration-150 ease-[ease] shadow-none";
+  "px-3 py-1 text-xs font-semibold font-body border-0 rounded-full cursor-pointer transition-[color,background] duration-150 ease-[ease] shadow-none";
 const QUICK_RANGE_IDLE =
   "text-muted bg-[color-mix(in_srgb,var(--text)_5%,transparent)] hover:text-text hover:bg-[color-mix(in_srgb,var(--text)_10%,transparent)] [[data-theme=oled]_&]:bg-card-soft [[data-theme=oled]_&]:hover:bg-[color-mix(in_srgb,white_8%,var(--card-soft))]";
 const QUICK_RANGE_ACTIVE = "text-accent bg-[color-mix(in_srgb,var(--accent)_15%,transparent)]";
@@ -73,19 +73,19 @@ export function DashboardSection({
   anniversaryCards: MemorableDay[];
 }) {
   return (
-    <section className="@container p-inline">
-      <h1 className="m-0 mb-stack text-[22px] font-bold tracking-tight text-text">Dashboard</h1>
+    <section className="@container p-2">
+      <h1 className="m-0 mb-3 text-title font-bold tracking-tight text-text">Dashboard</h1>
 
-      <div className="flex flex-wrap gap-stack items-end mb-block">
-        <label className="flex flex-col gap-inline">
+      <div className="flex flex-wrap gap-3 items-end mb-5">
+        <label className="flex flex-col gap-2">
           <span className={FIELD_LINE_LABEL}>From</span>
           <DateInput value={dashboardFrom} onChange={(v) => onDateChange("from", v)} ariaLabel="From date" />
         </label>
-        <label className="flex flex-col gap-inline">
+        <label className="flex flex-col gap-2">
           <span className={FIELD_LINE_LABEL}>To</span>
           <DateInput value={dashboardTo} onChange={(v) => onDateChange("to", v)} ariaLabel="To date" />
         </label>
-        <div className="flex gap-inline flex-wrap">
+        <div className="flex gap-2 flex-wrap">
           {dashboardQuickRanges.map((range) => (
             <button
               type="button"
@@ -116,7 +116,7 @@ export function DashboardSection({
           {anniversaryCards.length > 0 ? (
             <>
               <SectionHead title="Anniversaries today" variant="dashboard" />
-              <div className="grid grid-cols-[repeat(auto-fit,minmax(128px,1fr))] gap-stack">
+              <div className="grid grid-cols-[repeat(auto-fit,minmax(128px,1fr))] gap-3">
                 {anniversaryCards.map((card) => (
                   <article key={`${card.source}-${card.id}-${card.date}`} className={DASH_CARD}>
                     <h3 className={CARD_H3}>
@@ -136,7 +136,7 @@ export function DashboardSection({
           ) : null}
 
           <SectionHead title="Averages" variant="dashboard" />
-          <div data-testid="averages" className="grid grid-cols-[repeat(auto-fit,minmax(128px,1fr))] gap-stack">
+          <div data-testid="averages" className="grid grid-cols-[repeat(auto-fit,minmax(128px,1fr))] gap-3">
             {dashboardCards.map((card) => {
               const deltaPct = calcDeltaPercent(card.value, card.previous);
               const delta = deltaPct === null ? null : formatDelta(deltaPct, Boolean(card.invertDelta));
@@ -164,9 +164,9 @@ export function DashboardSection({
           </div>
 
           <SectionHead title="Metrics over time" variant="dashboard" />
-          <div className="grid gap-stack p-stack rounded-md bg-card-soft mt-stack">
-            <div className="flex justify-between items-start gap-inline flex-wrap">
-              <div className="flex flex-wrap gap-inline">
+          <div className="grid gap-3 p-3 rounded-md bg-card-soft mt-3">
+            <div className="flex justify-between items-start gap-2 flex-wrap">
+              <div className="flex flex-wrap gap-2">
                 {wellbeingSeries.map((series) => {
                   const checked = graphSelection[series.key] ?? true;
                   const hasData = series.points.length > 0;
@@ -174,7 +174,7 @@ export function DashboardSection({
                     <label
                       key={series.key}
                       data-testid="series-toggle"
-                      className={`inline-flex items-center gap-inline border-0 rounded-full px-stack py-tight bg-card-soft text-micro font-semibold leading-none shadow-none${hasData ? "" : " opacity-50"}`}
+                      className={`inline-flex items-center gap-2 border-0 rounded-full px-3 py-1 bg-card-soft text-micro font-semibold leading-none shadow-none${hasData ? "" : " opacity-50"}`}
                       style={{ "--series-color": series.color } as CSSProperties}
                     >
                       <input
@@ -204,12 +204,12 @@ export function DashboardSection({
             )}
           </div>
 
-          <div className="grid grid-cols-[repeat(2,minmax(0,1fr))] gap-block items-start @max-[720px]:grid-cols-1">
-            <section className="grid gap-stack">
+          <div className="grid grid-cols-[repeat(2,minmax(0,1fr))] gap-5 items-start @max-[720px]:grid-cols-1">
+            <section className="grid gap-3">
               <SectionHead title="At a glance" variant="dashboard" />
-              <div data-testid="insights" className="grid gap-stack">
+              <div data-testid="insights" className="grid gap-3">
                 {dashboardInsights.map((insight) => (
-                  <div key={insight.title} className="grid gap-tight">
+                  <div key={insight.title} className="grid gap-1">
                     <strong className="text-muted text-nano font-bold tracking-[0.16em] uppercase">{insight.title}</strong>
                     <p className="m-0 text-text text-control leading-normal">{insight.detail}</p>
                   </div>
@@ -217,21 +217,21 @@ export function DashboardSection({
               </div>
             </section>
 
-            <section className="grid gap-stack">
+            <section className="grid gap-3">
               <SectionHead title="Patterns" variant="dashboard" />
               {dashboardConnections.length > 0 ? (
-                <div className="grid gap-stack">
+                <div className="grid gap-3">
                   {dashboardConnections.map((connection) => (
-                    <article key={connection.title} className="grid gap-inline rounded-md p-stack bg-card-soft">
+                    <article key={connection.title} className="grid gap-2 rounded-md p-3 bg-card-soft">
                       <span className="text-nano font-bold tracking-[0.16em] uppercase text-muted">{connection.title}</span>
                       <strong className="m-0 text-text text-control font-semibold">{connection.summary}</strong>
                       <p className="m-0 text-muted text-control leading-normal">{connection.detail}</p>
-                      <span className={`justify-self-start rounded-full px-inline py-[2px] text-micro font-bold ${CONFIDENCE_TONE[connection.confidence] ?? CONFIDENCE_TONE.weak}`}>{connection.confidence} confidence</span>
+                      <span className={`justify-self-start rounded-full px-2 py-0.5 text-micro font-bold ${CONFIDENCE_TONE[connection.confidence] ?? CONFIDENCE_TONE.weak}`}>{connection.confidence} confidence</span>
                     </article>
                   ))}
                 </div>
               ) : (
-                <div className="grid gap-inline m-0">
+                <div className="grid gap-2 m-0">
                   <p className="text-control font-semibold text-text m-0">No connection signals yet</p>
                   <p className="max-w-[60ch] text-control text-muted leading-normal m-0">Log more overlapping diary and pain entries to unlock pattern cards here.</p>
                 </div>

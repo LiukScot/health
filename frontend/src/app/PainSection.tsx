@@ -35,7 +35,7 @@ import {
 } from "./entries";
 
 const DATETIME_FIELD =
-  "!w-auto max-w-full justify-self-start cursor-pointer tabular-nums [&::-webkit-calendar-picker-indicator]:cursor-pointer [&::-webkit-calendar-picker-indicator]:ml-inline [&::-webkit-calendar-picker-indicator]:invert [&::-webkit-calendar-picker-indicator]:opacity-60 hover:[&::-webkit-calendar-picker-indicator]:opacity-100";
+  "!w-auto max-w-full justify-self-start cursor-pointer tabular-nums [&::-webkit-calendar-picker-indicator]:cursor-pointer [&::-webkit-calendar-picker-indicator]:ml-2 [&::-webkit-calendar-picker-indicator]:invert [&::-webkit-calendar-picker-indicator]:opacity-60 hover:[&::-webkit-calendar-picker-indicator]:opacity-100";
 
 const PAIN_TABS: { id: PainFieldKey; label: string }[] = [
   { id: "area", label: "Area" },
@@ -107,13 +107,13 @@ export function PainSection({
   ];
 
   return (
-    <section className="@container p-inline">
-      <h1 className="m-0 mb-stack text-[22px] font-bold tracking-tight text-text">Pain</h1>
-      <div className="grid gap-page min-[1100px]:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] min-[1100px]:gap-split min-[1100px]:items-start">
-        <div className="min-w-0 max-[1099px]:border-b max-[1099px]:border-[var(--border-soft)]" ref={leftColRef}>
-          <EntriesHeading className="min-[1100px]:mt-0">New entry</EntriesHeading>
-          <form className="mb-inline" onSubmit={painForm.handleSubmit(onSubmit)}>
-            <div className="grid gap-stack content-start min-w-0">
+    <section className="@container p-2">
+      <h1 className="m-0 mb-3 text-title font-bold tracking-tight text-text">Pain</h1>
+      <div className="grid gap-8 wide:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] wide:gap-12 wide:items-start">
+        <div className="min-w-0 max-wide:border-b max-wide:border-border" ref={leftColRef}>
+          <EntriesHeading className="wide:mt-0">New entry</EntriesHeading>
+          <form className="mb-2" onSubmit={painForm.handleSubmit(onSubmit)}>
+            <div className="grid gap-3 content-start min-w-0">
               <div className="sr-only" aria-hidden="true">
                 <input type="hidden" {...painForm.register("painLevel", { valueAsNumber: true })} />
                 <input type="hidden" {...painForm.register("fatigueLevel", { valueAsNumber: true })} />
@@ -130,7 +130,7 @@ export function PainSection({
                   el.showPicker?.();
                 }}
               />
-              <div className="grid gap-inline content-start">
+              <div className="grid gap-2 content-start">
                 <span className={FIELD_LINE_LABEL}>Values</span>
               </div>
               <BarMetric
@@ -153,7 +153,7 @@ export function PainSection({
                 aria-label="Note"
               />
               {editingPain ? (
-                <div className="flex gap-inline flex-wrap">
+                <div className="flex gap-2 flex-wrap">
                   <Button type="button" onClick={onCancelEdit}>
                     Cancel edit
                   </Button>
@@ -161,8 +161,8 @@ export function PainSection({
               ) : null}
             </div>
 
-            <div className="grid gap-block min-w-0 pt-block">
-              <div className="grid gap-stack">
+            <div className="grid gap-5 min-w-0 pt-5">
+              <div className="grid gap-3">
                 <SectionHead title="Factors" variant="tags" />
                 <TagTabs
                   tabs={PAIN_TABS.map((t) => ({ id: t.id, label: t.label, count: painTabCounts[t.id] }))}
@@ -170,7 +170,7 @@ export function PainSection({
                   onSelect={setPainTab}
                   ariaLabel="Pain categories"
                 />
-                <div className="grid gap-stack">
+                <div className="grid gap-3">
                   <MultiSelectField
                     hideLabel
                     label={tabLabel}
@@ -181,8 +181,8 @@ export function PainSection({
                   />
                 </div>
               </div>
-              <div className="flex justify-end pt-inline">
-                <Button type="submit" variant={painMutationState.isSuccess ? "success" : "primary"} className="mb-block">
+              <div className="flex justify-end pt-2">
+                <Button type="submit" variant={painMutationState.isSuccess ? "success" : "primary"} className="mb-5">
                   {painMutationState.isSuccess ? "✓ Saved" : editingPain ? "Update entry" : "Save entry"}
                 </Button>
               </div>
