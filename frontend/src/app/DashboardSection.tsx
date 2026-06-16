@@ -204,7 +204,7 @@ export function DashboardSection({
             )}
           </div>
 
-          <div className="grid grid-cols-[repeat(2,minmax(0,1fr))] gap-5 items-start @max-mobile:grid-cols-1">
+          <div className="grid grid-cols-[repeat(2,minmax(0,1fr))] gap-5 items-start @max-[720px]:grid-cols-1">
             <section className="grid gap-3">
               <SectionHead title="At a glance" variant="dashboard" />
               <div data-testid="insights" className="grid gap-3">

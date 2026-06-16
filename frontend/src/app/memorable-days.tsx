@@ -556,6 +556,8 @@ export function MemorableDaysSection({ memorable }: Props) {
                         <span className={`${FIELD_LINE_LABEL} pt-0 pb-0`}>Search emoji</span>
                         <input
                           ref={emojiPickerSearchRef}
+                          id="emoji-search"
+                          name="emoji-search"
                           className="w-full bg-[color-mix(in_srgb,white_3%,var(--bg))] border-0 rounded-sm px-3 py-2 text-text text-control font-medium font-body shadow-none outline-none transition-[background,box-shadow] duration-150 ease-[ease] hover:bg-[color-mix(in_srgb,white_5%,var(--bg))] focus:bg-[color-mix(in_srgb,white_5%,var(--bg))] focus:shadow-[inset_0_0_0_1px_var(--accent)] placeholder:text-muted-soft [[data-theme=oled]_&]:bg-card-soft"
                           type="search"
                           value={emojiPickerSearch}
