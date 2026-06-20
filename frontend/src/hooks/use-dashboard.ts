@@ -10,6 +10,7 @@ import {
   formatNumber,
   getQuickRangeBounds,
   inDateRange,
+  MS_PER_DAY,
   normalizeQuickRange,
   painListSchema,
   previousRange,
@@ -93,7 +94,7 @@ function getLongestEntryStreak(days: DashboardDay[]) {
   for (let index = 1; index < days.length; index += 1) {
     const previous = new Date(`${days[index - 1].date}T00:00:00`);
     const next = new Date(`${days[index].date}T00:00:00`);
-    const diffDays = Math.round((next.getTime() - previous.getTime()) / (24 * 60 * 60 * 1000));
+    const diffDays = Math.round((next.getTime() - previous.getTime()) / MS_PER_DAY);
     if (diffDays === 1) {
       current += 1;
       best = Math.max(best, current);

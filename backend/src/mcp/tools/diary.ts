@@ -29,14 +29,14 @@ export function registerDiaryTools(server: McpServer, ctx: McpToolContext): void
           .regex(/^\d{4}-\d{2}-\d{2}$/)
           .optional()
           .describe("Inclusive end date (YYYY-MM-DD)."),
-        mood_min: z.number().int().min(0).max(10).optional()
-          .describe("Minimum mood level (0-10, where 10 is best)."),
-        mood_max: z.number().int().min(0).max(10).optional()
-          .describe("Maximum mood level (0-10)."),
-        anxiety_min: z.number().int().min(0).max(10).optional()
-          .describe("Minimum anxiety level (0-10, where 10 is worst)."),
-        depression_min: z.number().int().min(0).max(10).optional()
-          .describe("Minimum depression level (0-10, where 10 is worst)."),
+        mood_min: z.number().int().min(1).max(9).optional()
+          .describe("Minimum mood level (1-9, where 9 is best)."),
+        mood_max: z.number().int().min(1).max(9).optional()
+          .describe("Maximum mood level (1-9)."),
+        anxiety_min: z.number().int().min(1).max(9).optional()
+          .describe("Minimum anxiety level (1-9, where 9 is worst)."),
+        depression_min: z.number().int().min(1).max(9).optional()
+          .describe("Minimum depression level (1-9, where 9 is worst)."),
         limit: z.number().int().min(1).max(500).optional().default(50),
       },
       annotations: { readOnlyHint: true, openWorldHint: false },

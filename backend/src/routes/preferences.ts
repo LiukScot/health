@@ -45,7 +45,8 @@ preferences.get("/", (c) => {
   let graphSelection = {};
   try {
     graphSelection = JSON.parse(row.graphSelectionJson || "{}");
-  } catch {
+  } catch (e) {
+    console.error("Failed to parse graphSelectionJson:", e);
     graphSelection = {};
   }
 
