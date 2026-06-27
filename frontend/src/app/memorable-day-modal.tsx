@@ -14,6 +14,7 @@ import {
   MEMO_BACKDROP,
   MEMO_MODAL,
   MEMO_MODAL_ACTIONS,
+  REPEAT_OPTIONS,
 } from "./memorable-days-constants";
 
 const EMOJI_TAB =
@@ -42,12 +43,6 @@ type EmojiPickerState = {
 };
 
 const emojiCategoryOrder = Object.keys(emojiCategoryLabels) as EmojiCategory[];
-
-export const REPEAT_OPTIONS: { value: DraftState["repeatMode"]; label: string }[] = [
-  { value: "one-time", label: "One-time" },
-  { value: "monthly", label: "Monthly" },
-  { value: "yearly", label: "Yearly" },
-];
 
 function createEmojiPickerScrollTopByCategory(): EmojiPickerScrollTopByCategory {
   return { recent: 0, smileys: 0, people: 0, nature: 0, food: 0, travel: 0, objects: 0, symbols: 0, flags: 0 };

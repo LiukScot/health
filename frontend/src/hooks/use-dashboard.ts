@@ -437,15 +437,12 @@ export function useDashboard(enabled: boolean) {
     });
   };
 
-  // Global streak: use unfiltered data when a range is active; fall back to range data while loading
-  const streakDiary = dashboardFrom ? (allDiaryQuery.data ?? diaryQuery.data ?? []) : (diaryQuery.data ?? []);
-  const streakPain = dashboardFrom ? (allPainQuery.data ?? painQuery.data ?? []) : (painQuery.data ?? []);
-  const globalDays = useMemo(
-    () => buildDashboardDays(streakDiary, streakPain),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [streakDiary, streakPain],
-  );
-  const globalStreak = useMemo(() => getLongestEntryStreak(globalDays), [globalDays]);
+  // Global (all-time) streak: use unfiltered data when range is active, else main query data.
+  const globalStreak = useMemo(() => {
+    const streakDiary = dashboardFrom ? (allDiaryQuery.data ?? diaryQuery.data ?? []) : (diaryQuery.data ?? []);
+    const streakPain = dashboardFrom ? (allPainQuery.data ?? painQuery.data ?? []) : (painQuery.data ?? []);
+    return getLongestEntryStreak(buildDashboardDays(streakDiary, streakPain));
+  }, [dashboardFrom, allDiaryQuery.data, diaryQuery.data, allPainQuery.data, painQuery.data]);
 
   const dashboardInsights = useMemo(
     () => buildInsightRail(dashboardDays, dashboardCards, globalStreak),

@@ -10,3 +10,9 @@ export const DAY_NUMBER =
   "bg-transparent border-0 shadow-none min-h-0 p-0 font-[inherit] text-[inherit] cursor-pointer leading-none";
 export const EMOJI_TRIGGER =
   "min-w-0 min-h-0 p-0 rounded-none inline-flex items-center justify-center bg-transparent border border-transparent text-text shadow-none cursor-pointer focus-visible:outline-none focus-visible:shadow-[0_0_0_2px_var(--ring)]";
+
+export const REPEAT_OPTIONS: { value: "one-time" | "monthly" | "yearly"; label: string }[] = [
+  { value: "one-time", label: "One-time" },
+  { value: "monthly", label: "Monthly" },
+  { value: "yearly", label: "Yearly" },
+];
