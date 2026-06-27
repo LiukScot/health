@@ -50,9 +50,13 @@ app.use("*", async (c, next) => {
   c.res.headers.set("Strict-Transport-Security", "max-age=31536000; includeSubDomains");
   c.res.headers.set("Referrer-Policy", "strict-origin-when-cross-origin");
   c.res.headers.set("Permissions-Policy", "geolocation=(), camera=(), microphone=()");
+  // The script-src hash matches the inline anti-FOUC theme script in
+  // frontend/index.html; the Google Fonts origins are required by its
+  // <link rel="stylesheet"> and the woff2 files it loads. Update the hash
+  // if that inline script changes (the settings e2e test guards this).
   c.res.headers.set(
     "Content-Security-Policy",
-    "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self'; font-src 'self'; object-src 'none'; frame-ancestors 'none'"
+    "default-src 'self'; script-src 'self' 'sha256-SYmqnPbOcSnEcdBzLjFMbLGa205TqQNjcle7y27x96o='; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data:; connect-src 'self'; font-src 'self' https://fonts.gstatic.com; object-src 'none'; frame-ancestors 'none'"
   );
 });
 
