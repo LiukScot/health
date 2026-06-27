@@ -132,11 +132,11 @@ const BACKUP_MAX_ROWS = 50_000;
 
 export const backupImportSchema = z.object({
   diary: z
-    .object({ rows: z.array(z.record(z.string(), z.any())).max(BACKUP_MAX_ROWS).default([]) })
+    .object({ rows: z.array(z.record(z.string(), z.unknown())).max(BACKUP_MAX_ROWS).default([]) })
     .optional(),
   pain: z
     .object({
-      rows: z.array(z.record(z.string(), z.any())).max(BACKUP_MAX_ROWS).default([]),
+      rows: z.array(z.record(z.string(), z.unknown())).max(BACKUP_MAX_ROWS).default([]),
       options: z
         .object({
           options: z.record(z.string(), z.array(z.string())).optional(),

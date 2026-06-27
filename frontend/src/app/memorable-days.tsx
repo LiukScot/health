@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { z } from "zod";
 import { SectionHead, InlineFeedback, useSplitColumnHeightSync } from "./shared";
-import { toDateKey, type InlineMessage, type MemorableDay } from "./core";
+import { MS_PER_DAY, toDateKey, type InlineMessage, type MemorableDay } from "./core";
 import { emojiCatalog, emojiCategoryLabels, type EmojiCategory, type EmojiRecord } from "./emoji-catalog";
 import { getErrorMessage } from "../lib";
 import { memorableDayPayloadSchema, matchesMemorableDate, type useMemorableDays } from "../hooks/use-memorable-days";
@@ -100,7 +100,7 @@ function buildCalendarDays(month: Date, weekStart: "sunday" | "monday") {
   start.setDate(start.getDate() - firstOffset);
   const end = new Date(lastDay);
   end.setDate(end.getDate() + lastOffset);
-  const dayCount = Math.round((end.getTime() - start.getTime()) / (24 * 60 * 60 * 1000)) + 1;
+  const dayCount = Math.round((end.getTime() - start.getTime()) / MS_PER_DAY) + 1;
   return Array.from({ length: dayCount }, (_, index) => {
     const value = new Date(start);
     value.setDate(start.getDate() + index);
