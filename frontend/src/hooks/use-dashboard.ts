@@ -130,15 +130,14 @@ function describeMissingData(days: DashboardDay[]) {
   return `Diary missing on ${missingDiary} tracked day${missingDiary === 1 ? "" : "s"}.`;
 }
 
-function buildInsightRail(days: DashboardDay[], cards: DashboardCard[]): DashboardInsight[] {
-  const streak = getLongestEntryStreak(days);
+function buildInsightRail(days: DashboardDay[], cards: DashboardCard[], globalStreak: number): DashboardInsight[] {
   return [
     {
       title: "Best streak",
       detail:
-        streak === 0
-          ? "No tracked days in this range yet."
-          : `${streak} day${streak === 1 ? "" : "s"} with at least one diary or pain entry.`,
+        globalStreak === 0
+          ? "No tracked days yet."
+          : `${globalStreak} day${globalStreak === 1 ? "" : "s"} with at least one diary or pain entry.`,
     },
     {
       title: "Biggest shift",
@@ -243,22 +242,46 @@ export function useDashboard(enabled: boolean) {
     return () => observer.disconnect();
   }, []);
 
-  const diaryQuery = useQuery({
-    queryKey: ["diary"],
-    enabled,
-    queryFn: async () => apiFetch("/api/v1/diary", { method: "GET" }, (raw) => diaryListSchema.parse(raw).data),
-  });
-
-  const painQuery = useQuery({
-    queryKey: ["pain"],
-    enabled,
-    queryFn: async () => apiFetch("/api/v1/pain", { method: "GET" }, (raw) => painListSchema.parse(raw).data),
-  });
-
   const restoredRange = normalizeQuickRange(prefsQuery.data?.lastRange);
   const restoredBounds = getQuickRangeBounds(restoredRange);
   const dashboardFrom = dashboardBoundsOverride?.from ?? restoredBounds.from;
   const dashboardTo = dashboardBoundsOverride?.to ?? restoredBounds.to;
+
+  // Extend range to cover the previous period too (needed for comparison cards)
+  const extFrom = dashboardFrom
+    ? (previousRange(dashboardFrom, dashboardTo)?.from ?? dashboardFrom)
+    : "";
+
+  const diaryQuery = useQuery({
+    queryKey: ["diary", extFrom || null, dashboardTo || null],
+    enabled,
+    queryFn: async () => {
+      const qs = extFrom ? `?from=${extFrom}&to=${dashboardTo}` : "";
+      return apiFetch(`/api/v1/diary${qs}`, { method: "GET" }, (raw) => diaryListSchema.parse(raw).data);
+    },
+  });
+
+  const painQuery = useQuery({
+    queryKey: ["pain", extFrom || null, dashboardTo || null],
+    enabled,
+    queryFn: async () => {
+      const qs = extFrom ? `?from=${extFrom}&to=${dashboardTo}` : "";
+      return apiFetch(`/api/v1/pain${qs}`, { method: "GET" }, (raw) => painListSchema.parse(raw).data);
+    },
+  });
+
+  // Unfiltered queries for global (all-time) streak — only enabled when a date range is active.
+  // When range is "all", the main queries already fetch all data.
+  const allDiaryQuery = useQuery({
+    queryKey: ["diary-all"],
+    enabled: enabled && Boolean(dashboardFrom),
+    queryFn: async () => apiFetch("/api/v1/diary", { method: "GET" }, (raw) => diaryListSchema.parse(raw).data),
+  });
+  const allPainQuery = useQuery({
+    queryKey: ["pain-all"],
+    enabled: enabled && Boolean(dashboardFrom),
+    queryFn: async () => apiFetch("/api/v1/pain", { method: "GET" }, (raw) => painListSchema.parse(raw).data),
+  });
   const activeQuickRange = activeQuickRangeOverride ?? restoredRange;
   const graphSelection = graphSelectionOverride ?? extractWellbeingSelection(prefsQuery.data?.graphSelection);
 
@@ -288,7 +311,13 @@ export function useDashboard(enabled: boolean) {
     [painQuery.data, dashboardFrom, dashboardTo],
   );
 
-  const hasEntriesOverall = (diaryQuery.data?.length ?? 0) > 0 || (painQuery.data?.length ?? 0) > 0;
+  // Include all-data queries for hasEntriesOverall so "no entries" empty state
+  // is not shown when a date range is active but historical data exists.
+  const hasEntriesOverall =
+    (diaryQuery.data?.length ?? 0) > 0 ||
+    (painQuery.data?.length ?? 0) > 0 ||
+    (allDiaryQuery.data?.length ?? 0) > 0 ||
+    (allPainQuery.data?.length ?? 0) > 0;
   const hasEntriesInRange = filteredDiary.length > 0 || filteredPain.length > 0;
   const dashboardDays = useMemo(
     () => buildDashboardDays(filteredDiary, filteredPain),
@@ -408,9 +437,16 @@ export function useDashboard(enabled: boolean) {
     });
   };
 
+  // Global (all-time) streak: use unfiltered data when range is active, else main query data.
+  const globalStreak = useMemo(() => {
+    const streakDiary = dashboardFrom ? (allDiaryQuery.data ?? diaryQuery.data ?? []) : (diaryQuery.data ?? []);
+    const streakPain = dashboardFrom ? (allPainQuery.data ?? painQuery.data ?? []) : (painQuery.data ?? []);
+    return getLongestEntryStreak(buildDashboardDays(streakDiary, streakPain));
+  }, [dashboardFrom, allDiaryQuery.data, diaryQuery.data, allPainQuery.data, painQuery.data]);
+
   const dashboardInsights = useMemo(
-    () => buildInsightRail(dashboardDays, dashboardCards),
-    [dashboardDays, dashboardCards],
+    () => buildInsightRail(dashboardDays, dashboardCards, globalStreak),
+    [dashboardDays, dashboardCards, globalStreak],
   );
 
   const dashboardConnections = useMemo(
@@ -422,7 +458,7 @@ export function useDashboard(enabled: boolean) {
     dashboardFrom,
     dashboardTo,
     activeQuickRange,
-    isLoading: diaryQuery.isLoading || painQuery.isLoading,
+    isLoading: diaryQuery.isLoading || painQuery.isLoading || allDiaryQuery.isLoading || allPainQuery.isLoading,
     hasEntriesInRange,
     hasEntriesOverall,
     handleDateChange,
