@@ -90,8 +90,8 @@ export const dbtSchema = z.object({
 
 export const prefsSchema = z.object({
   model: z.string().max(200).default(DEFAULT_MODEL),
-  chatRange: z.string().default("all"),
-  lastRange: z.string().default("all"),
+  chatRange: z.string().max(50).default("all"),
+  lastRange: z.string().max(50).default("all"),
   graphSelection: z.record(z.string(), z.unknown()).default({}),
   birthday: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).refine(isoDateRefine, {
     message: "Invalid birthday: must be a valid calendar date in YYYY-MM-DD format"
