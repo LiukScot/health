@@ -8,12 +8,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700&display=swap" rel="stylesheet" />
     <title>Health</title>
-    <script>
-      try {
-        var t = localStorage.getItem("health-theme");
-        if (t && ["dark", "grey", "oled"].includes(t)) document.documentElement.dataset.theme = t;
-      } catch (e) {}
-    </script>
+    <script src="/theme-init.js"></script>
   </head>
   <body>
     <div id="root"></div>
