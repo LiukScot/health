@@ -18,7 +18,7 @@ const appTs = readFileSync(resolve(root, "backend/src/app.ts"), "utf8");
 // including the leading newline and trailing whitespace, because that is
 // exactly what the browser hashes when enforcing CSP (it does not strip
 // surrounding whitespace before computing the digest).
-const scriptMatch = html.match(/<script>([\s\S]*?)<\/script>/);
+const scriptMatch = html.match(/<script>([\s\S]*?)<\/script>/i);
 if (!scriptMatch) {
   console.error("ERROR: no inline <script> block found in frontend/index.html");
   process.exit(1);
