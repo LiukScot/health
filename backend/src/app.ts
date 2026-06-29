@@ -56,7 +56,7 @@ app.use("*", async (c, next) => {
   // if that inline script changes (ci/check-csp-hash.ts guards this).
   c.res.headers.set(
     "Content-Security-Policy",
-    "default-src 'self'; script-src 'self' 'sha256-Sg0wMWHz37ixu5Wy/jN1CurrXUIGuUlnoZaLi6EqfYA='; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data:; connect-src 'self'; font-src 'self' https://fonts.gstatic.com; object-src 'none'; frame-ancestors 'none'"
+    "default-src 'self'; script-src 'self' 'sha256-SYmqnPbOcSnEcdBzLjFMbLGa205TqQNjcle7y27x96o='; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data:; connect-src 'self'; font-src 'self' https://fonts.gstatic.com; object-src 'none'; frame-ancestors 'none'"
   );
 });
 

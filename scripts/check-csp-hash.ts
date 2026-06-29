@@ -14,13 +14,16 @@ const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const html = readFileSync(resolve(root, "frontend/index.html"), "utf8");
 const appTs = readFileSync(resolve(root, "backend/src/app.ts"), "utf8");
 
-// Extract inline script content (between <script> and </script>)
-const scriptMatch = html.match(/<script>\n([\s\S]*?)\n\s*<\/script>/);
+// Extract inline script content — capture everything between the tags,
+// including the leading newline and trailing whitespace, because that is
+// exactly what the browser hashes when enforcing CSP (it does not strip
+// surrounding whitespace before computing the digest).
+const scriptMatch = html.match(/<script>([\s\S]*?)<\/script>/);
 if (!scriptMatch) {
   console.error("ERROR: no inline <script> block found in frontend/index.html");
   process.exit(1);
 }
-const scriptContent = scriptMatch[1] + "\n";
+const scriptContent = scriptMatch[1];
 
 // Compute sha256 base64
 const hash = createHash("sha256").update(scriptContent).digest("base64");
