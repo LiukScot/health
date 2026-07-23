@@ -1,7 +1,7 @@
 import type { Context } from "hono";
 import { z } from "zod";
 import { HTTPException } from "hono/http-exception";
-import { parse as parseCookie, serialize as serializeCookie } from "cookie";
+import { parseCookie, stringifySetCookie } from "cookie";
 import { env } from "./env.ts";
 import { TAG_TYPES, type TagType, MOOD_TAG_FIELDS, type MoodTagField } from "./schema.ts";
 
@@ -41,7 +41,9 @@ export function readCookie(req: Request, name: string): string | null {
 }
 
 export function buildSessionCookie(sid: string): string {
-  return serializeCookie(env.SESSION_COOKIE_NAME, sid, {
+  return stringifySetCookie({
+    name: env.SESSION_COOKIE_NAME,
+    value: sid,
     httpOnly: true,
     sameSite: "strict",
     path: "/",
@@ -51,7 +53,9 @@ export function buildSessionCookie(sid: string): string {
 }
 
 export function clearSessionCookie(): string {
-  return serializeCookie(env.SESSION_COOKIE_NAME, "", {
+  return stringifySetCookie({
+    name: env.SESSION_COOKIE_NAME,
+    value: "",
     httpOnly: true,
     sameSite: "strict",
     path: "/",
