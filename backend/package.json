@@ -17,11 +17,12 @@
     "cookie": "^1.1.1",
     "drizzle-orm": "^0.45.2",
     "exceljs": "^4.4.0",
-    "hono": "^4.12.25",
+    "hono": "^4.12.26",
     "zod": "^4.3.6"
   },
   "overrides": {
-    "esbuild": ">=0.25.0",
+    "esbuild": ">=0.28.1",
+    "@hono/node-server": ">=1.19.13",
     "fast-uri": ">=3.1.2",
     "tmp": "^0.2.6",
     "qs": ">=6.15.2",

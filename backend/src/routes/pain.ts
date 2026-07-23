@@ -1,5 +1,5 @@
 import { Hono } from "hono";
-import { eq, and, desc, sql } from "drizzle-orm";
+import { eq, and, between, gte, lte, desc, sql } from "drizzle-orm";
 import { z } from "zod";
 import type { DrizzleDB } from "../db/index.ts";
 import { painEntries, painOptions } from "../db/index.ts";
@@ -8,6 +8,7 @@ import type { SQLiteDB } from "../db.ts";
 import {
   parseJson,
   parseIdParam,
+  DATE_RE,
   PAIN_MULTI_FIELDS,
   type PainMultiField,
   type PainTagMap,
@@ -128,10 +129,26 @@ pain.post("/options/restore", async (c) => {
 pain.get("/", (c) => {
   const db = c.get("db");
   const userId = c.get("userId");
+  const from = c.req.query("from");
+  const to = c.req.query("to");
+
+  if ((from && !DATE_RE.test(from)) || (to && !DATE_RE.test(to))) {
+    return c.json({ error: { code: "INVALID_DATE", message: "from/to must be YYYY-MM-DD" } }, 400);
+  }
+
+  const conditions = [eq(painEntries.userId, userId)];
+  if (from && to) {
+    conditions.push(between(painEntries.entryDate, from, to));
+  } else if (from) {
+    conditions.push(gte(painEntries.entryDate, from));
+  } else if (to) {
+    conditions.push(lte(painEntries.entryDate, to));
+  }
+
   const rows = db
     .select()
     .from(painEntries)
-    .where(eq(painEntries.userId, userId))
+    .where(and(...conditions))
     .orderBy(desc(painEntries.entryDate), desc(painEntries.entryTime), desc(painEntries.id))
     .all();
   return c.json({ data: rows.map((row) => painRowToApi(row)) });

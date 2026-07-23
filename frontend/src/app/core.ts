@@ -9,6 +9,8 @@ export const useAuthStore = create<AuthState>((set) => ({ user: null, setUser: (
 export type PainFieldKey = "area" | "symptoms" | "activities" | "medicines" | "habits" | "other";
 export type MoodFieldKey = "positive_moods" | "negative_moods" | "general_moods";
 
+export const MS_PER_DAY = 24 * 60 * 60 * 1000;
+
 export const sessionDataSchema = apiEnvelopeSchema(
   z.object({
     authenticated: z.boolean(),
@@ -72,7 +74,7 @@ export const prefsSchema = apiEnvelopeSchema(
     model: z.string(),
     chatRange: z.string(),
     lastRange: z.string(),
-    graphSelection: z.record(z.string(), z.any()),
+    graphSelection: z.record(z.string(), z.boolean()),
     birthday: z.union([z.string().regex(/^\d{4}-\d{2}-\d{2}$/, { message: "Birthday must be in YYYY-MM-DD format" }), z.null()]).nullable().optional().default(null),
   }),
 );
@@ -458,7 +460,7 @@ export function previousRange(from: string, to: string): { from: string; to: str
   if (duration <= 0) {
     return null;
   }
-  const prevTo = new Date(fromDate.getTime() - 24 * 60 * 60 * 1000);
+  const prevTo = new Date(fromDate.getTime() - MS_PER_DAY);
   const prevFrom = new Date(prevTo.getTime() - duration);
   return {
     from: prevFrom.toISOString().slice(0, 10),
@@ -555,7 +557,7 @@ export function getQuickRangeBounds(range: DashboardQuickRange): { from: string;
   }
   const days = Number(range);
   const now = new Date();
-  const from = new Date(now.getTime() - days * 24 * 60 * 60 * 1000);
+  const from = new Date(now.getTime() - days * MS_PER_DAY);
   return {
     from: from.toISOString().slice(0, 10),
     to: now.toISOString().slice(0, 10),

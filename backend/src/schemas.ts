@@ -90,8 +90,8 @@ export const dbtSchema = z.object({
 
 export const prefsSchema = z.object({
   model: z.string().max(200).default(DEFAULT_MODEL),
-  chatRange: z.string().default("all"),
-  lastRange: z.string().default("all"),
+  chatRange: z.string().max(50).default("all"),
+  lastRange: z.string().max(50).default("all"),
   graphSelection: z.record(z.string(), z.unknown()).default({}),
   birthday: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).refine(isoDateRefine, {
     message: "Invalid birthday: must be a valid calendar date in YYYY-MM-DD format"
@@ -132,11 +132,11 @@ const BACKUP_MAX_ROWS = 50_000;
 
 export const backupImportSchema = z.object({
   diary: z
-    .object({ rows: z.array(z.record(z.string(), z.any())).max(BACKUP_MAX_ROWS).default([]) })
+    .object({ rows: z.array(z.record(z.string(), z.unknown())).max(BACKUP_MAX_ROWS).default([]) })
     .optional(),
   pain: z
     .object({
-      rows: z.array(z.record(z.string(), z.any())).max(BACKUP_MAX_ROWS).default([]),
+      rows: z.array(z.record(z.string(), z.unknown())).max(BACKUP_MAX_ROWS).default([]),
       options: z
         .object({
           options: z.record(z.string(), z.array(z.string())).optional(),

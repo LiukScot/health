@@ -185,8 +185,8 @@ export function MultiSelectField({ label, fieldKey, value, options, onChange, do
           (raw) => apiEnvelopeSchema(z.object({ ok: z.boolean() })).parse(raw).data,
         );
         await queryClient.invalidateQueries({ queryKey: [queryKeyName] });
-      } catch {
-        // ignore failure: option already restored locally
+      } catch (e) {
+        console.error("commitCustomValue: failed to sync restored option to server", e);
       }
     })();
   };
@@ -215,8 +215,8 @@ export function MultiSelectField({ label, fieldKey, value, options, onChange, do
         (raw) => apiEnvelopeSchema(z.object({ ok: z.boolean() })).parse(raw).data,
       );
       await queryClient.invalidateQueries({ queryKey: [queryKeyName] });
-    } catch {
-      // ignore failure: option stays hidden locally for this session
+    } catch (e) {
+      console.error("permanentlyRemoveOption: failed to sync removal to server", e);
     }
   };
 

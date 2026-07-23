@@ -253,7 +253,12 @@ backup.post("/json/import", async (c) => {
     }
   });
 
-  tx();
+  try {
+    tx();
+  } catch (e) {
+    console.error("JSON import transaction failed:", e);
+    return c.json({ error: { code: "IMPORT_FAILED", message: "Import failed: invalid or incompatible backup data" } }, 422);
+  }
   return c.json({ data: { ok: true } });
 });
 
@@ -341,6 +346,11 @@ backup.post("/xlsx/import", async (c) => {
       );
     }
     const arrayBuffer = await file.arrayBuffer();
+    // Verify ZIP magic bytes (PK\x03\x04) — client-reported MIME is not trustworthy
+    const magic = new Uint8Array(arrayBuffer, 0, 4);
+    if (magic[0] !== 0x50 || magic[1] !== 0x4b || magic[2] !== 0x03 || magic[3] !== 0x04) {
+      return c.json({ error: { code: "INVALID_FILE_TYPE", message: "File does not appear to be a valid XLSX file" } }, 400);
+    }
     await workbook.xlsx.load(arrayBuffer);
   } else {
     const payload = (await c.req.json().catch(() => null)) as Record<string, unknown> | null;
@@ -359,6 +369,10 @@ backup.post("/xlsx/import", async (c) => {
         { error: { code: "FILE_TOO_LARGE", message: "XLSX upload exceeds 10 MB limit" } },
         413
       );
+    }
+    // Verify ZIP magic bytes (PK\x03\x04) — base64 payload can contain arbitrary bytes
+    if (decoded[0] !== 0x50 || decoded[1] !== 0x4b || decoded[2] !== 0x03 || decoded[3] !== 0x04) {
+      return c.json({ error: { code: "INVALID_FILE_TYPE", message: "File does not appear to be a valid XLSX file" } }, 400);
     }
     await workbook.xlsx.load(decoded.buffer.slice(decoded.byteOffset, decoded.byteOffset + decoded.byteLength));
   }
@@ -414,7 +428,12 @@ backup.post("/xlsx/import", async (c) => {
     }
   });
 
-  tx();
+  try {
+    tx();
+  } catch (e) {
+    console.error("XLSX import transaction failed:", e);
+    return c.json({ error: { code: "IMPORT_FAILED", message: "Import failed: invalid or incompatible XLSX data" } }, 422);
+  }
   return c.json({ data: { ok: true, imported: { diaryRows: diaryRows.length, painRows: painRows.length } } });
 });
 
@@ -430,6 +449,8 @@ backup.post("/purge", async (c) => {
     rawDb.query(`DELETE FROM user_preferences WHERE user_id = ?`).run(userId);
     rawDb.query(`DELETE FROM pain_options WHERE user_id = ?`).run(userId);
     rawDb.query(`DELETE FROM pain_removed_options WHERE user_id = ?`).run(userId);
+    rawDb.query(`DELETE FROM mood_options WHERE user_id = ?`).run(userId);
+    rawDb.query(`DELETE FROM mcp_tokens WHERE user_id = ?`).run(userId);
   });
   tx();
   return c.json({ data: { ok: true } });

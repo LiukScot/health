@@ -16,6 +16,10 @@ export const envSchema = z.object({
 
 export const env = envSchema.parse(process.env);
 
+if (!env.COOKIE_SECURE && process.env.NODE_ENV === "production") {
+  throw new Error("COOKIE_SECURE must be true in production");
+}
+
 export const allowedOrigins = new Set(
   env.ALLOWED_ORIGINS.split(",")
     .map((value) => value.trim())

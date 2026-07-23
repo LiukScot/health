@@ -10,6 +10,7 @@ import { Button } from "../components/ui/Button";
 import { FieldLine } from "../components/ui/FieldLine";
 import {
   DELETE_CONFIRM,
+  DATETIME_FIELD,
   DETAIL_ACTIONS,
   DETAIL_ACTION_BTN,
   DetailGroup,
@@ -23,9 +24,6 @@ import {
   PainBadge,
   PastEntriesColumn,
 } from "./entries";
-
-const DATETIME_FIELD =
-  "!w-auto max-w-full justify-self-start cursor-pointer tabular-nums [&::-webkit-calendar-picker-indicator]:cursor-pointer [&::-webkit-calendar-picker-indicator]:ml-2 [&::-webkit-calendar-picker-indicator]:invert [&::-webkit-calendar-picker-indicator]:opacity-60 hover:[&::-webkit-calendar-picker-indicator]:opacity-100";
 const THERAPY_CALLOUT =
   "m-0 px-3 py-2 bg-card-soft border-l-2 border-[color-mix(in_srgb,var(--accent)_50%,transparent)] rounded-sm text-muted text-hint leading-normal";
 

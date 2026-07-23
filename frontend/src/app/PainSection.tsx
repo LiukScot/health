@@ -18,6 +18,7 @@ import { Button } from "../components/ui/Button";
 import { FieldLine, FIELD_LINE_LABEL } from "../components/ui/FieldLine";
 import {
   DELETE_CONFIRM,
+  DATETIME_FIELD,
   DETAIL_ACTIONS,
   DETAIL_ACTION_BTN,
   DetailGroup,
@@ -33,9 +34,6 @@ import {
   TagList,
   TagTabs,
 } from "./entries";
-
-const DATETIME_FIELD =
-  "!w-auto max-w-full justify-self-start cursor-pointer tabular-nums [&::-webkit-calendar-picker-indicator]:cursor-pointer [&::-webkit-calendar-picker-indicator]:ml-2 [&::-webkit-calendar-picker-indicator]:invert [&::-webkit-calendar-picker-indicator]:opacity-60 hover:[&::-webkit-calendar-picker-indicator]:opacity-100";
 
 const PAIN_TABS: { id: PainFieldKey; label: string }[] = [
   { id: "area", label: "Area" },
