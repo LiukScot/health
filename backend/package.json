@@ -34,6 +34,6 @@
     "@types/cookie": "^1.0.0",
     "@types/node": "^26.0.0",
     "drizzle-kit": "^0.31.10",
-    "typescript": "^6.0.3"
+    "typescript": "^7.0.2"
   }
 }
