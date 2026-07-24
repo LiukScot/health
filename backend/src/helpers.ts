@@ -1,7 +1,7 @@
 import type { Context } from "hono";
 import { z } from "zod";
 import { HTTPException } from "hono/http-exception";
-import cookie from "cookie";
+import { parseCookie, stringifySetCookie } from "cookie";
 import { env } from "./env.ts";
 import { TAG_TYPES, type TagType, MOOD_TAG_FIELDS, type MoodTagField } from "./schema.ts";
 
@@ -36,12 +36,14 @@ export function parseIdParam(c: Context, paramName = "id"): { id: number } | Res
 export function readCookie(req: Request, name: string): string | null {
   const raw = req.headers.get("cookie");
   if (!raw) return null;
-  const parsed = cookie.parse(raw);
+  const parsed = parseCookie(raw);
   return parsed[name] ?? null;
 }
 
 export function buildSessionCookie(sid: string): string {
-  return cookie.serialize(env.SESSION_COOKIE_NAME, sid, {
+  return stringifySetCookie({
+    name: env.SESSION_COOKIE_NAME,
+    value: sid,
     httpOnly: true,
     sameSite: "strict",
     path: "/",
@@ -51,7 +53,9 @@ export function buildSessionCookie(sid: string): string {
 }
 
 export function clearSessionCookie(): string {
-  return cookie.serialize(env.SESSION_COOKIE_NAME, "", {
+  return stringifySetCookie({
+    name: env.SESSION_COOKIE_NAME,
+    value: "",
     httpOnly: true,
     sameSite: "strict",
     path: "/",
