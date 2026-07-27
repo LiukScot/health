@@ -13,7 +13,7 @@ updates:
       actions-routine:
         patterns: ["*"]
 
-  - package-ecosystem: "npm"
+  - package-ecosystem: "bun"
     directories:
       - "/"
       - "/backend"
@@ -27,7 +27,7 @@ updates:
       semver-minor-days: 14
       semver-patch-days: 7
     groups:
-      npm-minor-patch:
+      bun-minor-patch:
         patterns: ["*"]
         update-types: ["minor", "patch"]
 
