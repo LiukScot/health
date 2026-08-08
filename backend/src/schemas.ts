@@ -205,3 +205,17 @@ export const stylesSchema = z.object({
 });
 
 export const moneyPrefsSchema = z.object({ showZeroAssets: z.boolean() });
+
+// Import rows stay loosely typed on purpose: the fields are read defensively
+// by applyImport, and passthrough keeps unknown keys so a backup written by
+// an older or newer version still imports.
+const looseRow = z.looseObject({});
+
+export const moneyBackupImportSchema = z.object({
+  transactions: z.array(looseRow).max(50_000).optional(),
+  monthlyMovements: z.array(looseRow).max(50_000).optional(),
+  monthlySnapshots: z.array(looseRow).max(50_000).optional(),
+  assetColors: z.record(z.string().min(1).max(120), z.string()).optional(),
+  assetRisks: z.record(z.string().min(1).max(120), z.string()).optional(),
+  preferences: looseRow.optional()
+});

@@ -23,6 +23,7 @@ import moneyMovements from "./routes/money-movements.ts";
 import moneySnapshots from "./routes/money-snapshots.ts";
 import moneyStyles from "./routes/money-styles.ts";
 import moneyPrefs from "./routes/money-prefs.ts";
+import moneyBackup from "./routes/money-backup.ts";
 import { createMcpApp } from "./mcp/server.ts";
 
 // Initialize database
@@ -107,6 +108,8 @@ app.route("/api/v1/money/monthly-movements", moneyMovements);
 app.route("/api/v1/money/monthly-snapshots", moneySnapshots);
 app.route("/api/v1/money/assets/styles", moneyStyles);
 app.route("/api/v1/money/preferences", moneyPrefs);
+app.route("/api/v1/money/backup", moneyBackup);
+app.route("/api/v1/money/data", moneyBackup);
 
 // API 404 fallback
 app.all("/api/*", (c) => {

@@ -15,6 +15,7 @@ import {
 } from "../helpers.ts";
 import { backupImportSchema, DEFAULT_MODEL } from "../schemas.ts";
 import { requireAuth } from "../middleware/auth.ts";
+import { sheetToObjects } from "../xlsx-helpers.ts";
 import { loadPainOptionsForUser, loadPreselectedMedicines } from "./pain.ts";
 import { loadMoodOptionsForUser } from "./mood.ts";
 
@@ -23,45 +24,6 @@ type Env = { Variables: { db: DrizzleDB; rawDb: SQLiteDB; userId: number; userEm
 const backup = new Hono<Env>();
 
 backup.use(requireAuth);
-
-// Normalize ExcelJS cell value to plain primitive matching the previous xlsx behavior.
-// ExcelJS returns objects for richtext / hyperlink / formula and Date objects for date cells.
-function cellToPrimitive(v: unknown): string | number | boolean | null {
-  if (v == null) return "";
-  if (v instanceof Date) return v.toISOString().slice(0, 10);
-  if (typeof v === "object") {
-    const obj = v as Record<string, unknown>;
-    if (Array.isArray(obj.richText)) return (obj.richText as Array<{ text?: string }>).map((r) => r.text ?? "").join("");
-    if (typeof obj.text === "string") return obj.text;
-    if (obj.result !== undefined) return cellToPrimitive(obj.result);
-    if (typeof obj.hyperlink === "string") return (obj.text as string | undefined) ?? obj.hyperlink;
-    return "";
-  }
-  return v as string | number | boolean;
-}
-
-function sheetToObjects(sheet: ExcelJS.Worksheet | undefined): Record<string, unknown>[] {
-  if (!sheet) return [];
-  const headers: string[] = [];
-  const rows: Record<string, unknown>[] = [];
-  sheet.eachRow({ includeEmpty: false }, (row, rowNumber) => {
-    const values = row.values as unknown[]; // ExcelJS row.values is 1-indexed
-    if (rowNumber === 1) {
-      for (let i = 1; i < values.length; i++) {
-        headers[i - 1] = String(values[i] ?? "").trim();
-      }
-      return;
-    }
-    const obj: Record<string, unknown> = {};
-    for (let i = 1; i < values.length; i++) {
-      const key = headers[i - 1];
-      if (!key) continue;
-      obj[key] = cellToPrimitive(values[i]);
-    }
-    rows.push(obj);
-  });
-  return rows;
-}
 
 backup.get("/json", (c) => {
   const db = c.get("db");
