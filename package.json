@@ -15,6 +15,7 @@
     "typecheck": "bun run --cwd backend typecheck && bun run --cwd frontend build",
     "migrate": "./scripts/run-bun.sh --cwd backend src/migrate.ts",
     "migrate:legacy": "./scripts/run-bun.sh --cwd backend src/migrate-from-mytools.ts",
+    "migrate:money": "./scripts/run-bun.sh --cwd backend src/migrate-money.ts",
     "user": "./scripts/run-bun.sh --cwd backend src/user-cli.ts",
     "backup": "./scripts/run-bun.sh --cwd backend src/backup-db.ts",
     "restore": "./scripts/run-bun.sh --cwd backend src/restore-db.ts",

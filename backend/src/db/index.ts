@@ -23,5 +23,9 @@ export {
   moodOptions,
   mcpTokens,
   memorableDays,
-  metricTypes
+  metricTypes,
+  transactions,
+  monthlyMovements,
+  monthlySnapshots,
+  assetStyles
 } from "./drizzle-schema.ts";

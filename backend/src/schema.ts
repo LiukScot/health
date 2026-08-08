@@ -1,4 +1,4 @@
-export const SCHEMA_VERSION = 11;
+export const SCHEMA_VERSION = 12;
 
 export const METRIC_KINDS = ["scale", "counter", "tags", "text", "measure"] as const;
 export type MetricKind = (typeof METRIC_KINDS)[number];
@@ -133,11 +133,13 @@ export const migrationStatements: string[] = [
     last_range TEXT NOT NULL DEFAULT 'all',
     graph_selection_json TEXT NOT NULL DEFAULT '{}',
     birthday TEXT,
+    show_zero_assets INTEGER NOT NULL DEFAULT 0,
     updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
   )`,
-  // schema-v9: birthday column added to CREATE TABLE above; ALTER TABLE for
-  // existing databases is handled separately in db.ts via columnExists guard.
+  // schema-v9: birthday column added to CREATE TABLE above; schema-v12:
+  // show_zero_assets. ALTER TABLE for existing databases is handled
+  // separately in db.ts via columnExists guard.
   `CREATE TABLE IF NOT EXISTS memorable_days (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     user_id INTEGER NOT NULL,
@@ -451,6 +453,65 @@ export const migrationStatements: string[] = [
   )`,
   `CREATE UNIQUE INDEX IF NOT EXISTS idx_metric_types_user_key ON metric_types(user_id, key)`,
   buildMetricTypesSeedSql(),
+
+  // ── Money realm ────────────────────────────────────────────────────────
+  // Ported from the standalone money app. Table names are kept unprefixed to
+  // match the health tables next to them, and because none of them collide.
+  // Money's own users/sessions tables are gone: both realms share this DB's
+  // users and sessions. Its show_zero_assets preference moved into
+  // user_preferences above rather than getting a second preferences table.
+  `CREATE TABLE IF NOT EXISTS transactions (
+    id TEXT PRIMARY KEY,
+    user_id INTEGER NOT NULL,
+    tx_date TEXT NOT NULL,
+    asset TEXT NOT NULL,
+    tipo TEXT NOT NULL,
+    derived_type TEXT NOT NULL,
+    buy_value REAL NOT NULL DEFAULT 0,
+    pnl REAL NOT NULL DEFAULT 0,
+    current_value REAL NOT NULL DEFAULT 0,
+    note TEXT,
+    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+  )`,
+  `CREATE INDEX IF NOT EXISTS idx_tx_user_date ON transactions(user_id, tx_date DESC)`,
+  `CREATE TABLE IF NOT EXISTS monthly_movements (
+    id TEXT PRIMARY KEY,
+    user_id INTEGER NOT NULL,
+    name TEXT NOT NULL,
+    direction TEXT NOT NULL,
+    amount REAL NOT NULL DEFAULT 0,
+    note TEXT,
+    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+  )`,
+  `CREATE INDEX IF NOT EXISTS idx_mm_user ON monthly_movements(user_id, direction)`,
+  `CREATE INDEX IF NOT EXISTS idx_mm_user_name ON monthly_movements(user_id, name, id)`,
+  `CREATE TABLE IF NOT EXISTS monthly_snapshots (
+    id TEXT PRIMARY KEY,
+    user_id INTEGER NOT NULL,
+    snapshot_date TEXT NOT NULL,
+    low_risk REAL NOT NULL DEFAULT 0,
+    medium_risk REAL NOT NULL DEFAULT 0,
+    high_risk REAL NOT NULL DEFAULT 0,
+    liquid REAL NOT NULL DEFAULT 0,
+    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+  )`,
+  `CREATE INDEX IF NOT EXISTS idx_snap_user_date ON monthly_snapshots(user_id, snapshot_date DESC)`,
+  `CREATE TABLE IF NOT EXISTS asset_styles (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id INTEGER NOT NULL,
+    asset TEXT NOT NULL,
+    color_hex TEXT,
+    risk_level TEXT,
+    updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+  )`,
+  `CREATE UNIQUE INDEX IF NOT EXISTS idx_asset_styles_user_asset ON asset_styles(user_id, asset)`,
 ];
 
 export const TAG_TYPES = ["area", "symptoms", "activities", "medicines", "habits", "other"] as const;
