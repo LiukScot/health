@@ -21,15 +21,13 @@ import {
 } from "./core";
 
 describe("formatDocumentTitle", () => {
-  test("appends Health when section provided", () => {
-    expect(formatDocumentTitle("Diary")).toBe("Diary - Health");
+  test("names the app when no realm is given", () => {
+    expect(formatDocumentTitle("Sign in")).toBe("Sign in - World");
+    expect(formatDocumentTitle()).toBe("World");
   });
 
-  test("returns Health alone when no section", () => {
-    expect(formatDocumentTitle()).toBe("Health");
-  });
-
-  test("uses the realm name as the app name", () => {
+  test("names the realm when one is given", () => {
+    expect(formatDocumentTitle("Diary", "health")).toBe("Diary - Health");
     expect(formatDocumentTitle("Snapshots", "money")).toBe("Snapshots - Money");
   });
 });

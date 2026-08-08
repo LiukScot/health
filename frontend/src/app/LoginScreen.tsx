@@ -15,8 +15,8 @@ export function LoginScreen({ loginForm, loginMutation }: LoginScreenProps) {
   return (
     <main className="grid place-items-center min-h-screen p-0 max-mobile:p-3">
       <section className="w-[min(560px,94vw)] bg-card border border-border rounded-lg p-3 shadow-[var(--shadow)]">
-        <h1>Health</h1>
-        <p>Sign in to access your private health workspace.</p>
+        <h1>World</h1>
+        <p>Sign in to access your private workspace.</p>
         <form noValidate onSubmit={loginForm.handleSubmit((values) => loginMutation.mutate(values))} className="grid gap-3">
           <label className={LOGIN_LABEL}>
             Email

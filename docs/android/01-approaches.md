@@ -1,6 +1,6 @@
 # Android conversion — approaches
 
-Five candidate paths for delivering Health on Android. Ordered by
+Five candidate paths for delivering World on Android. Ordered by
 effort, low → high.
 
 ## A. TWA / PWA wrapper

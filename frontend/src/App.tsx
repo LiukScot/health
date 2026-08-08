@@ -102,7 +102,7 @@ function App() {
   useEffect(() => {
     document.title = loggedIn
       ? formatDocumentTitle(navLabels[nav], realm)
-      : formatDocumentTitle("Sign in", realm);
+      : formatDocumentTitle("Sign in");
   }, [loggedIn, nav, realm]);
 
   // Drive the accent (see :root[data-realm] in styles.css) and remember the

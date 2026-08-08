@@ -1,6 +1,6 @@
 # Android conversion — design docs
 
-This folder collects the analysis behind bringing Health to Android.
+This folder collects the analysis behind bringing World to Android.
 No code yet. The goal of these docs is to make the eventual decision
 explicit and reviewable.
 

@@ -56,7 +56,7 @@ app.use("*", async (c, next) => {
   // if that inline script changes (the settings e2e test guards this).
   c.res.headers.set(
     "Content-Security-Policy",
-    "default-src 'self'; script-src 'self' 'sha256-850K9AaV93gSeoYmOwZFtyC8ZIIPzEoCuvIvscH9bsc='; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data:; connect-src 'self'; font-src 'self' https://fonts.gstatic.com; object-src 'none'; frame-ancestors 'none'"
+    "default-src 'self'; script-src 'self' 'sha256-DjZOBaBl2sWi5KpUTP2ZHr4F4RYPlys7DKDml1hHm98='; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data:; connect-src 'self'; font-src 'self' https://fonts.gstatic.com; object-src 'none'; frame-ancestors 'none'"
   );
 });
 
@@ -181,7 +181,7 @@ app.get("*", (c) => {
     return new Response(Bun.file(indexFile));
   }
 
-  return c.text("Health backend running. Frontend build not found.");
+  return c.text("World backend running. Frontend build not found.");
 });
 
 // Global error handler

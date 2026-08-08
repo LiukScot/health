@@ -1,6 +1,6 @@
 # android/
 
-Placeholder for the Android client of Health.
+Placeholder for the Android client of World.
 
 **Status**: not implemented yet. Approach decision pending — see
 [`docs/android/`](../docs/android/) for the comparison of options and
@@ -19,7 +19,7 @@ monorepo root) — Gradle expects `settings.gradle.kts` at the project
 root and gets confused by sibling `node_modules/`.
 
 ```
-File → Open → /home/luca/github/apps/health/android
+File → Open → /home/luca/github/apps/world/android
 ```
 
 ## Talking to the backend

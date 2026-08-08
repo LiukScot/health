@@ -258,7 +258,7 @@ export const navLabels: Record<NavItem, string> = {
 export const realms = ["health", "money"] as const;
 export type Realm = (typeof realms)[number];
 export const DEFAULT_REALM: Realm = "health";
-export const REALM_STORAGE_KEY = "health-realm";
+export const REALM_STORAGE_KEY = "world-realm";
 
 export const realmLabels: Record<Realm, string> = { health: "Health", money: "Money" };
 
@@ -283,9 +283,13 @@ export function readStoredRealm(): Realm {
   return DEFAULT_REALM;
 }
 
-export function formatDocumentTitle(section?: string, realm: Realm = DEFAULT_REALM) {
-  const appName = realmLabels[realm];
-  return section ? `${section} - ${appName}` : appName;
+export const APP_NAME = "World";
+
+// Inside a realm the title names the realm ("Diary - Health"); outside one —
+// the sign-in screen, before a realm is picked — it names the app.
+export function formatDocumentTitle(section?: string, realm?: Realm) {
+  const name = realm ? realmLabels[realm] : APP_NAME;
+  return section ? `${section} - ${name}` : name;
 }
 
 export const dashboardQuickRanges = [
@@ -318,7 +322,7 @@ export function formatMonthLabel(value: Date) {
   return new Intl.DateTimeFormat(undefined, { month: "long", year: "numeric" }).format(value);
 }
 
-export const THEME_STORAGE_KEY = "health-theme";
+export const THEME_STORAGE_KEY = "world-theme";
 export const themeIds = ["dark", "grey", "oled"] as const;
 export type ThemeId = (typeof themeIds)[number];
 export const DEFAULT_THEME: ThemeId = "dark";

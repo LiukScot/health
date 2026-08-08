@@ -7,7 +7,7 @@ choice is reviewable and reversible.
 ## Proposed top-level layout
 
 ```
-health/
+world/
 ├── backend/                Bun + SQLite, unchanged
 ├── frontend/               React + Vite + shadcn/ui, unchanged
 ├── android/                NEW — Android client (approach TBD)
@@ -64,7 +64,7 @@ None of these are close.
 - Gradle wrapper (`gradlew`) lives inside `android/`. Build commands
   always run from there: `cd android && ./gradlew assembleDebug`.
 - Android Studio opens `android/` as the project root, not the repo
-  root. Open `health/android` from the welcome screen, not `health/`.
+  root. Open `world/android` from the welcome screen, not `world/`.
 - Add to `android/.gitignore`: `.gradle/`, `build/`, `local.properties`,
   `*.iml`, `.idea/` — the usual Android list.
 

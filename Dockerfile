@@ -22,7 +22,7 @@ RUN mkdir -p /app/data
 
 ENV HOST=0.0.0.0 \
     PORT=5555 \
-    DB_PATH=/app/data/health.sqlite
+    DB_PATH=/app/data/world.sqlite
 
 EXPOSE 5555
 HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \

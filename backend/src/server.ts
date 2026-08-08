@@ -13,4 +13,4 @@ const server = Bun.serve({
   fetch: app.fetch
 });
 
-console.log(`Health backend listening on http://${env.HOST}:${server.port}`);
+console.log(`World backend listening on http://${env.HOST}:${server.port}`);

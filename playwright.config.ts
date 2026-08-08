@@ -4,8 +4,8 @@ import path from "node:path";
 import { defineConfig } from "@playwright/test";
 
 const smokePort = Number(process.env.SMOKE_PORT || 4173);
-const smokeDbDir = fs.mkdtempSync(path.join(os.tmpdir(), "health-playwright-"));
-const smokeDbPath = path.join(smokeDbDir, "smoke-health.sqlite");
+const smokeDbDir = fs.mkdtempSync(path.join(os.tmpdir(), "world-playwright-"));
+const smokeDbPath = path.join(smokeDbDir, "smoke-world.sqlite");
 const externalBaseURL = process.env.PLAYWRIGHT_BASE_URL;
 const quoteShell = (value: string) => JSON.stringify(value);
 
