@@ -9,7 +9,6 @@ import {
   AnimatedEditingLabel,
   MultiSelectField,
   SectionHead,
-  useDiaryColumnCap,
 } from "./shared";
 import { BarMetric, EmptyState } from "./screen-helpers";
 import { bandNine, diaryPreview, formatEntrySummaryDate } from "./screen-format";
@@ -29,7 +28,7 @@ import {
   ENTRY_ROW,
   ENTRY_SUMMARY,
   PainBadge,
-  PastEntriesColumn,
+  PastEntries,
   TagList,
   TagTabs,
 } from "./entries";
@@ -74,19 +73,13 @@ export function DiarySection({
     { id: "general" as const, label: "General", count: csvToList(generalMoods).length },
   ];
 
-  const {
-    leftColRef,
-    pastColRef,
-    pastEntriesBodyRef,
-    overflow: pastEntriesOverflow,
-  } = useDiaryColumnCap(diaryEntries, isLoading);
 
   return (
     <section className="@container p-2">
       <h1 className="m-0 mb-3 text-title font-bold tracking-tight text-text">Diary</h1>
-      <div className="grid gap-8 wide:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] wide:gap-12 wide:items-start">
-        <div className="min-w-0 max-wide:border-b max-wide:border-border" ref={leftColRef}>
-          <EntriesHeading className="wide:mt-0">New entry</EntriesHeading>
+      <div className="grid gap-8 max-w-[80ch]">
+        <div className="min-w-0 border-b border-border">
+          <EntriesHeading className="mt-0">New entry</EntriesHeading>
           <form className="mb-2" onSubmit={diaryForm.handleSubmit(onSubmit)}>
             <div className="grid gap-3 content-start min-w-0">
               <div className="sr-only" aria-hidden="true">
@@ -198,7 +191,7 @@ export function DiarySection({
             </div>
           </form>
         </div>
-        <PastEntriesColumn
+        <PastEntries
           title="Past entries"
           isLoading={isLoading}
           loadingText="Loading diary entries..."
@@ -209,9 +202,6 @@ export function DiarySection({
               description="Use the form above to log your first mood entry. Once you save it, it will appear here."
             />
           }
-          overflow={pastEntriesOverflow}
-          colRef={pastColRef}
-          bodyRef={pastEntriesBodyRef}
         >
           {diaryEntries.map((entry) => {
             const moodBand = bandNine(entry.moodLevel ?? undefined, true);
@@ -264,7 +254,7 @@ export function DiarySection({
               </details>
             );
           })}
-        </PastEntriesColumn>
+        </PastEntries>
       </div>
     </section>
   );

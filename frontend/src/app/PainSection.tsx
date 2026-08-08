@@ -10,7 +10,6 @@ import {
   AnimatedEditingLabel,
   MultiSelectField,
   SectionHead,
-  useDiaryColumnCap,
 } from "./shared";
 import { BarMetric, CoffeeStepper, EmptyState } from "./screen-helpers";
 import { bandNine, painPreview, formatEntrySummaryDate } from "./screen-format";
@@ -30,7 +29,7 @@ import {
   ENTRY_ROW,
   ENTRY_SUMMARY,
   PainBadge,
-  PastEntriesColumn,
+  PastEntries,
   TagList,
   TagTabs,
 } from "./entries";
@@ -87,12 +86,6 @@ export function PainSection({
 
   const painOptionsForTab = (id: PainFieldKey) => painFieldOptions[id];
 
-  const {
-    leftColRef,
-    pastColRef,
-    pastEntriesBodyRef,
-    overflow: pastEntriesOverflow,
-  } = useDiaryColumnCap(painEntries, isLoading);
 
   const tabLabel = PAIN_TABS.find((t) => t.id === painTab)?.label ?? "";
   const painDetails: { label: string; key: PainFieldKey }[] = [
@@ -107,9 +100,9 @@ export function PainSection({
   return (
     <section className="@container p-2">
       <h1 className="m-0 mb-3 text-title font-bold tracking-tight text-text">Pain</h1>
-      <div className="grid gap-8 wide:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] wide:gap-12 wide:items-start">
-        <div className="min-w-0 max-wide:border-b max-wide:border-border" ref={leftColRef}>
-          <EntriesHeading className="wide:mt-0">New entry</EntriesHeading>
+      <div className="grid gap-8 max-w-[80ch]">
+        <div className="min-w-0 border-b border-border">
+          <EntriesHeading className="mt-0">New entry</EntriesHeading>
           <form className="mb-2" onSubmit={painForm.handleSubmit(onSubmit)}>
             <div className="grid gap-3 content-start min-w-0">
               <div className="sr-only" aria-hidden="true">
@@ -187,7 +180,7 @@ export function PainSection({
             </div>
           </form>
         </div>
-        <PastEntriesColumn
+        <PastEntries
           title="Past entries"
           isLoading={isLoading}
           loadingText="Loading pain entries..."
@@ -198,9 +191,6 @@ export function PainSection({
               description="Track your first session with the form above. Your pain history will show up here once you save it."
             />
           }
-          overflow={pastEntriesOverflow}
-          colRef={pastColRef}
-          bodyRef={pastEntriesBodyRef}
         >
           {painEntries.map((entry) => {
             const painBand = bandNine(entry.painLevel ?? undefined);
@@ -254,7 +244,7 @@ export function PainSection({
               </details>
             );
           })}
-        </PastEntriesColumn>
+        </PastEntries>
       </div>
     </section>
   );

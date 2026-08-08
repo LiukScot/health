@@ -3,7 +3,7 @@ import {
   type DbtEntry,
   type DbtFormValues,
 } from "./core";
-import { AnimatedEditingLabel, SectionHead, useDiaryColumnCap } from "./shared";
+import { AnimatedEditingLabel, SectionHead } from "./shared";
 import { EmptyState } from "./screen-helpers";
 import { formatEntrySummaryDate } from "./screen-format";
 import { Button } from "../components/ui/Button";
@@ -22,7 +22,7 @@ import {
   ENTRY_ROW,
   ENTRY_SUMMARY,
   PainBadge,
-  PastEntriesColumn,
+  PastEntries,
 } from "./entries";
 const THERAPY_CALLOUT =
   "m-0 px-3 py-2 bg-card-soft border-l-2 border-[color-mix(in_srgb,var(--accent)_50%,transparent)] rounded-sm text-muted text-hint leading-normal";
@@ -105,12 +105,6 @@ export function DbtSection({
     },
   ];
 
-  const {
-    leftColRef,
-    pastColRef,
-    pastEntriesBodyRef,
-    overflow: pastEntriesOverflow,
-  } = useDiaryColumnCap(dbtEntries, isLoading);
 
   const dbtDetails: { label: string; key: keyof DbtEntry }[] = [
     { label: "Emotion", key: "emotionName" },
@@ -124,9 +118,9 @@ export function DbtSection({
   return (
     <section className="@container p-2">
       <h1 className="m-0 mb-3 text-title font-bold tracking-tight text-text">DBT Distress Tolerance</h1>
-      <div className="grid gap-8 wide:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] wide:gap-12 wide:items-start">
-        <div className="min-w-0 max-wide:border-b max-wide:border-border" ref={leftColRef}>
-          <EntriesHeading className="wide:mt-0">New entry</EntriesHeading>
+      <div className="grid gap-8 max-w-[80ch]">
+        <div className="min-w-0 border-b border-border">
+          <EntriesHeading className="mt-0">New entry</EntriesHeading>
           <form className="mb-2" onSubmit={dbtForm.handleSubmit(onSubmit)}>
             <div className="grid gap-3 content-start min-w-0">
               <FieldLine
@@ -179,7 +173,7 @@ export function DbtSection({
             </div>
           </form>
         </div>
-        <PastEntriesColumn
+        <PastEntries
           title="Past entries"
           isLoading={isLoading}
           loadingText="Loading DBT entries..."
@@ -190,9 +184,6 @@ export function DbtSection({
               description="Work through the steps above to log your first distress-tolerance practice. Saved entries will appear here."
             />
           }
-          overflow={pastEntriesOverflow}
-          colRef={pastColRef}
-          bodyRef={pastEntriesBodyRef}
         >
           {dbtEntries.map((entry) => (
             <details key={entry.id} className={ENTRY_ROW}>
@@ -233,7 +224,7 @@ export function DbtSection({
               </div>
             </details>
           ))}
-        </PastEntriesColumn>
+        </PastEntries>
       </div>
     </section>
   );

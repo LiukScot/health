@@ -1,5 +1,4 @@
-import type { ReactNode, Ref } from "react";
-import { Button } from "../components/ui/Button";
+import type { ReactNode } from "react";
 
 // Past-entries primitives shared by CBT/DBT/Diary/Pain. The summary layout
 // differs per screen (badges, mood, preview), so these expose styled wrappers
@@ -33,19 +32,16 @@ export function EntriesHeading({ children, className = "" }: { children: ReactNo
   );
 }
 
-// Right column of the split form (CBT/DBT/Diary/Pain). Owns the wide-screen
-// height-cap layout (--diary-past-col-max-h is set by useDiaryColumnCap) that
-// clips overflow rows behind a fade + "Show more". leftColRef stays on the form
-// column in the screen; this takes the past column + body refs.
-export function PastEntriesColumn({
+// The entry log, stacked under the form it belongs to. Every row is rendered:
+// the list used to sit in a right-hand column capped to the form's height,
+// which clipped the overflow behind a fade and a "Show more" button that was
+// never wired to anything, so the clipped rows had no way back.
+export function PastEntries({
   title,
   isLoading,
   loadingText,
   isEmpty,
   emptyState,
-  overflow,
-  colRef,
-  bodyRef,
   children,
 }: {
   title: ReactNode;
@@ -53,36 +49,13 @@ export function PastEntriesColumn({
   loadingText: string;
   isEmpty: boolean;
   emptyState: ReactNode;
-  overflow: boolean;
-  colRef: Ref<HTMLDivElement>;
-  bodyRef: Ref<HTMLDivElement>;
   children: ReactNode;
 }) {
   return (
-    <div
-      ref={colRef}
-      className="min-w-0 wide:border-l wide:border-border wide:pl-12 wide:flex wide:flex-col wide:min-h-[var(--diary-past-col-max-h,0)] wide:max-h-[var(--diary-past-col-max-h,none)]"
-    >
+    <div className="min-w-0">
       {isLoading && <p className="text-muted text-control">{loadingText}</p>}
-      <EntriesHeading className="wide:mt-0">{title}</EntriesHeading>
-      {isEmpty ? (
-        emptyState
-      ) : (
-        <div className="wide:flex wide:flex-col wide:flex-1 wide:min-h-0">
-          <div
-            ref={bodyRef}
-            className="wide:flex-1 wide:min-h-0 wide:overflow-hidden wide:[mask-image:linear-gradient(to_bottom,#000_calc(100%-20px),transparent)]"
-          >
-            {children}
-          </div>
-          <div
-            aria-hidden={!overflow}
-            className="flex justify-end items-center pt-2 wide:flex-shrink-0 wide:box-border wide:min-h-[calc(8px+40px+20px)]"
-          >
-            {!isLoading && overflow ? <Button className="mb-5">Show more</Button> : null}
-          </div>
-        </div>
-      )}
+      <EntriesHeading className="mt-0">{title}</EntriesHeading>
+      {isEmpty ? emptyState : children}
     </div>
   );
 }

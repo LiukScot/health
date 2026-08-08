@@ -3,7 +3,7 @@ import { Controller, type UseFormReturn } from "react-hook-form";
 import { Button } from "../../components/ui/Button";
 import { FieldLine, FIELD_LINE_LABEL } from "../../components/ui/FieldLine";
 import { Select } from "../../components/ui/select";
-import { AnimatedEditingLabel, useDiaryColumnCap } from "../shared";
+import { AnimatedEditingLabel } from "../shared";
 import { EmptyState } from "../screen-helpers";
 import {
   DELETE_CONFIRM,
@@ -18,7 +18,7 @@ import {
   ENTRY_ROW,
   ENTRY_SUMMARY,
   PainBadge,
-  PastEntriesColumn,
+  PastEntries,
 } from "../entries";
 import {
   formatCurrency,
@@ -62,14 +62,13 @@ export function TransactionsSection({
   const watchedTipo = txForm.watch("tipo");
   const showBuyValue = tipoShowsBuyValue(watchedTipo);
 
-  const { leftColRef, pastColRef, pastEntriesBodyRef, overflow } = useDiaryColumnCap(transactions, isLoading);
 
   return (
     <section className="@container p-2">
       <h1 className="m-0 mb-3 text-title font-bold tracking-tight text-text">Transactions</h1>
-      <div className="grid gap-8 wide:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] wide:gap-12 wide:items-start">
-        <div className="min-w-0 max-wide:border-b max-wide:border-border" ref={leftColRef}>
-          <EntriesHeading className="wide:mt-0">New transaction</EntriesHeading>
+      <div className="grid gap-8 max-w-[80ch]">
+        <div className="min-w-0 border-b border-border">
+          <EntriesHeading className="mt-0">New transaction</EntriesHeading>
           <form className="mb-2" onSubmit={txForm.handleSubmit(onSubmit)}>
             <div className="grid gap-3 content-start min-w-0">
               <FieldLine
@@ -164,7 +163,7 @@ export function TransactionsSection({
           </form>
         </div>
 
-        <PastEntriesColumn
+        <PastEntries
           title="History"
           isLoading={isLoading}
           loadingText="Loading transactions..."
@@ -175,9 +174,6 @@ export function TransactionsSection({
               description="Record a purchase, a coupon or a revaluation with the form. Everything you log shows up here, newest first."
             />
           }
-          overflow={overflow}
-          colRef={pastColRef}
-          bodyRef={pastEntriesBodyRef}
         >
           {transactions.map((row) => {
             const gain = row.pnl > 0;
@@ -227,7 +223,7 @@ export function TransactionsSection({
               </details>
             );
           })}
-        </PastEntriesColumn>
+        </PastEntries>
       </div>
     </section>
   );

@@ -3,7 +3,7 @@ import {
   type CbtEntry,
   type CbtFormValues,
 } from "./core";
-import { AnimatedEditingLabel, SectionHead, useDiaryColumnCap } from "./shared";
+import { AnimatedEditingLabel, SectionHead } from "./shared";
 import { EmptyState } from "./screen-helpers";
 import { formatEntrySummaryDate } from "./screen-format";
 import { Button } from "../components/ui/Button";
@@ -22,7 +22,7 @@ import {
   ENTRY_ROW,
   ENTRY_SUMMARY,
   PainBadge,
-  PastEntriesColumn,
+  PastEntries,
 } from "./entries";
 
 export function CbtSection({
@@ -107,19 +107,13 @@ export function CbtSection({
     },
   ];
 
-  const {
-    leftColRef,
-    pastColRef,
-    pastEntriesBodyRef,
-    overflow: pastEntriesOverflow,
-  } = useDiaryColumnCap(cbtEntries, isLoading);
 
   return (
     <section className="@container p-2">
       <h1 className="m-0 mb-3 text-title font-bold tracking-tight text-text">CBT Thought Response</h1>
-      <div className="grid gap-8 wide:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] wide:gap-12 wide:items-start">
-        <div className="min-w-0 max-wide:border-b max-wide:border-border" ref={leftColRef}>
-          <EntriesHeading className="wide:mt-0">New entry</EntriesHeading>
+      <div className="grid gap-8 max-w-[80ch]">
+        <div className="min-w-0 border-b border-border">
+          <EntriesHeading className="mt-0">New entry</EntriesHeading>
           <form className="mb-2" onSubmit={cbtForm.handleSubmit(onSubmit)}>
             <div className="grid gap-3 content-start min-w-0">
               <FieldLine
@@ -162,7 +156,7 @@ export function CbtSection({
             </div>
           </form>
         </div>
-        <PastEntriesColumn
+        <PastEntries
           title="Past entries"
           isLoading={isLoading}
           loadingText="Loading CBT entries..."
@@ -173,9 +167,6 @@ export function CbtSection({
               description="Use the prompts above to record your first thought response. Completed reflections will appear here."
             />
           }
-          overflow={pastEntriesOverflow}
-          colRef={pastColRef}
-          bodyRef={pastEntriesBodyRef}
         >
           {cbtEntries.map((entry) => (
             <details key={entry.id} className={ENTRY_ROW}>
@@ -217,7 +208,7 @@ export function CbtSection({
               </div>
             </details>
           ))}
-        </PastEntriesColumn>
+        </PastEntries>
       </div>
     </section>
   );
