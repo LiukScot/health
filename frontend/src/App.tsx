@@ -1,6 +1,6 @@
 import { lazy, Suspense, useEffect, useRef, useState } from "react";
 import { Toaster } from "sonner";
-import { useAuth, useDiary, usePain, useCbt, useDbt, useDashboard, useMemorableDays, useSettings } from "./hooks";
+import { useAuth, useDiary, usePain, useCbt, useDbt, useDashboard, useMemorableDays, useMoneyTransactions, useSettings } from "./hooks";
 import { LoginScreen } from "./app/LoginScreen";
 import { Sidebar } from "./app/Sidebar";
 import { DashboardSection } from "./app/DashboardSection";
@@ -23,6 +23,7 @@ const SettingsSection = lazy(() => import("./app/SettingsSection").then((m) => (
 const DesignSystemSection = lazy(() => import("./app/DesignSystemSection").then((m) => ({ default: m.DesignSystemSection })));
 const MemorableDaysSection = lazy(() => import("./app/memorable-days").then((m) => ({ default: m.MemorableDaysSection })));
 const MoneySection = lazy(() => import("./app/money/MoneySection").then((m) => ({ default: m.MoneySection })));
+const TransactionsSection = lazy(() => import("./app/money/TransactionsSection").then((m) => ({ default: m.TransactionsSection })));
 
 function App() {
   const auth = useAuth();
@@ -124,6 +125,9 @@ function App() {
   const dashboard = useDashboard(loggedIn);
   const memorable = useMemorableDays(loggedIn);
   const settings = useSettings(loggedIn);
+  // Only fetched once you're actually in the Money realm — the health realm
+  // has no use for it and shouldn't pay for the request.
+  const moneyTx = useMoneyTransactions(loggedIn && realm === "money");
 
   // Interactive swipe gestures: the sidebar follows the finger 1:1 during
   // the drag, then snaps open or closed on release based on how far it moved.
@@ -389,7 +393,19 @@ function App() {
 
         {nav === "design-system" && <DesignSystemSection />}
 
-        {realm === "money" && <MoneySection nav={nav} />}
+        {nav === "money-transactions" && (
+          <TransactionsSection
+            txForm={moneyTx.txForm} txMutationState={{ isSuccess: moneyTx.txMutation.isSuccess }}
+            isLoading={moneyTx.isLoading} editingTx={moneyTx.editingTx}
+            transactions={moneyTx.transactions} assetOptions={moneyTx.assetOptions}
+            confirmDeleteTx={moneyTx.confirmDeleteTx}
+            onSubmit={(v) => moneyTx.txMutation.mutate(v)} onCancelEdit={moneyTx.resetTxForm}
+            onStartEdit={moneyTx.startTxEdit} onDeleteClick={moneyTx.onDeleteClick}
+            onDeleteBlur={moneyTx.onDeleteBlur}
+          />
+        )}
+
+        {realm === "money" && nav !== "money-transactions" && <MoneySection nav={nav} />}
         </Suspense>
         </SectionErrorBoundary>
       </main>

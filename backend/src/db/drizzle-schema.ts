@@ -1,3 +1,4 @@
+import { sql } from "drizzle-orm";
 import { sqliteTable, text, integer, real, index, uniqueIndex, primaryKey } from "drizzle-orm/sqlite-core";
 
 export const users = sqliteTable("users", {
@@ -5,8 +6,8 @@ export const users = sqliteTable("users", {
   email: text("email").notNull().unique(),
   passwordHash: text("password_hash").notNull(),
   name: text("name"),
-  createdAt: text("created_at").notNull().default("CURRENT_TIMESTAMP"),
-  updatedAt: text("updated_at").notNull().default("CURRENT_TIMESTAMP"),
+  createdAt: text("created_at").notNull().default(sql`CURRENT_TIMESTAMP`),
+  updatedAt: text("updated_at").notNull().default(sql`CURRENT_TIMESTAMP`),
   disabledAt: text("disabled_at"),
 });
 
@@ -26,8 +27,8 @@ export const diaryEntries = sqliteTable(
     description: text("description"),
     gratitude: text("gratitude"),
     reflection: text("reflection"),
-    createdAt: text("created_at").notNull().default("CURRENT_TIMESTAMP"),
-    updatedAt: text("updated_at").notNull().default("CURRENT_TIMESTAMP"),
+    createdAt: text("created_at").notNull().default(sql`CURRENT_TIMESTAMP`),
+    updatedAt: text("updated_at").notNull().default(sql`CURRENT_TIMESTAMP`),
   },
   (table) => [
     index("idx_diary_user_date").on(table.userId, table.entryDate, table.entryTime),
@@ -51,8 +52,8 @@ export const painEntries = sqliteTable(
     habits: text("habits").notNull().default(""),
     other: text("other").notNull().default(""),
     note: text("note"),
-    createdAt: text("created_at").notNull().default("CURRENT_TIMESTAMP"),
-    updatedAt: text("updated_at").notNull().default("CURRENT_TIMESTAMP"),
+    createdAt: text("created_at").notNull().default(sql`CURRENT_TIMESTAMP`),
+    updatedAt: text("updated_at").notNull().default(sql`CURRENT_TIMESTAMP`),
   },
   (table) => [
     index("idx_pain_user_date").on(table.userId, table.entryDate, table.entryTime),
@@ -76,8 +77,8 @@ export const cbtEntries = sqliteTable(
     worstBestScenario: text("worst_best_scenario").notNull().default(""),
     friendAdvice: text("friend_advice").notNull().default(""),
     productiveResponse: text("productive_response").notNull().default(""),
-    createdAt: text("created_at").notNull().default("CURRENT_TIMESTAMP"),
-    updatedAt: text("updated_at").notNull().default("CURRENT_TIMESTAMP"),
+    createdAt: text("created_at").notNull().default(sql`CURRENT_TIMESTAMP`),
+    updatedAt: text("updated_at").notNull().default(sql`CURRENT_TIMESTAMP`),
   },
   (table) => [
     index("idx_cbt_user_date").on(table.userId, table.entryDate, table.entryTime),
@@ -98,8 +99,8 @@ export const dbtEntries = sqliteTable(
     bodyFeeling: text("body_feeling").notNull().default(""),
     presentMoment: text("present_moment").notNull().default(""),
     emotionReturns: text("emotion_returns").notNull().default(""),
-    createdAt: text("created_at").notNull().default("CURRENT_TIMESTAMP"),
-    updatedAt: text("updated_at").notNull().default("CURRENT_TIMESTAMP"),
+    createdAt: text("created_at").notNull().default(sql`CURRENT_TIMESTAMP`),
+    updatedAt: text("updated_at").notNull().default(sql`CURRENT_TIMESTAMP`),
   },
   (table) => [
     index("idx_dbt_user_date").on(table.userId, table.entryDate, table.entryTime),
@@ -116,7 +117,7 @@ export const userPreferences = sqliteTable("user_preferences", {
   // Money realm: kept here rather than in a second preferences table, since
   // there is one row per user either way.
   showZeroAssets: integer("show_zero_assets").notNull().default(0),
-  updatedAt: text("updated_at").notNull().default("CURRENT_TIMESTAMP"),
+  updatedAt: text("updated_at").notNull().default(sql`CURRENT_TIMESTAMP`),
 });
 
 export const memorableDays = sqliteTable(
@@ -129,8 +130,8 @@ export const memorableDays = sqliteTable(
     emoji: text("emoji").notNull().default(""),
     description: text("description").notNull().default(""),
     repeatMode: text("repeat_mode").notNull(),
-    createdAt: text("created_at").notNull().default("CURRENT_TIMESTAMP"),
-    updatedAt: text("updated_at").notNull().default("CURRENT_TIMESTAMP"),
+    createdAt: text("created_at").notNull().default(sql`CURRENT_TIMESTAMP`),
+    updatedAt: text("updated_at").notNull().default(sql`CURRENT_TIMESTAMP`),
   },
   (table) => [
     index("idx_memorable_days_user_date").on(table.userId, table.date, table.id),
@@ -147,7 +148,7 @@ export const sessions = sqliteTable("sessions", {
   userId: integer("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
   email: text("email").notNull(),
   expiresAt: text("expires_at").notNull(),
-  createdAt: text("created_at").notNull().default("CURRENT_TIMESTAMP"),
+  createdAt: text("created_at").notNull().default(sql`CURRENT_TIMESTAMP`),
 });
 
 export const painRemovedOptions = sqliteTable(
@@ -191,8 +192,8 @@ export const metricTypes = sqliteTable(
     step: real("step"),
     configJson: text("config_json").notNull().default("{}"),
     archivedAt: text("archived_at"),
-    createdAt: text("created_at").notNull().default("CURRENT_TIMESTAMP"),
-    updatedAt: text("updated_at").notNull().default("CURRENT_TIMESTAMP"),
+    createdAt: text("created_at").notNull().default(sql`CURRENT_TIMESTAMP`),
+    updatedAt: text("updated_at").notNull().default(sql`CURRENT_TIMESTAMP`),
   },
   (table) => [
     uniqueIndex("idx_metric_types_user_key").on(table.userId, table.key),
@@ -206,7 +207,7 @@ export const mcpTokens = sqliteTable(
     userId: integer("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
     tokenHash: text("token_hash").notNull().unique(),
     label: text("label").notNull().default(""),
-    createdAt: text("created_at").notNull().default("CURRENT_TIMESTAMP"),
+    createdAt: text("created_at").notNull().default(sql`CURRENT_TIMESTAMP`),
     expiresAt: text("expires_at"),
     lastUsedAt: text("last_used_at"),
   },
@@ -233,8 +234,8 @@ export const transactions = sqliteTable(
     pnl: real("pnl").notNull().default(0),
     currentValue: real("current_value").notNull().default(0),
     note: text("note"),
-    createdAt: text("created_at").notNull().default("CURRENT_TIMESTAMP"),
-    updatedAt: text("updated_at").notNull().default("CURRENT_TIMESTAMP"),
+    createdAt: text("created_at").notNull().default(sql`CURRENT_TIMESTAMP`),
+    updatedAt: text("updated_at").notNull().default(sql`CURRENT_TIMESTAMP`),
   },
   (table) => [
     index("idx_tx_user_date").on(table.userId, table.txDate),
@@ -250,8 +251,8 @@ export const monthlyMovements = sqliteTable(
     direction: text("direction").notNull(),
     amount: real("amount").notNull().default(0),
     note: text("note"),
-    createdAt: text("created_at").notNull().default("CURRENT_TIMESTAMP"),
-    updatedAt: text("updated_at").notNull().default("CURRENT_TIMESTAMP"),
+    createdAt: text("created_at").notNull().default(sql`CURRENT_TIMESTAMP`),
+    updatedAt: text("updated_at").notNull().default(sql`CURRENT_TIMESTAMP`),
   },
   (table) => [
     index("idx_mm_user").on(table.userId, table.direction),
@@ -269,8 +270,8 @@ export const monthlySnapshots = sqliteTable(
     mediumRisk: real("medium_risk").notNull().default(0),
     highRisk: real("high_risk").notNull().default(0),
     liquid: real("liquid").notNull().default(0),
-    createdAt: text("created_at").notNull().default("CURRENT_TIMESTAMP"),
-    updatedAt: text("updated_at").notNull().default("CURRENT_TIMESTAMP"),
+    createdAt: text("created_at").notNull().default(sql`CURRENT_TIMESTAMP`),
+    updatedAt: text("updated_at").notNull().default(sql`CURRENT_TIMESTAMP`),
   },
   (table) => [
     index("idx_snap_user_date").on(table.userId, table.snapshotDate),
@@ -285,7 +286,7 @@ export const assetStyles = sqliteTable(
     asset: text("asset").notNull(),
     colorHex: text("color_hex"),
     riskLevel: text("risk_level"),
-    updatedAt: text("updated_at").notNull().default("CURRENT_TIMESTAMP"),
+    updatedAt: text("updated_at").notNull().default(sql`CURRENT_TIMESTAMP`),
   },
   (table) => [
     uniqueIndex("idx_asset_styles_user_asset").on(table.userId, table.asset),
