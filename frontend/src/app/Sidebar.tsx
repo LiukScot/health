@@ -1,4 +1,4 @@
-import { navItemsByWorld, navLabels, worldLabels, worlds, type NavItem, type World } from "./core";
+import { navItemsByRealm, navLabels, realmLabels, realms, type NavItem, type Realm } from "./core";
 
 // .sidebar / .sidebar-close-btn / .mobile-menu-btn keep their class names: the
 // shell's focus-trap + swipe handlers query them. Styling moves to utilities;
@@ -10,13 +10,13 @@ export const NAV_ITEM_IDLE = "text-muted bg-transparent hover:text-text hover:bg
 export const NAV_ITEM_ACTIVE = "text-accent bg-[color-mix(in_srgb,var(--accent)_10%,transparent)]";
 const NAV_LABEL = "opacity-100 transition-opacity";
 
-// Square world tiles that replace the old Design System footer button. Active
+// Square realm tiles that replace the old Design System footer button. Active
 // state is signalled by accent colour *and* a solid border (never colour
 // alone), plus aria-pressed for screen readers.
-const WORLD_TILE =
+const REALM_TILE =
   "flex items-center justify-center w-11 h-11 shrink-0 rounded-sm border cursor-pointer transition-all shadow-none [&>svg]:w-5 [&>svg]:h-5 max-mobile:w-12 max-mobile:h-12 max-mobile:[&>svg]:w-[22px] max-mobile:[&>svg]:h-[22px]";
-const WORLD_TILE_ACTIVE = "border-accent text-accent bg-[color-mix(in_srgb,var(--accent)_12%,transparent)]";
-const WORLD_TILE_IDLE = "border-transparent text-muted bg-card-soft hover:text-text hover:bg-card-strong";
+const REALM_TILE_ACTIVE = "border-accent text-accent bg-[color-mix(in_srgb,var(--accent)_12%,transparent)]";
+const REALM_TILE_IDLE = "border-transparent text-muted bg-card-soft hover:text-text hover:bg-card-strong";
 
 const dashboardIcon = (
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
@@ -26,8 +26,8 @@ const settingsIcon = (
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
 );
 
-// One icon per world: used both by the sidebar header and by the switcher tiles.
-const worldIcons: Record<World, React.ReactNode> = {
+// One icon per realm: used both by the sidebar header and by the switcher tiles.
+const realmIcons: Record<Realm, React.ReactNode> = {
   health: (
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
   ),
@@ -75,16 +75,16 @@ const navIcons: Record<string, React.ReactNode> = {
 type SidebarProps = {
   nav: NavItem;
   onNav: (item: NavItem) => void;
-  world: World;
-  onWorldChange: (world: World) => void;
+  realm: Realm;
+  onRealmChange: (realm: Realm) => void;
   collapsed: boolean;
   onToggle: () => void;
   onCloseMobile: () => void;
   mobileOpen: boolean;
 };
 
-export function Sidebar({ nav, onNav, world, onWorldChange, collapsed, onToggle, onCloseMobile, mobileOpen }: SidebarProps) {
-  const items = navItemsByWorld[world];
+export function Sidebar({ nav, onNav, realm, onRealmChange, collapsed, onToggle, onCloseMobile, mobileOpen }: SidebarProps) {
+  const items = navItemsByRealm[realm];
 
   return (
     <aside
@@ -94,9 +94,9 @@ export function Sidebar({ nav, onNav, world, onWorldChange, collapsed, onToggle,
     >
       <div className={`flex items-center gap-3 pt-1 px-2 pb-3 border-b border-border mb-2 min-h-[48px] overflow-hidden ${collapsed ? "mobile:justify-center mobile:gap-0 mobile:px-0" : ""}`}>
         <span className={`flex-shrink-0 text-accent transition-all duration-200 [&>svg]:w-[26px] [&>svg]:h-[26px] ${collapsed ? "mobile:w-0 mobile:opacity-0 mobile:overflow-hidden" : ""}`}>
-          {worldIcons[world]}
+          {realmIcons[realm]}
         </span>
-        <span className={`text-xl font-bold tracking-tight whitespace-nowrap flex-1 min-w-0 overflow-hidden opacity-100 transition-opacity duration-200 ${collapsed ? "mobile:opacity-0 mobile:flex-[0]" : ""}`}>{worldLabels[world]}</span>
+        <span className={`text-xl font-bold tracking-tight whitespace-nowrap flex-1 min-w-0 overflow-hidden opacity-100 transition-opacity duration-200 ${collapsed ? "mobile:opacity-0 mobile:flex-[0]" : ""}`}>{realmLabels[realm]}</span>
         <button className="flex-shrink-0 flex items-center justify-center w-8 h-8 p-0 border-0 rounded-[8px] bg-transparent text-muted cursor-pointer transition-all shadow-none hover:text-text [&>svg]:w-5 [&>svg]:h-5 max-mobile:hidden" onClick={onToggle} aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}>
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" /><line x1="9" y1="3" x2="9" y2="21" /></svg>
         </button>
@@ -124,17 +124,17 @@ export function Sidebar({ nav, onNav, world, onWorldChange, collapsed, onToggle,
         role="group"
         aria-label="Switch app"
       >
-        {worlds.map((id) => (
+        {realms.map((id) => (
           <button
             key={id}
             type="button"
-            className={`${WORLD_TILE} ${id === world ? WORLD_TILE_ACTIVE : WORLD_TILE_IDLE}`}
-            onClick={() => onWorldChange(id)}
-            aria-pressed={id === world}
-            aria-label={worldLabels[id]}
-            title={worldLabels[id]}
+            className={`${REALM_TILE} ${id === realm ? REALM_TILE_ACTIVE : REALM_TILE_IDLE}`}
+            onClick={() => onRealmChange(id)}
+            aria-pressed={id === realm}
+            aria-label={realmLabels[id]}
+            title={realmLabels[id]}
           >
-            {worldIcons[id]}
+            {realmIcons[id]}
           </button>
         ))}
       </div>

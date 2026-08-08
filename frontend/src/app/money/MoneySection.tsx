@@ -1,7 +1,7 @@
 import { navLabels, type NavItem } from "../core";
 import { EmptyState } from "../screen-helpers";
 
-// Placeholder shell for the Money world. Each panel is ported from the
+// Placeholder shell for the Money realm. Each panel is ported from the
 // standalone money app one at a time; until its turn comes it renders here.
 export function MoneySection({ nav }: { nav: NavItem }) {
   return (

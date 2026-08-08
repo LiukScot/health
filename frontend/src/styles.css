@@ -109,10 +109,10 @@
   --text: #c9c9ce;
 }
 
-/* Per-world accent. Themes own the surfaces, the world owns the accent, so
-   the two compose: any theme × any world. --ring is color-mixed from --accent
+/* Per-realm accent. Themes own the surfaces, the realm owns the accent, so
+   the two compose: any theme × any realm. --ring is color-mixed from --accent
    above, so it re-resolves here for free. */
-:root[data-world="money"] {
+:root[data-realm="money"] {
   --accent: #34d399;
 }
 

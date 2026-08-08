@@ -12,12 +12,12 @@ import {
   isSameMonth,
   listToCsv,
   mergeOptions,
-  navItemsByWorld,
+  navItemsByRealm,
   navLabels,
   normalizeQuickRange,
   previousRange,
-  worldOf,
-  worlds,
+  realmOf,
+  realms,
 } from "./core";
 
 describe("formatDocumentTitle", () => {
@@ -29,28 +29,28 @@ describe("formatDocumentTitle", () => {
     expect(formatDocumentTitle()).toBe("Health");
   });
 
-  test("uses the world name as the app name", () => {
+  test("uses the realm name as the app name", () => {
     expect(formatDocumentTitle("Snapshots", "money")).toBe("Snapshots - Money");
   });
 });
 
-describe("worlds", () => {
-  test("worldOf routes money-prefixed items to money, everything else to health", () => {
-    expect(worldOf("money-dashboard")).toBe("money");
-    expect(worldOf("dashboard")).toBe("health");
-    expect(worldOf("design-system")).toBe("health");
+describe("realms", () => {
+  test("realmOf routes money-prefixed items to money, everything else to health", () => {
+    expect(realmOf("money-dashboard")).toBe("money");
+    expect(realmOf("dashboard")).toBe("health");
+    expect(realmOf("design-system")).toBe("health");
   });
 
-  test("every nav item is reachable from exactly one world", () => {
-    const listed = worlds.flatMap((world) => navItemsByWorld[world]);
+  test("every nav item is reachable from exactly one realm", () => {
+    const listed = realms.flatMap((realm) => navItemsByRealm[realm]);
     expect(new Set(listed).size).toBe(listed.length);
     expect([...listed].sort()).toEqual(Object.keys(navLabels).sort());
   });
 
-  test("worldOf agrees with the list each item is filed under", () => {
-    for (const world of worlds) {
-      for (const item of navItemsByWorld[world]) {
-        expect(worldOf(item)).toBe(world);
+  test("realmOf agrees with the list each item is filed under", () => {
+    for (const realm of realms) {
+      for (const item of navItemsByRealm[realm]) {
+        expect(realmOf(item)).toBe(realm);
       }
     }
   });
