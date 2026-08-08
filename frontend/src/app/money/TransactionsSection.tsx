@@ -3,7 +3,7 @@ import { Controller, type UseFormReturn } from "react-hook-form";
 import { Button } from "../../components/ui/Button";
 import { FieldLine, FIELD_LINE_LABEL } from "../../components/ui/FieldLine";
 import { Select } from "../../components/ui/select";
-import { AnimatedEditingLabel, SectionHead, useDiaryColumnCap } from "../shared";
+import { AnimatedEditingLabel, useDiaryColumnCap } from "../shared";
 import { EmptyState } from "../screen-helpers";
 import {
   DELETE_CONFIRM,
@@ -118,7 +118,6 @@ export function TransactionsSection({
                 />
               </div>
 
-              <SectionHead title="Amount" />
               {showBuyValue ? (
                 <FieldLine
                   label="Buy value"
