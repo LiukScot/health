@@ -2,7 +2,7 @@ import { lazy, Suspense, useEffect, useRef, useState } from "react";
 import { Toaster } from "sonner";
 import {
   useAuth, useDiary, usePain, useCbt, useDbt, useDashboard, useMemorableDays,
-  useMoneyMovements, useMoneySnapshots, useMoneyTransactions, useSettings,
+  useMoneyMovements, useMoneySettings, useMoneySnapshots, useMoneyTransactions, useSettings,
 } from "./hooks";
 import { LoginScreen } from "./app/LoginScreen";
 import { Sidebar } from "./app/Sidebar";
@@ -29,10 +29,11 @@ const MoneySection = lazy(() => import("./app/money/MoneySection").then((m) => (
 const TransactionsSection = lazy(() => import("./app/money/TransactionsSection").then((m) => ({ default: m.TransactionsSection })));
 const MovementsSection = lazy(() => import("./app/money/MovementsSection").then((m) => ({ default: m.MovementsSection })));
 const SnapshotsSection = lazy(() => import("./app/money/SnapshotsSection").then((m) => ({ default: m.SnapshotsSection })));
+const MoneySettingsSection = lazy(() => import("./app/money/MoneySettingsSection").then((m) => ({ default: m.MoneySettingsSection })));
 
 // Money panels that have their own screen; the rest still fall through to
 // the placeholder.
-const PORTED_MONEY_NAV = new Set<NavItem>(["money-transactions", "money-movements", "money-snapshots"]);
+const PORTED_MONEY_NAV = new Set<NavItem>(["money-transactions", "money-movements", "money-snapshots", "money-settings"]);
 
 function App() {
   const auth = useAuth();
@@ -139,6 +140,7 @@ function App() {
   const moneyTx = useMoneyTransactions(loggedIn && realm === "money");
   const moneyMovements = useMoneyMovements(loggedIn && nav === "money-movements");
   const moneySnapshots = useMoneySnapshots(loggedIn && nav === "money-snapshots");
+  const moneySettings = useMoneySettings(loggedIn && nav === "money-settings");
 
   // Interactive swipe gestures: the sidebar follows the finger 1:1 during
   // the drag, then snaps open or closed on release based on how far it moved.
@@ -438,6 +440,8 @@ function App() {
             onDeleteClick={moneySnapshots.onDeleteClick} onDeleteBlur={moneySnapshots.onDeleteBlur}
           />
         )}
+
+        {nav === "money-settings" && <MoneySettingsSection {...moneySettings} />}
 
         {realm === "money" && !PORTED_MONEY_NAV.has(nav) && <MoneySection nav={nav} />}
         </Suspense>
