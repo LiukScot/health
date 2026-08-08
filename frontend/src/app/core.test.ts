@@ -12,8 +12,12 @@ import {
   isSameMonth,
   listToCsv,
   mergeOptions,
+  navItemsByWorld,
+  navLabels,
   normalizeQuickRange,
   previousRange,
+  worldOf,
+  worlds,
 } from "./core";
 
 describe("formatDocumentTitle", () => {
@@ -23,6 +27,32 @@ describe("formatDocumentTitle", () => {
 
   test("returns Health alone when no section", () => {
     expect(formatDocumentTitle()).toBe("Health");
+  });
+
+  test("uses the world name as the app name", () => {
+    expect(formatDocumentTitle("Snapshots", "money")).toBe("Snapshots - Money");
+  });
+});
+
+describe("worlds", () => {
+  test("worldOf routes money-prefixed items to money, everything else to health", () => {
+    expect(worldOf("money-dashboard")).toBe("money");
+    expect(worldOf("dashboard")).toBe("health");
+    expect(worldOf("design-system")).toBe("health");
+  });
+
+  test("every nav item is reachable from exactly one world", () => {
+    const listed = worlds.flatMap((world) => navItemsByWorld[world]);
+    expect(new Set(listed).size).toBe(listed.length);
+    expect([...listed].sort()).toEqual(Object.keys(navLabels).sort());
+  });
+
+  test("worldOf agrees with the list each item is filed under", () => {
+    for (const world of worlds) {
+      for (const item of navItemsByWorld[world]) {
+        expect(worldOf(item)).toBe(world);
+      }
+    }
   });
 });
 

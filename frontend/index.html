@@ -12,6 +12,8 @@
       try {
         var t = localStorage.getItem("health-theme");
         if (t && ["dark", "grey", "oled"].includes(t)) document.documentElement.dataset.theme = t;
+        var w = localStorage.getItem("health-world");
+        if (w && ["health", "money"].includes(w)) document.documentElement.dataset.world = w;
       } catch (e) {}
     </script>
   </head>

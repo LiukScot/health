@@ -227,10 +227,11 @@ export type PainFormValues = z.infer<typeof painFormSchema>;
 export type CbtFormValues = z.infer<typeof cbtFormSchema>;
 export type DbtFormValues = z.infer<typeof dbtFormSchema>;
 
-export const navItems = ["dashboard", "memorable-days", "diary", "pain", "cbt", "dbt", "settings", "design-system"] as const;
+export const navItems = [
+  "dashboard", "memorable-days", "diary", "pain", "cbt", "dbt", "settings", "design-system",
+  "money-dashboard", "money-transactions", "money-movements", "money-snapshots", "money-settings",
+] as const;
 export type NavItem = (typeof navItems)[number];
-
-const appName = "Health";
 
 export const navLabels: Record<NavItem, string> = {
   dashboard: "Dashboard",
@@ -241,9 +242,49 @@ export const navLabels: Record<NavItem, string> = {
   dbt: "DBT",
   settings: "Settings",
   "design-system": "Design System",
+  "money-dashboard": "Dashboard",
+  "money-transactions": "Transactions",
+  "money-movements": "Movements",
+  "money-snapshots": "Snapshots",
+  "money-settings": "Settings",
 };
 
-export function formatDocumentTitle(section?: string) {
+/*
+ * The app hosts two worlds behind one shell and one login. A world owns its
+ * nav list, its accent (see :root[data-world] in styles.css) and its title.
+ * Money's nav items carry a `money-` prefix so the world is derivable from
+ * the current nav item — there is no second piece of state to keep in sync.
+ */
+export const worlds = ["health", "money"] as const;
+export type World = (typeof worlds)[number];
+export const DEFAULT_WORLD: World = "health";
+export const WORLD_STORAGE_KEY = "health-world";
+
+export const worldLabels: Record<World, string> = { health: "Health", money: "Money" };
+
+export const navItemsByWorld: Record<World, NavItem[]> = {
+  health: ["dashboard", "pain", "diary", "cbt", "dbt", "memorable-days", "settings", "design-system"],
+  money: ["money-dashboard", "money-transactions", "money-movements", "money-snapshots", "money-settings"],
+};
+
+export function worldOf(nav: NavItem): World {
+  return nav.startsWith("money-") ? "money" : "health";
+}
+
+export function readStoredWorld(): World {
+  try {
+    const stored = localStorage.getItem(WORLD_STORAGE_KEY);
+    if (stored && (worlds as readonly string[]).includes(stored)) {
+      return stored as World;
+    }
+  } catch {
+    // localStorage unavailable (private mode, disabled) — fall back to default.
+  }
+  return DEFAULT_WORLD;
+}
+
+export function formatDocumentTitle(section?: string, world: World = DEFAULT_WORLD) {
+  const appName = worldLabels[world];
   return section ? `${section} - ${appName}` : appName;
 }
 

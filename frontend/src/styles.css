@@ -109,6 +109,13 @@
   --text: #c9c9ce;
 }
 
+/* Per-world accent. Themes own the surfaces, the world owns the accent, so
+   the two compose: any theme × any world. --ring is color-mixed from --accent
+   above, so it re-resolves here for free. */
+:root[data-world="money"] {
+  --accent: #34d399;
+}
+
 html { overflow-x: hidden; }
 
 * { box-sizing: border-box; }

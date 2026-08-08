@@ -5,7 +5,10 @@ import { LoginScreen } from "./app/LoginScreen";
 import { Sidebar } from "./app/Sidebar";
 import { DashboardSection } from "./app/DashboardSection";
 import { SectionErrorBoundary } from "./app/ErrorBoundary";
-import { formatDocumentTitle, navLabels, type NavItem } from "./app/core";
+import {
+  formatDocumentTitle, navItemsByWorld, navLabels, readStoredWorld, worldOf,
+  WORLD_STORAGE_KEY, type NavItem,
+} from "./app/core";
 
 // The Dashboard is the default view and stays eager so the first paint after
 // login has no loading flash. The other sections are reached only via nav, so
@@ -19,11 +22,16 @@ const DbtSection = lazy(() => import("./app/DbtSection").then((m) => ({ default:
 const SettingsSection = lazy(() => import("./app/SettingsSection").then((m) => ({ default: m.SettingsSection })));
 const DesignSystemSection = lazy(() => import("./app/DesignSystemSection").then((m) => ({ default: m.DesignSystemSection })));
 const MemorableDaysSection = lazy(() => import("./app/memorable-days").then((m) => ({ default: m.MemorableDaysSection })));
+const MoneySection = lazy(() => import("./app/money/MoneySection").then((m) => ({ default: m.MoneySection })));
 
 function App() {
   const auth = useAuth();
   const loggedIn = !!auth.user;
-  const [nav, setNav] = useState<NavItem>("dashboard");
+  // The world is derived from the nav item (money's items are `money-`
+  // prefixed), so there is only one piece of state to keep straight. The
+  // last world is remembered so a reload lands you back where you were.
+  const [nav, setNav] = useState<NavItem>(() => navItemsByWorld[readStoredWorld()][0]);
+  const world = worldOf(nav);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
   // Mirror of mobileSidebarOpen for the swipe handler closure to read,
@@ -92,8 +100,22 @@ function App() {
   }, [nav]);
 
   useEffect(() => {
-    document.title = loggedIn ? formatDocumentTitle(navLabels[nav]) : formatDocumentTitle("Sign in");
-  }, [loggedIn, nav]);
+    document.title = loggedIn
+      ? formatDocumentTitle(navLabels[nav], world)
+      : formatDocumentTitle("Sign in", world);
+  }, [loggedIn, nav, world]);
+
+  // Drive the accent (see :root[data-world] in styles.css) and remember the
+  // choice. index.html replays it before first paint to avoid a flash of the
+  // wrong accent; keep the two lists of world ids in sync.
+  useEffect(() => {
+    document.documentElement.dataset.world = world;
+    try {
+      localStorage.setItem(WORLD_STORAGE_KEY, world);
+    } catch {
+      // Persisting is best-effort; the live attribute change still applies.
+    }
+  }, [world]);
 
   const diary = useDiary(loggedIn);
   const pain = usePain(loggedIn);
@@ -273,6 +295,8 @@ function App() {
       <Sidebar
         nav={nav}
         onNav={(item) => { setNav(item); setMobileSidebarOpen(false); }}
+        world={world}
+        onWorldChange={(next) => setNav(navItemsByWorld[next][0])}
         collapsed={sidebarCollapsed}
         onToggle={() => setSidebarCollapsed((c) => !c)}
         onCloseMobile={() => setMobileSidebarOpen(false)}
@@ -364,6 +388,8 @@ function App() {
         )}
 
         {nav === "design-system" && <DesignSystemSection />}
+
+        {world === "money" && <MoneySection nav={nav} />}
         </Suspense>
         </SectionErrorBoundary>
       </main>
