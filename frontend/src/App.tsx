@@ -1,6 +1,9 @@
 import { lazy, Suspense, useEffect, useRef, useState } from "react";
 import { Toaster } from "sonner";
-import { useAuth, useDiary, usePain, useCbt, useDbt, useDashboard, useMemorableDays, useMoneyTransactions, useSettings } from "./hooks";
+import {
+  useAuth, useDiary, usePain, useCbt, useDbt, useDashboard, useMemorableDays,
+  useMoneyMovements, useMoneySnapshots, useMoneyTransactions, useSettings,
+} from "./hooks";
 import { LoginScreen } from "./app/LoginScreen";
 import { Sidebar } from "./app/Sidebar";
 import { DashboardSection } from "./app/DashboardSection";
@@ -24,6 +27,12 @@ const DesignSystemSection = lazy(() => import("./app/DesignSystemSection").then(
 const MemorableDaysSection = lazy(() => import("./app/memorable-days").then((m) => ({ default: m.MemorableDaysSection })));
 const MoneySection = lazy(() => import("./app/money/MoneySection").then((m) => ({ default: m.MoneySection })));
 const TransactionsSection = lazy(() => import("./app/money/TransactionsSection").then((m) => ({ default: m.TransactionsSection })));
+const MovementsSection = lazy(() => import("./app/money/MovementsSection").then((m) => ({ default: m.MovementsSection })));
+const SnapshotsSection = lazy(() => import("./app/money/SnapshotsSection").then((m) => ({ default: m.SnapshotsSection })));
+
+// Money panels that have their own screen; the rest still fall through to
+// the placeholder.
+const PORTED_MONEY_NAV = new Set<NavItem>(["money-transactions", "money-movements", "money-snapshots"]);
 
 function App() {
   const auth = useAuth();
@@ -128,6 +137,8 @@ function App() {
   // Only fetched once you're actually in the Money realm — the health realm
   // has no use for it and shouldn't pay for the request.
   const moneyTx = useMoneyTransactions(loggedIn && realm === "money");
+  const moneyMovements = useMoneyMovements(loggedIn && nav === "money-movements");
+  const moneySnapshots = useMoneySnapshots(loggedIn && nav === "money-snapshots");
 
   // Interactive swipe gestures: the sidebar follows the finger 1:1 during
   // the drag, then snaps open or closed on release based on how far it moved.
@@ -405,7 +416,30 @@ function App() {
           />
         )}
 
-        {realm === "money" && nav !== "money-transactions" && <MoneySection nav={nav} />}
+        {nav === "money-movements" && (
+          <MovementsSection
+            movementForm={moneyMovements.movementForm}
+            movementMutationState={{ isSuccess: moneyMovements.movementMutation.isSuccess }}
+            isLoading={moneyMovements.isLoading} editingMovement={moneyMovements.editingMovement}
+            movements={moneyMovements.movements} confirmDeleteMovement={moneyMovements.confirmDeleteMovement}
+            onSubmit={(v) => moneyMovements.movementMutation.mutate(v)}
+            onCancelEdit={moneyMovements.resetMovementForm} onStartEdit={moneyMovements.startMovementEdit}
+            onDeleteClick={moneyMovements.onDeleteClick} onDeleteBlur={moneyMovements.onDeleteBlur}
+          />
+        )}
+
+        {nav === "money-snapshots" && (
+          <SnapshotsSection
+            snapshotForm={moneySnapshots.snapshotForm}
+            snapshotMutationState={{ isSuccess: moneySnapshots.snapshotMutation.isSuccess }}
+            isLoading={moneySnapshots.isLoading} canSave={moneySnapshots.canSave}
+            snapshots={moneySnapshots.snapshots} confirmDeleteSnapshot={moneySnapshots.confirmDeleteSnapshot}
+            onSubmit={(v) => moneySnapshots.snapshotMutation.mutate(v)}
+            onDeleteClick={moneySnapshots.onDeleteClick} onDeleteBlur={moneySnapshots.onDeleteBlur}
+          />
+        )}
+
+        {realm === "money" && !PORTED_MONEY_NAV.has(nav) && <MoneySection nav={nav} />}
         </Suspense>
         </SectionErrorBoundary>
       </main>

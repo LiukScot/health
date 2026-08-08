@@ -114,6 +114,14 @@
    above, so it re-resolves here for free. */
 :root[data-realm="money"] {
   --accent: #34d399;
+
+  /* Risk buckets, carried over from the money app. Theme-constant on purpose:
+     they encode a fixed scale (low → high) plus liquid, so they must stay
+     distinguishable from each other rather than follow the surface. */
+  --risk-low: #34d399;
+  --risk-medium: #fbbf24;
+  --risk-high: #fb7185;
+  --risk-liquid: #60a5fa;
 }
 
 html { overflow-x: hidden; }

@@ -1,8 +1,13 @@
 import { describe, expect, test } from "vitest";
 import {
+  computeRiskTotals,
   formatCurrency,
   formatTxDate,
+  freshMovementDefaults,
+  freshSnapshotDefaults,
   freshTxDefaults,
+  movementFormSchema,
+  snapshotFormSchema,
   TIPO_OPTIONS,
   tipoShowsBuyValue,
   tipoShowsPnl,
@@ -81,5 +86,75 @@ describe("transactionSchema", () => {
       updatedAt: "2026-03-14 10:00:00",
     };
     expect(transactionSchema.safeParse(row).success).toBe(true);
+  });
+});
+
+describe("computeRiskTotals", () => {
+  const tx = (asset: string, currentValue: number) => ({
+    id: `tx-${asset}-${currentValue}`, txDate: "2026-01-01", asset, tipo: "nuovo vincolo",
+    derivedType: "buy", buyValue: currentValue, pnl: 0, currentValue, note: "",
+    createdAt: "", updatedAt: "",
+  });
+  const style = (riskLevel: string | null) => ({ colorHex: null, riskLevel });
+
+  test("buckets each asset by its risk level", () => {
+    const totals = computeRiskTotals(
+      [tx("A", 100), tx("B", 50), tx("C", 25)],
+      { A: style("low"), B: style("medium"), C: style("high") },
+    );
+    expect(totals).toEqual({ low: 100, medium: 50, high: 25 });
+  });
+
+  test("sums several transactions on the same asset", () => {
+    const totals = computeRiskTotals([tx("A", 100), tx("A", 40)], { A: style("low") });
+    expect(totals.low).toBe(140);
+  });
+
+  // An asset nobody classified must not be quietly counted as low risk — that
+  // would overstate the safe share of the portfolio.
+  test("ignores assets with no risk level, and unknown levels", () => {
+    const totals = computeRiskTotals(
+      [tx("A", 100), tx("B", 999), tx("C", 999)],
+      { A: style("low"), B: style(null), C: style("extreme") },
+    );
+    expect(totals).toEqual({ low: 100, medium: 0, high: 0 });
+  });
+
+  test("ignores an asset missing from the styles map entirely", () => {
+    expect(computeRiskTotals([tx("Ghost", 500)], {})).toEqual({ low: 0, medium: 0, high: 0 });
+  });
+
+  test("rounds to cents so floating point noise never reaches the database", () => {
+    const totals = computeRiskTotals([tx("A", 0.1), tx("A", 0.2)], { A: style("low") });
+    expect(totals.low).toBe(0.3);
+  });
+
+  test("keeps negative values, which a sold-off asset legitimately has", () => {
+    const totals = computeRiskTotals([tx("A", 100), tx("A", -130)], { A: style("high") });
+    expect(totals.high).toBe(-30);
+  });
+
+  test("returns zeros with no transactions", () => {
+    expect(computeRiskTotals([], { A: style("low") })).toEqual({ low: 0, medium: 0, high: 0 });
+  });
+});
+
+describe("movement and snapshot forms", () => {
+  test("empty amount coerces to 0 on submit", () => {
+    expect(movementFormSchema.parse({ name: "Rent", direction: "expense", amount: "", note: "" }).amount).toBe(0);
+    expect(snapshotFormSchema.parse({ snapshotDate: "2026-01-31", liquid: "" }).liquid).toBe(0);
+  });
+
+  test("rejects an unknown direction and a negative amount", () => {
+    expect(movementFormSchema.safeParse({ name: "X", direction: "sideways", amount: 1 }).success).toBe(false);
+    expect(movementFormSchema.safeParse({ name: "X", direction: "income", amount: -1 }).success).toBe(false);
+  });
+
+  test("movement defaults start on income with an empty amount", () => {
+    expect(freshMovementDefaults()).toEqual({ name: "", direction: "income", amount: "", note: "" });
+  });
+
+  test("snapshot defaults start on today", () => {
+    expect(freshSnapshotDefaults().snapshotDate).toBe(todayIso());
   });
 });

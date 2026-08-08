@@ -81,3 +81,102 @@ export function formatTxDate(iso: string): string {
   if (!Number.isFinite(ms)) return "—";
   return SHORT_DATE.format(new Date(ms));
 }
+
+// ── Monthly movements ────────────────────────────────────────────────────
+
+export const movementSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  direction: z.string(),
+  amount: z.number(),
+  note: z.string(),
+  createdAt: z.string(),
+  updatedAt: z.string(),
+});
+
+export type Movement = z.infer<typeof movementSchema>;
+export const movementListSchema = apiEnvelopeSchema(z.array(movementSchema));
+
+export const DIRECTIONS = ["income", "expense"] as const;
+export type Direction = (typeof DIRECTIONS)[number];
+
+export const movementFormSchema = z.object({
+  name: z.string().min(1),
+  direction: z.enum(DIRECTIONS),
+  amount: z.coerce.number().finite().nonnegative(),
+  note: z.string().default(""),
+});
+
+export type MovementFormValues = Omit<z.infer<typeof movementFormSchema>, "amount"> & { amount: number | "" };
+
+export function freshMovementDefaults(): MovementFormValues {
+  return { name: "", direction: "income", amount: "", note: "" };
+}
+
+// ── Monthly snapshots ────────────────────────────────────────────────────
+
+export const snapshotSchema = z.object({
+  id: z.string(),
+  snapshotDate: z.string(),
+  lowRisk: z.number(),
+  mediumRisk: z.number(),
+  highRisk: z.number(),
+  liquid: z.number(),
+  createdAt: z.string(),
+  updatedAt: z.string(),
+});
+
+export type Snapshot = z.infer<typeof snapshotSchema>;
+export const snapshotListSchema = apiEnvelopeSchema(z.array(snapshotSchema));
+
+export const RISK_LEVELS = ["low", "medium", "high"] as const;
+export type RiskLevel = (typeof RISK_LEVELS)[number];
+
+export const stylesMapSchema = apiEnvelopeSchema(
+  z.record(
+    z.string(),
+    z.object({ colorHex: z.string().nullable(), riskLevel: z.string().nullable() }),
+  ),
+);
+
+export type StylesMap = z.infer<typeof stylesMapSchema>["data"];
+
+export const snapshotFormSchema = z.object({
+  snapshotDate: z.string().min(1),
+  liquid: z.coerce.number().finite(),
+});
+
+export type SnapshotFormValues = Omit<z.infer<typeof snapshotFormSchema>, "liquid"> & { liquid: number | "" };
+
+export function freshSnapshotDefaults(): SnapshotFormValues {
+  return { snapshotDate: todayIso(), liquid: "" };
+}
+
+const round2 = (n: number) => Math.round(n * 100) / 100;
+
+/**
+ * A snapshot only asks for the date and the liquid amount: the three risk
+ * buckets are derived from the current transactions. Each asset's current
+ * value is summed, then attributed to the bucket its style says it belongs
+ * to. Assets with no risk level set count towards none of them — they are
+ * simply absent from the snapshot rather than silently folded into "low".
+ */
+export function computeRiskTotals(
+  transactions: readonly Transaction[],
+  styles: StylesMap,
+): Record<RiskLevel, number> {
+  const currentByAsset = new Map<string, number>();
+  for (const row of transactions) {
+    currentByAsset.set(row.asset, (currentByAsset.get(row.asset) ?? 0) + row.currentValue);
+  }
+
+  const totals: Record<RiskLevel, number> = { low: 0, medium: 0, high: 0 };
+  for (const [asset, current] of currentByAsset) {
+    const level = styles[asset]?.riskLevel;
+    if (level && (RISK_LEVELS as readonly string[]).includes(level)) {
+      totals[level as RiskLevel] += current;
+    }
+  }
+
+  return { low: round2(totals.low), medium: round2(totals.medium), high: round2(totals.high) };
+}
