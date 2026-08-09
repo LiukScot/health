@@ -76,10 +76,16 @@ export function formatCurrency(value: number): string {
   return CURRENCY.format(Number.isFinite(value) ? value : 0);
 }
 
+// txDate is a calendar day, not an instant. Date.parse reads a date-only
+// string as UTC midnight, which formats as the day before for any reader
+// behind UTC, so the parts are placed into a local date instead.
 export function formatTxDate(iso: string): string {
-  const ms = Date.parse(iso);
-  if (!Number.isFinite(ms)) return "—";
-  return SHORT_DATE.format(new Date(ms));
+  const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(iso);
+  if (!match) return "—";
+  const [, year, month, day] = match.map(Number);
+  const date = new Date(year, month - 1, day);
+  if (Number.isNaN(date.getTime())) return "—";
+  return SHORT_DATE.format(date);
 }
 
 // ── Monthly movements ────────────────────────────────────────────────────

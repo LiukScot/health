@@ -1,3 +1,4 @@
+import { useId } from "react";
 import { Button, buttonClass } from "../../components/ui/Button";
 import { Select } from "../../components/ui/select";
 import { InlineFeedback, SectionHead } from "../shared";
@@ -31,23 +32,45 @@ const DEFAULT_SWATCH = "#34d399";
 const ROW = "flex items-center justify-between gap-5 px-[14px] py-[12px] rounded-md bg-card-strong max-sm:flex-col max-sm:items-stretch";
 
 function PreferencesBlock({ showZeroAssets, onToggleShowZeroAssets }: Pick<MoneySettingsProps, "showZeroAssets" | "onToggleShowZeroAssets">) {
+  const id = useId();
+  const hintId = `${id}-hint`;
   return (
     <div className={ROW}>
       <div className="flex flex-col gap-[2px] min-w-0">
-        <span className="text-sm font-bold text-text">Show zero-value assets</span>
-        <span className="text-xs text-muted">Keep assets you have fully sold off visible in lists and charts.</span>
+        <label htmlFor={id} className="text-sm font-bold text-text cursor-pointer">Show zero-value assets</label>
+        <span id={hintId} className="text-xs text-muted">Keep assets you have fully sold off visible in lists and charts.</span>
       </div>
-      <label className="flex items-center gap-2 cursor-pointer flex-shrink-0">
+      <div className="flex items-center gap-2 flex-shrink-0">
         <input
+          id={id}
           type="checkbox"
           name="showZeroAssets"
+          aria-describedby={hintId}
           className="w-4 h-4 accent-[var(--accent)] cursor-pointer"
           checked={showZeroAssets}
           onChange={(e) => onToggleShowZeroAssets(e.target.checked)}
         />
         <span className="text-control text-muted">{showZeroAssets ? "Shown" : "Hidden"}</span>
-      </label>
+      </div>
     </div>
+  );
+}
+
+// Dragging inside the colour picker fires `input` continuously, and a
+// controlled value would PUT the whole styles map on every one of those
+// events. Uncontrolled, the browser holds the colour during the drag and only
+// the final pick is committed. The caller keys this on the stored value so a
+// colour that changes server-side (import, purge) still resets the swatch.
+function AssetColorInput({ id, value, onCommit }: { id: string; value: string; onCommit: (colorHex: string) => void }) {
+  return (
+    <input
+      id={id}
+      name={id}
+      type="color"
+      defaultValue={value}
+      onBlur={(e) => e.target.value !== value && onCommit(e.target.value)}
+      className="w-7 h-7 p-0 rounded-sm border border-border bg-transparent cursor-pointer"
+    />
   );
 }
 
@@ -76,13 +99,11 @@ function AssetsBlock({ styles, assets, stylesLoading, onChangeStyle }: Pick<Mone
             <div className="flex items-center gap-3 min-w-0">
               <label htmlFor={colorId} className="flex items-center gap-2 cursor-pointer flex-shrink-0">
                 <span className="sr-only">Colour for {asset}</span>
-                <input
+                <AssetColorInput
+                  key={style.colorHex ?? DEFAULT_SWATCH}
                   id={colorId}
-                  name={colorId}
-                  type="color"
                   value={style.colorHex ?? DEFAULT_SWATCH}
-                  onChange={(e) => onChangeStyle(asset, { colorHex: e.target.value })}
-                  className="w-7 h-7 p-0 rounded-sm border border-border bg-transparent cursor-pointer"
+                  onCommit={(colorHex) => onChangeStyle(asset, { colorHex })}
                 />
               </label>
               <span className="text-sm font-bold text-text truncate">{asset}</span>

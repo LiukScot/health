@@ -4,7 +4,7 @@ import backupRoute from "./money-backup.ts";
 import preferencesRoute from "./preferences.ts";
 import transactionsRoute from "./money-transactions.ts";
 import stylesRoute from "./money-styles.ts";
-import { setupAuthedApp } from "../test-helpers.ts";
+import { loginAndGetCookie, seedUser, setupAuthedApp } from "../test-helpers.ts";
 
 async function setup() {
   return setupAuthedApp([
@@ -90,6 +90,31 @@ describe("money JSON backup", () => {
 
     const list = await (await app.request("/money/transactions", { headers: { cookie } })).json();
     expect(list.data.map((t: { asset: string }) => t.asset)).toEqual(["Good"]);
+
+    // The movement is the other half of the contract: "sideways" is neither
+    // income nor expense, so it must not have been stored under either.
+    const dump = await (await app.request("/money/backup/json", { headers: { cookie } })).json();
+    expect(dump.data.monthlyMovements).toEqual([]);
+  });
+
+  test("imports rows whose ids already belong to another account", async () => {
+    const { ctx, app, cookie } = await setup();
+    const other = await seedUser(ctx.db);
+    const otherCookie = await loginAndGetCookie(app, "/auth", other.email, other.password);
+
+    // Both accounts import the same file. The row ids inside it are identical,
+    // and `id` is the primary key across all users, so reusing them would make
+    // the second import collide and silently drop the row.
+    const payload = {
+      transactions: [{ id: "tx-shared", date: "2026-03-03", asset: "Shared", tipo: "cedola", pnl: 3 }],
+    };
+    expect((await importJson(app, cookie, payload)).status).toBe(200);
+    expect((await importJson(app, otherCookie, payload)).status).toBe(200);
+
+    for (const who of [cookie, otherCookie]) {
+      const list = await (await app.request("/money/transactions", { headers: { cookie: who } })).json();
+      expect(list.data.map((t: { asset: string }) => t.asset)).toEqual(["Shared"]);
+    }
   });
 
   test("infers the derived type when the backup omits it", async () => {
@@ -111,6 +136,9 @@ describe("money JSON backup", () => {
     });
     const styles = await (await app.request("/money/assets/styles", { headers: { cookie } })).json();
     expect(styles.data["ETF-A"]).toEqual({ colorHex: "#34d399", riskLevel: "low" });
+
+    const dump = await (await app.request("/money/backup/json", { headers: { cookie } })).json();
+    expect(dump.data.preferences.showZeroAssets).toBe(true);
   });
 });
 

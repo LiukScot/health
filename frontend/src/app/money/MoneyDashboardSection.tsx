@@ -1,4 +1,4 @@
-import { lazy, Suspense } from "react";
+import { lazy, Suspense, useId } from "react";
 import { SectionHead } from "../shared";
 import { EmptyState } from "../screen-helpers";
 import { CARD_GRID, DASH_CARD, CARD_H3, CARD_VALUE } from "../cards";
@@ -35,6 +35,7 @@ export function MoneyDashboardSection({
   isLoading: boolean;
 }) {
   const hasAssets = visibleAssets.length > 0;
+  const showZeroId = useId();
 
   return (
     <section className="@container">
@@ -119,8 +120,9 @@ export function MoneyDashboardSection({
       )}
 
       <div className="flex items-center gap-2 mt-5">
-        <label className="flex items-center gap-2 cursor-pointer">
+        <label htmlFor={showZeroId} className="flex items-center gap-2 cursor-pointer">
           <input
+            id={showZeroId}
             type="checkbox"
             name="showZeroAssets"
             className="w-4 h-4 accent-[var(--accent)] cursor-pointer"

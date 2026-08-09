@@ -90,6 +90,12 @@ For a production-style local run, use Docker directly.
 
 Your data is stored in `data/world.sqlite`. The app runs migrations automatically on startup — no manual steps needed.
 
+> **Upgrading from a release named `health`:** rename the database file to
+> `world.sqlite` **together with its `-wal` and `-shm` companions** before
+> starting the new version, or SQLite creates an empty database and the app
+> comes up with no data. The session cookie is also renamed, so everyone is
+> signed out once on the first start; MCP tokens are unaffected.
+
 To back up or restore your data:
 
 ```bash

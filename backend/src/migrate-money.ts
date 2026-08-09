@@ -46,7 +46,7 @@ function resolveUserId(db: Database, email: string, label: string): number {
     .query(`SELECT id FROM users WHERE lower(email) = ? LIMIT 1`)
     .get(email) as { id?: number } | null;
   if (!row?.id) {
-    throw new Error(`No ${label} account found for ${email}.`);
+    throw new Error(`No ${label} account found for the given email.`);
   }
   return row.id;
 }
@@ -145,10 +145,12 @@ function main(): void {
   for (const [table, count] of Object.entries(counts)) {
     console.log(`${verb} ${count} row(s) into ${table}`);
   }
+  // The account is identified by the --email argument the operator just typed,
+  // so echoing it back adds nothing and puts an address into CI and shell logs.
   console.log(
     cfg.dryRun
       ? `Dry run only — ${cfg.target} was not modified.`
-      : `Money data imported into ${cfg.target} for ${cfg.email}.`
+      : `Money data imported into ${cfg.target}.`
   );
 }
 

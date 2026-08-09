@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { z } from "zod";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
@@ -13,13 +13,30 @@ import type { InlineMessage } from "../app/core";
 
 const okSchema = apiEnvelopeSchema(z.object({ ok: z.boolean() }));
 const prefsSchema = apiEnvelopeSchema(z.object({ showZeroAssets: z.boolean() }));
+// The backup endpoint returns the whole dump; nothing here reads inside it, so
+// the envelope is validated and the payload passes through unexamined.
+const backupSchema = apiEnvelopeSchema(z.unknown());
+
+const MONEY_QUERY_KEYS = [
+  ["money-transactions"],
+  ["money-movements"],
+  ["money-snapshots"],
+  ["money-styles"],
+  ["money-preferences"],
+];
 
 function downloadBlob(blob: Blob, filename: string): void {
+  const url = URL.createObjectURL(blob);
   const anchor = document.createElement("a");
-  anchor.href = URL.createObjectURL(blob);
+  anchor.href = url;
   anchor.download = filename;
+  // Firefox and Safari only start fetching the blob once the anchor is in the
+  // document, and not before the current task ends — revoking on this tick
+  // invalidates the URL and the file downloads empty.
+  document.body.appendChild(anchor);
   anchor.click();
-  URL.revokeObjectURL(anchor.href);
+  anchor.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 0);
 }
 
 function datedName(extension: string): string {
@@ -85,50 +102,66 @@ export function useMoneySettings(enabled: boolean) {
       apiFetch("/api/v1/money/data/purge", { method: "POST" }, (raw) => okSchema.parse(raw).data),
     onSuccess: async () => {
       setPurgeConfirmArmed(false);
-      await queryClient.invalidateQueries();
+      await Promise.all(MONEY_QUERY_KEYS.map((queryKey) => queryClient.invalidateQueries({ queryKey })));
       toast.success("Money data purged");
     },
   });
 
-  const runBackupAction = async (action: () => Promise<void>, done: InlineMessage) => {
+  // A spreadsheet import or export can outlive the screen that started it, so
+  // unmounting cancels the request rather than leaving it running.
+  const abortRef = useRef<AbortController | null>(null);
+  useEffect(() => () => abortRef.current?.abort(), []);
+
+  const runBackupAction = async (
+    action: (signal: AbortSignal) => Promise<void>,
+    done: InlineMessage,
+    changesData: boolean,
+  ) => {
     setBackupMessage(null);
+    abortRef.current = new AbortController();
     try {
-      await action();
+      await action(abortRef.current.signal);
       setBackupMessage(done);
-      await queryClient.invalidateQueries();
+      // An export changes nothing on the server. An import replaces the Money
+      // data only, so the Health queries have no reason to refetch.
+      if (changesData) {
+        await Promise.all(MONEY_QUERY_KEYS.map((queryKey) => queryClient.invalidateQueries({ queryKey })));
+      }
     } catch (error) {
       setBackupMessage({ tone: "error", text: getErrorMessage(error) });
     }
   };
 
-  const exportJson = async () => {
-    const payload = await apiFetch("/api/v1/money/backup/json", { method: "GET" }, (raw) => raw);
-    const data = (payload as { data: unknown }).data;
-    downloadBlob(new Blob([JSON.stringify(data, null, 2)], { type: "application/json" }), datedName("json"));
+  const exportJson = async (signal: AbortSignal) => {
+    const payload = await apiFetch("/api/v1/money/backup/json", { method: "GET", signal }, (raw) =>
+      backupSchema.parse(raw).data,
+    );
+    downloadBlob(new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" }), datedName("json"));
   };
 
-  const importJson = async (file: File) => {
+  const importJson = async (file: File, signal: AbortSignal) => {
     const parsed: unknown = JSON.parse(await file.text());
     await apiFetch(
       "/api/v1/money/backup/json/import",
-      { method: "POST", body: JSON.stringify(parsed) },
+      { method: "POST", body: JSON.stringify(parsed), signal },
       (raw) => raw,
     );
   };
 
-  const exportXlsx = async () => {
-    const response = await fetch("/api/v1/money/backup/xlsx", { credentials: "include" });
+  const exportXlsx = async (signal: AbortSignal) => {
+    const response = await fetch("/api/v1/money/backup/xlsx", { credentials: "include", signal });
     if (!response.ok) throw new Error(`Export failed (HTTP ${response.status})`);
     downloadBlob(await response.blob(), datedName("xlsx"));
   };
 
-  const importXlsx = async (file: File) => {
+  const importXlsx = async (file: File, signal: AbortSignal) => {
     const form = new FormData();
     form.append("file", file);
     const response = await fetch("/api/v1/money/backup/xlsx/import", {
       method: "POST",
       credentials: "include",
       body: form,
+      signal,
     });
     if (!response.ok) {
       const body = (await response.json().catch(() => null)) as { error?: { message?: string } } | null;
@@ -156,12 +189,15 @@ export function useMoneySettings(enabled: boolean) {
     },
 
     backupMessage,
-    onExportJson: () => void runBackupAction(exportJson, { tone: "info", text: "JSON export started." }),
+    // fire and forget: runBackupAction reports both outcomes through
+    // backupMessage, so there is nothing left for the caller to await.
+    onExportJson: () => void runBackupAction(exportJson, { tone: "info", text: "JSON export started." }, false),
     onImportJson: (file: File) =>
-      void runBackupAction(() => importJson(file), { tone: "success", text: "JSON import completed." }),
-    onExportXlsx: () => void runBackupAction(exportXlsx, { tone: "info", text: "Spreadsheet export started." }),
+      void runBackupAction((s) => importJson(file, s), { tone: "success", text: "JSON import completed." }, true),
+    onExportXlsx: () =>
+      void runBackupAction(exportXlsx, { tone: "info", text: "Spreadsheet export started." }, false),
     onImportXlsx: (file: File) =>
-      void runBackupAction(() => importXlsx(file), { tone: "success", text: "Spreadsheet import completed." }),
+      void runBackupAction((s) => importXlsx(file, s), { tone: "success", text: "Spreadsheet import completed." }, true),
 
     purgeConfirmArmed,
     purgePending: purgeMutation.isPending,

@@ -79,6 +79,13 @@ export function useMoneyDashboard(enabled: boolean) {
     hiddenAssetCount: allAssets.length - visibleAssets.length,
     showZeroAssets,
     onToggleShowZeroAssets: (next: boolean) => prefsMutation.mutate(next),
-    isLoading: transactionsQuery.isLoading || movementsQuery.isLoading,
+    // Styles and preferences are part of the answer, not decoration: without
+    // them every asset renders as "no risk" and zero-value assets stay hidden,
+    // then both flip once the queries land.
+    isLoading:
+      transactionsQuery.isLoading ||
+      movementsQuery.isLoading ||
+      stylesQuery.isLoading ||
+      prefsQuery.isLoading,
   };
 }

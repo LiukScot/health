@@ -1,5 +1,3 @@
-// Dashboard stat card. Shared by the health and money dashboards, which show
-// different numbers in the same shape.
 // The card fills its grid track. It used to cap itself at 200px and pin
 // left, which left track-width minus 200 as dead space — a gap that grew
 // as the row held fewer cards, so two rows of different length never lined

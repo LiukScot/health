@@ -207,14 +207,14 @@ export function CbtSection({
                     type="button"
                     className={DETAIL_ACTION_BTN}
                     onClick={() => {
-                      if (editingCbt) {
+                      if (editingCbt?.id === entry.id) {
                         onCancelEdit();
                         return;
                       }
                       onStartEdit(entry);
                     }}
                   >
-                    <AnimatedEditingLabel active={Boolean(editingCbt)} />
+                    <AnimatedEditingLabel active={editingCbt?.id === entry.id} />
                   </button>
                   <button
                     type="button"

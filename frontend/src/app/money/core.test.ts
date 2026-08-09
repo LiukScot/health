@@ -67,6 +67,12 @@ describe("formatting", () => {
     expect(formatTxDate("not-a-date")).toBe("—");
     expect(formatTxDate("2026-03-14")).not.toBe("—");
   });
+
+  test("renders the stored calendar day, not the UTC instant", () => {
+    // The suite runs behind UTC, so parsing this as an instant would render
+    // the 13th. The stored value is a calendar day and must survive as one.
+    expect(formatTxDate("2026-03-14")).toContain("14");
+  });
 });
 
 describe("transactionSchema", () => {

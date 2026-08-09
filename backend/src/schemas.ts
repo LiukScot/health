@@ -215,7 +215,10 @@ export const moneyBackupImportSchema = z.object({
   transactions: z.array(looseRow).max(50_000).optional(),
   monthlyMovements: z.array(looseRow).max(50_000).optional(),
   monthlySnapshots: z.array(looseRow).max(50_000).optional(),
-  assetColors: z.record(z.string().min(1).max(120), z.string()).optional(),
-  assetRisks: z.record(z.string().min(1).max(120), z.string()).optional(),
+  // Same constraints as stylesSchema above: these land in the same columns and
+  // the colour is rendered as a CSS value, so the JSON import cannot be looser
+  // than the endpoint that writes them directly.
+  assetColors: z.record(z.string().min(1).max(120), z.string().regex(/^#[0-9a-fA-F]{6}$/)).optional(),
+  assetRisks: z.record(z.string().min(1).max(120), z.enum(["low", "medium", "high"])).optional(),
   preferences: looseRow.optional()
 });

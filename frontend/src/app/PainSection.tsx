@@ -228,14 +228,14 @@ export function PainSection({
                       type="button"
                       className={DETAIL_ACTION_BTN}
                       onClick={() => {
-                        if (editingPain) {
+                        if (editingPain?.id === entry.id) {
                           onCancelEdit();
                           return;
                         }
                         onStartEdit(entry);
                       }}
                     >
-                      <AnimatedEditingLabel active={Boolean(editingPain)} />
+                      <AnimatedEditingLabel active={editingPain?.id === entry.id} />
                     </button>
                     <button
                       type="button"

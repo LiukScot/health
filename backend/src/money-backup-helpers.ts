@@ -124,12 +124,14 @@ function toFiniteNumber(v: unknown, fallback: number): number {
   return Number.isFinite(n) ? n : fallback;
 }
 
-function warnSkipped(label: string, attempted: number, inserted: number): void {
-  const skipped = attempted - inserted;
-  if (skipped > 0) console.warn(`[money import] ${skipped} ${label} row(s) skipped (duplicate id)`);
-}
+export type ImportCounts = { transactions: number; monthlyMovements: number; monthlySnapshots: number };
 
-export function applyImport(db: DrizzleDB, userId: number, payload: ImportPayload): void {
+// Row ids are minted here rather than carried over from the backup file. These
+// three tables key on `id` alone, so an id belonging to another user collided,
+// and onConflictDoNothing then dropped the row with nothing but a console
+// warning. Both callers wipe the user's own rows first, so no id is reused and
+// nothing downstream depends on the ids the file happened to carry.
+export function applyImport(db: DrizzleDB, userId: number, payload: ImportPayload): ImportCounts {
   const txRows = payload.transactions
     .map((row) => {
       const txDate = toIsoDateOrNull(row.date ?? row.txDate);
@@ -138,7 +140,7 @@ export function applyImport(db: DrizzleDB, userId: number, payload: ImportPayloa
       const pnl = toFiniteNumber(row.pnl, 0);
       const tipo = String(row.tipo ?? "").slice(0, 60);
       return {
-        id: String(row.id ?? makeId("tx")).slice(0, 64),
+        id: makeId("tx"),
         userId,
         txDate,
         asset: String(row.asset ?? "").slice(0, 120),
@@ -151,10 +153,7 @@ export function applyImport(db: DrizzleDB, userId: number, payload: ImportPayloa
       };
     })
     .filter((r): r is NonNullable<typeof r> => r !== null);
-  if (txRows.length > 0) {
-    const inserted = db.insert(transactions).values(txRows).onConflictDoNothing().returning({ id: transactions.id }).all();
-    warnSkipped("transaction", txRows.length, inserted.length);
-  }
+  if (txRows.length > 0) db.insert(transactions).values(txRows).run();
 
   const validDirections = new Set(["income", "expense"]);
   const movementRows = payload.monthlyMovements
@@ -163,7 +162,7 @@ export function applyImport(db: DrizzleDB, userId: number, payload: ImportPayloa
       // Unknown directions are dropped rather than silently reclassified.
       if (!validDirections.has(direction)) return null;
       return {
-        id: String(row.id ?? makeId("mm")).slice(0, 64),
+        id: makeId("mm"),
         userId,
         name: String(row.name ?? "").slice(0, 120),
         direction,
@@ -172,17 +171,14 @@ export function applyImport(db: DrizzleDB, userId: number, payload: ImportPayloa
       };
     })
     .filter((r): r is NonNullable<typeof r> => r !== null);
-  if (movementRows.length > 0) {
-    const inserted = db.insert(monthlyMovements).values(movementRows).onConflictDoNothing().returning({ id: monthlyMovements.id }).all();
-    warnSkipped("monthly-movement", movementRows.length, inserted.length);
-  }
+  if (movementRows.length > 0) db.insert(monthlyMovements).values(movementRows).run();
 
   const snapshotRows = payload.monthlySnapshots
     .map((row) => {
       const snapshotDate = toIsoDateOrNull(row.date ?? row.snapshotDate);
       if (!snapshotDate) return null;
       return {
-        id: String(row.id ?? makeId("snap")).slice(0, 64),
+        id: makeId("snap"),
         userId,
         snapshotDate,
         lowRisk: toFiniteNumber(row.low ?? row.lowRisk, 0),
@@ -192,10 +188,7 @@ export function applyImport(db: DrizzleDB, userId: number, payload: ImportPayloa
       };
     })
     .filter((r): r is NonNullable<typeof r> => r !== null);
-  if (snapshotRows.length > 0) {
-    const inserted = db.insert(monthlySnapshots).values(snapshotRows).onConflictDoNothing().returning({ id: monthlySnapshots.id }).all();
-    warnSkipped("monthly-snapshot", snapshotRows.length, inserted.length);
-  }
+  if (snapshotRows.length > 0) db.insert(monthlySnapshots).values(snapshotRows).run();
 
   if (payload.replaceStyles) {
     const assets = new Set<string>([...Object.keys(payload.assetColors), ...Object.keys(payload.assetRisks)]);
@@ -208,7 +201,7 @@ export function applyImport(db: DrizzleDB, userId: number, payload: ImportPayloa
         riskLevel: payload.assetRisks[asset] ?? null,
       }));
     if (styleRows.length > 0) {
-      db.insert(assetStyles).values(styleRows).onConflictDoNothing().run();
+      db.insert(assetStyles).values(styleRows).run();
     }
   }
 
@@ -222,6 +215,12 @@ export function applyImport(db: DrizzleDB, userId: number, payload: ImportPayloa
       })
       .run();
   }
+
+  return {
+    transactions: txRows.length,
+    monthlyMovements: movementRows.length,
+    monthlySnapshots: snapshotRows.length,
+  };
 }
 
 /** Accepts the booleans spreadsheets and older backups produce: 1, "1", "true". */

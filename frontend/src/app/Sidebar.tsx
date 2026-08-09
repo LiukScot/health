@@ -41,7 +41,7 @@ const realmIcons: Record<Realm, React.ReactNode> = {
   settings: settingsIcon,
 };
 
-const navIcons: Record<string, React.ReactNode> = {
+const navIcons: Record<NavItem, React.ReactNode> = {
   dashboard: dashboardIcon,
   "money-dashboard": dashboardIcon,
   "settings-account": (

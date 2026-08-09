@@ -35,14 +35,16 @@ moneyStyles.put("/", async (c) => {
   const rawDb = c.get("rawDb");
   const userId = c.get("userId");
   const body = await parseJson(c, stylesSchema);
-  const rows = Object.entries(body.styles)
-    .filter(([asset]) => asset.trim())
-    .map(([asset, style]) => ({
-      userId,
-      asset: asset.trim(),
-      colorHex: style.colorHex ?? null,
-      riskLevel: style.riskLevel ?? null,
-    }));
+  // "BTC" and "BTC " are distinct keys in the payload but the same asset once
+  // trimmed, and (user_id, asset) is unique — inserting both would abort the
+  // transaction. Last one wins, as it would in the object literal.
+  const byAsset = new Map<string, { colorHex: string | null; riskLevel: string | null }>();
+  for (const [asset, style] of Object.entries(body.styles)) {
+    const key = asset.trim();
+    if (!key) continue;
+    byAsset.set(key, { colorHex: style.colorHex ?? null, riskLevel: style.riskLevel ?? null });
+  }
+  const rows = Array.from(byAsset, ([asset, style]) => ({ userId, asset, ...style }));
 
   const tx = rawDb.transaction(() => {
     db.delete(assetStyles).where(eq(assetStyles.userId, userId)).run();

@@ -171,14 +171,14 @@ export function MovementsSection({
                       type="button"
                       className={DETAIL_ACTION_BTN}
                       onClick={() => {
-                        if (editingMovement) {
+                        if (editingMovement?.id === row.id) {
                           onCancelEdit();
                           return;
                         }
                         onStartEdit(row);
                       }}
                     >
-                      <AnimatedEditingLabel active={Boolean(editingMovement)} />
+                      <AnimatedEditingLabel active={editingMovement?.id === row.id} />
                     </button>
                     <button
                       type="button"

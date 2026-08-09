@@ -238,14 +238,14 @@ export function DiarySection({
                       type="button"
                       className={DETAIL_ACTION_BTN}
                       onClick={() => {
-                        if (editingDiary) {
+                        if (editingDiary?.id === entry.id) {
                           onCancelEdit();
                           return;
                         }
                         onStartEdit(entry);
                       }}
                     >
-                      <AnimatedEditingLabel active={Boolean(editingDiary)} />
+                      <AnimatedEditingLabel active={editingDiary?.id === entry.id} />
                     </button>
                     <button
                       type="button"

@@ -19,7 +19,7 @@ monorepo root) — Gradle expects `settings.gradle.kts` at the project
 root and gets confused by sibling `node_modules/`.
 
 ```
-File → Open → /home/luca/github/apps/world/android
+File → Open → <path-to-clone>/android
 ```
 
 ## Talking to the backend

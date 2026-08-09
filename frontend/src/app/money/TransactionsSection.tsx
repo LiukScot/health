@@ -204,14 +204,14 @@ export function TransactionsSection({
                       type="button"
                       className={DETAIL_ACTION_BTN}
                       onClick={() => {
-                        if (editingTx) {
+                        if (editingTx?.id === row.id) {
                           onCancelEdit();
                           return;
                         }
                         onStartEdit(row);
                       }}
                     >
-                      <AnimatedEditingLabel active={Boolean(editingTx)} />
+                      <AnimatedEditingLabel active={editingTx?.id === row.id} />
                     </button>
                     <button
                       type="button"

@@ -3,7 +3,7 @@ import type ExcelJS from "exceljs";
 // Normalize an ExcelJS cell value to a plain primitive. ExcelJS returns
 // objects for richtext / hyperlink / formula cells and Date objects for date
 // cells; every importer here wants the flat value.
-export function cellToPrimitive(v: unknown): string | number | boolean | null {
+export function cellToPrimitive(v: unknown): string | number | boolean {
   if (v == null) return "";
   if (v instanceof Date) return v.toISOString().slice(0, 10);
   if (typeof v === "object") {
@@ -11,7 +11,9 @@ export function cellToPrimitive(v: unknown): string | number | boolean | null {
     if (Array.isArray(obj.richText)) return (obj.richText as Array<{ text?: string }>).map((r) => r.text ?? "").join("");
     if (typeof obj.text === "string") return obj.text;
     if (obj.result !== undefined) return cellToPrimitive(obj.result);
-    if (typeof obj.hyperlink === "string") return (obj.text as string | undefined) ?? obj.hyperlink;
+    // A string `text` already returned above, so a hyperlink cell that reaches
+    // here has none worth showing.
+    if (typeof obj.hyperlink === "string") return obj.hyperlink;
     return "";
   }
   return v as string | number | boolean;

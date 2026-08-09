@@ -1,11 +1,12 @@
 import { Hono, type Context } from "hono";
+import { bodyLimit } from "hono/body-limit";
 import ExcelJS from "exceljs";
 import type { DrizzleDB } from "../db/index.ts";
 import type { SQLiteDB } from "../db.ts";
 import { parseJson } from "../helpers.ts";
 import { moneyBackupImportSchema } from "../schemas.ts";
 import { requireAuth } from "../middleware/auth.ts";
-import { applyImport, buildBackupPayload, coerceBoolean, wipeMoneyData } from "../money-backup-helpers.ts";
+import { applyImport, buildBackupPayload, coerceBoolean, wipeMoneyData, type ImportCounts } from "../money-backup-helpers.ts";
 import { sheetToObjects } from "../xlsx-helpers.ts";
 
 type Env = { Variables: { db: DrizzleDB; rawDb: SQLiteDB; userId: number; userEmail: string; sessionSid: string } };
@@ -15,23 +16,50 @@ const MAX_XLSX_BYTES = 10 * 1024 * 1024;
 const MAX_XLSX_BASE64_LENGTH = Math.ceil((MAX_XLSX_BYTES * 4) / 3) + 4;
 const MAX_IMPORT_ROWS = 50_000;
 
+// Rejects oversized uploads before the body is buffered. The per-branch checks
+// inside readWorkbook still run: they catch a body that lies about its length,
+// and they report which limit was hit.
+const limitUploadSize = bodyLimit({
+  maxSize: MAX_XLSX_BYTES,
+  onError: (c) => c.json({ error: { code: "FILE_TOO_LARGE", message: "File exceeds 10 MB limit" } }, 413),
+});
+
 const moneyBackup = new Hono<Env>();
 
 moneyBackup.use(requireAuth);
+
+/**
+ * Runs an import transaction and turns a failure into a 422, matching the
+ * health JSON import: a bad backup file is the client's problem, not a server
+ * fault, and the two endpoints should be distinguishable the same way.
+ */
+function runImport(c: Context<Env>, tx: () => ImportCounts): Response {
+  let imported: ImportCounts;
+  try {
+    imported = tx();
+  } catch (e) {
+    console.error("Money import transaction failed:", e);
+    return c.json(
+      { error: { code: "IMPORT_FAILED", message: "Import failed: invalid or incompatible backup data" } },
+      422,
+    );
+  }
+  return c.json({ data: { ok: true, imported } });
+}
 
 moneyBackup.get("/json", (c) => {
   return c.json({ data: buildBackupPayload(c.get("db"), c.get("userId")) });
 });
 
-moneyBackup.post("/json/import", async (c) => {
+moneyBackup.post("/json/import", limitUploadSize, async (c) => {
   const db = c.get("db");
   const rawDb = c.get("rawDb");
   const userId = c.get("userId");
   const body = await parseJson(c, moneyBackupImportSchema);
 
-  rawDb.transaction(() => {
+  const tx = rawDb.transaction(() => {
     wipeMoneyData(db, userId, true, true);
-    applyImport(db, userId, {
+    return applyImport(db, userId, {
       transactions: body.transactions ?? [],
       monthlyMovements: body.monthlyMovements ?? [],
       monthlySnapshots: body.monthlySnapshots ?? [],
@@ -41,9 +69,9 @@ moneyBackup.post("/json/import", async (c) => {
       replaceStyles: true,
       replacePrefs: true,
     });
-  })();
+  });
 
-  return c.json({ data: { ok: true } });
+  return runImport(c, tx);
 });
 
 /**
@@ -131,7 +159,7 @@ async function readWorkbook(c: Context<Env>): Promise<ExcelJS.Workbook | Respons
   return wb;
 }
 
-moneyBackup.post("/xlsx/import", async (c) => {
+moneyBackup.post("/xlsx/import", limitUploadSize, async (c) => {
   const db = c.get("db");
   const rawDb = c.get("rawDb");
   const userId = c.get("userId");
@@ -168,9 +196,9 @@ moneyBackup.post("/xlsx/import", async (c) => {
   const replaceStyles = Boolean(styleSheet);
   const replacePrefs = Boolean(prefSheet);
 
-  rawDb.transaction(() => {
+  const tx = rawDb.transaction(() => {
     wipeMoneyData(db, userId, replaceStyles, replacePrefs);
-    applyImport(db, userId, {
+    return applyImport(db, userId, {
       transactions,
       monthlyMovements,
       monthlySnapshots,
@@ -180,18 +208,9 @@ moneyBackup.post("/xlsx/import", async (c) => {
       replaceStyles,
       replacePrefs,
     });
-  })();
-
-  return c.json({
-    data: {
-      ok: true,
-      imported: {
-        transactions: transactions.length,
-        monthlyMovements: monthlyMovements.length,
-        monthlySnapshots: monthlySnapshots.length,
-      },
-    },
   });
+
+  return runImport(c, tx);
 });
 
 moneyBackup.post("/purge", (c) => {

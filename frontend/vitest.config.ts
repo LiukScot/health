@@ -15,5 +15,10 @@ export default defineConfig({
     setupFiles: ["./src/test-setup.ts"],
     css: false,
     include: ["src/**/*.{test,spec}.{ts,tsx}"],
+    // A negative UTC offset, deliberately. Date-only strings parse as UTC
+    // midnight, so a zone behind UTC is the only place where treating one as
+    // an instant renders the wrong calendar day. Under TZ=UTC that class of
+    // bug passes every test.
+    env: { TZ: "America/New_York" },
   },
 });
