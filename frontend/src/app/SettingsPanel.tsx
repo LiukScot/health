@@ -256,7 +256,7 @@ export function SettingsScreen({ nav, money, ...props }: SettingsSectionProps & 
   switch (nav) {
     case "settings-account":
       return (
-        <div className="flex flex-col gap-5">
+        <div className="flex flex-col gap-5 min-w-0">
           <AccountIdentity auth={props.auth} />
           <AccountBlock auth={props.auth} />
         </div>
@@ -265,8 +265,7 @@ export function SettingsScreen({ nav, money, ...props }: SettingsSectionProps & 
       return <ThemeBlock />;
     case "settings-health":
       return (
-        <div className="grid gap-5">
-          <SectionHead title="Birthday" />
+        <div className="grid grid-cols-1 gap-5">
           <BirthdayBlock
             birthday={props.birthday}
             birthdayPending={props.birthdayPending}

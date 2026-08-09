@@ -182,7 +182,7 @@ function DangerBlock({ purgeConfirmArmed, purgePending, purgeError, onPurgeArm, 
 
 export function MoneySettings(props: MoneySettingsProps) {
   return (
-    <div className="grid gap-5">
+    <div className="grid grid-cols-1 gap-5">
       <SectionHead title="Preferences" />
       <PreferencesBlock {...props} />
       <SectionHead title="Assets" />
