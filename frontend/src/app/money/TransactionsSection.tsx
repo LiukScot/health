@@ -11,8 +11,8 @@ import {
   DETAIL_ACTION_BTN,
   DetailGroup,
   EntriesHeading,
-  FORM_FULL,
-  FORM_GRID,
+  FORM_COL,
+  FORM_SPLIT,
   ENTRY_CHEVRON,
   ENTRY_DATE,
   ENTRY_EXPANDED,
@@ -66,13 +66,15 @@ export function TransactionsSection({
 
 
   return (
-    <section className="@container p-2">
-      <h1 className="m-0 mb-3 text-title font-bold tracking-tight text-text">Transactions</h1>
-      <div className="grid gap-8">
+    <section className="@container">
+      <h1 className="m-0 mb-10 [text-box:trim-both_cap_alphabetic] text-title font-bold tracking-tight text-text">Transactions</h1>
+      <div className="grid gap-10">
         <div className="min-w-0 border-b border-border">
           <EntriesHeading className="mt-0">New transaction</EntriesHeading>
-          <form className="mb-2" onSubmit={txForm.handleSubmit(onSubmit)}>
-            <div className={FORM_GRID}>
+          <form onSubmit={txForm.handleSubmit(onSubmit)}>
+            <div className={FORM_SPLIT}>
+              {/* Left: what the transaction is. */}
+              <div className={FORM_COL}>
               <FieldLine
                 label="Date"
                 type="date"
@@ -119,6 +121,10 @@ export function TransactionsSection({
                 />
               </div>
 
+              </div>
+
+              {/* Right: how much, and why. */}
+              <div className={FORM_COL}>
               {showBuyValue ? (
                 <FieldLine
                   label="Buy value"
@@ -149,16 +155,11 @@ export function TransactionsSection({
                 {...txForm.register("note")}
               />
 
-              {editingTx ? (
-                <div className={`flex gap-2 flex-wrap ${FORM_FULL}`}>
-                  <Button type="button" onClick={onCancelEdit}>
-                    Cancel edit
-                  </Button>
-                </div>
-              ) : null}
+              </div>
             </div>
+
             <div className="flex justify-end pt-2">
-              <Button type="submit" variant={txMutationState.isSuccess ? "success" : "primary"} className="mb-5">
+              <Button type="submit" variant={txMutationState.isSuccess ? "success" : "primary"} >
                 {txMutationState.isSuccess ? "✓ Saved" : editingTx ? "Update transaction" : "Save transaction"}
               </Button>
             </div>

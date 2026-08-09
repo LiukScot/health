@@ -41,8 +41,8 @@ export function SettingsSection({
   }
 
   return (
-    <section className="@container p-2">
-      <h1 className="m-0 mb-3 text-title font-bold tracking-tight text-text">{navLabels[nav]}</h1>
+    <section className="@container">
+      <h1 className="m-0 mb-10 [text-box:trim-both_cap_alphabetic] text-title font-bold tracking-tight text-text">{navLabels[nav]}</h1>
       <div className="max-w-[80ch]">
         <SettingsScreen nav={nav} money={money} {...rest} />
       </div>

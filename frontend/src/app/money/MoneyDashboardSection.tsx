@@ -37,8 +37,8 @@ export function MoneyDashboardSection({
   const hasAssets = visibleAssets.length > 0;
 
   return (
-    <section className="@container p-2">
-      <h1 className="m-0 mb-3 text-title font-bold tracking-tight text-text">Dashboard</h1>
+    <section className="@container">
+      <h1 className="m-0 mb-10 [text-box:trim-both_cap_alphabetic] text-title font-bold tracking-tight text-text">Dashboard</h1>
 
       {isLoading ? <p className="text-muted text-control">Loading portfolio…</p> : null}
 

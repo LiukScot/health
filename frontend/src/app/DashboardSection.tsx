@@ -69,8 +69,8 @@ export function DashboardSection({
   anniversaryCards: MemorableDay[];
 }) {
   return (
-    <section className="@container p-2">
-      <h1 className="m-0 mb-3 text-title font-bold tracking-tight text-text">Dashboard</h1>
+    <section className="@container">
+      <h1 className="m-0 mb-10 [text-box:trim-both_cap_alphabetic] text-title font-bold tracking-tight text-text">Dashboard</h1>
 
       <div className="flex flex-wrap gap-3 items-end mb-5">
         <label className="flex flex-col gap-2">

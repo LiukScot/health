@@ -9,7 +9,8 @@ import {
   DETAIL_ACTION_BTN,
   DetailGroup,
   EntriesHeading,
-  FORM_GRID,
+  FORM_COL,
+  FORM_SPLIT,
   ENTRY_CHEVRON,
   ENTRY_DATE,
   ENTRY_EXPANDED,
@@ -46,17 +47,19 @@ export function SnapshotsSection({
   onDeleteBlur: () => void;
 }) {
   return (
-    <section className="@container p-2">
-      <h1 className="m-0 mb-3 text-title font-bold tracking-tight text-text">Snapshots</h1>
-      <div className="grid gap-8">
+    <section className="@container">
+      <h1 className="m-0 mb-10 [text-box:trim-both_cap_alphabetic] text-title font-bold tracking-tight text-text">Snapshots</h1>
+      <div className="grid gap-10">
         <div className="min-w-0 border-b border-border">
           <EntriesHeading className="mt-0">New snapshot</EntriesHeading>
           <p className="text-control text-muted m-0 mb-3 max-w-[60ch]">
             The three risk totals are worked out from your transactions and the risk level set on
             each asset. You only record the date and whatever is sitting liquid.
           </p>
-          <form className="mb-2" onSubmit={snapshotForm.handleSubmit(onSubmit)}>
-            <div className={FORM_GRID}>
+          <form onSubmit={snapshotForm.handleSubmit(onSubmit)}>
+            <div className={FORM_SPLIT}>
+              {/* Left: when. */}
+              <div className={FORM_COL}>
               <FieldLine
                 label="Date"
                 type="date"
@@ -67,6 +70,10 @@ export function SnapshotsSection({
                   el.showPicker?.();
                 }}
               />
+              </div>
+
+              {/* Right: how much is liquid. */}
+              <div className={FORM_COL}>
               <FieldLine
                 label="Liquid"
                 type="number"
@@ -75,7 +82,9 @@ export function SnapshotsSection({
                 aria-label="Liquid"
                 {...snapshotForm.register("liquid")}
               />
+              </div>
             </div>
+
             <div className="flex justify-end items-center gap-3 pt-2">
               {!canSave ? (
                 <span className="text-control text-muted">Loading transactions and asset styles…</span>
@@ -84,7 +93,7 @@ export function SnapshotsSection({
                 type="submit"
                 disabled={!canSave}
                 variant={snapshotMutationState.isSuccess ? "success" : "primary"}
-                className="mb-5"
+               
               >
                 {snapshotMutationState.isSuccess ? "✓ Saved" : "Take snapshot"}
               </Button>

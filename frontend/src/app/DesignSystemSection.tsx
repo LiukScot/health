@@ -51,7 +51,7 @@ export function DesignSystemSection() {
 
   return (
     <section className="@container p-2">
-      <h1 className="m-0 mb-3 text-title font-bold tracking-tight text-text">Design System</h1>
+      <h1 className="m-0 mb-10 [text-box:trim-both_cap_alphabetic] text-title font-bold tracking-tight text-text">Design System</h1>
       <p className="text-muted text-control mt-2 mb-5 max-w-[72ch] [&_code]:px-[6px] [&_code]:py-[1px] [&_code]:rounded-[6px] [&_code]:bg-card-soft [&_code]:text-text">
         Living reference for tokens, primitives, and patterns used across Diary, Pain, therapy forms, and Memorable days.
         Examples use the same classes as production &mdash; edit <code>styles.css</code> and this page tracks it.

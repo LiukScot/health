@@ -10,8 +10,8 @@ import {
   DETAIL_ACTION_BTN,
   DetailGroup,
   EntriesHeading,
-  FORM_FULL,
-  FORM_GRID,
+  FORM_COL,
+  FORM_SPLIT,
   ENTRY_CHEVRON,
   ENTRY_DATE,
   ENTRY_EXPANDED,
@@ -53,13 +53,15 @@ export function MovementsSection({
   const monthlyNet = movements.reduce((sum, m) => sum + (m.direction === "income" ? m.amount : -m.amount), 0);
 
   return (
-    <section className="@container p-2">
-      <h1 className="m-0 mb-3 text-title font-bold tracking-tight text-text">Movements</h1>
-      <div className="grid gap-8">
+    <section className="@container">
+      <h1 className="m-0 mb-10 [text-box:trim-both_cap_alphabetic] text-title font-bold tracking-tight text-text">Movements</h1>
+      <div className="grid gap-10">
         <div className="min-w-0 border-b border-border">
           <EntriesHeading className="mt-0">New movement</EntriesHeading>
-          <form className="mb-2" onSubmit={movementForm.handleSubmit(onSubmit)}>
-            <div className={FORM_GRID}>
+          <form onSubmit={movementForm.handleSubmit(onSubmit)}>
+            <div className={FORM_SPLIT}>
+              {/* Left: what recurs and in which direction. */}
+              <div className={FORM_COL}>
               <FieldLine
                 label="Name"
                 type="text"
@@ -86,6 +88,10 @@ export function MovementsSection({
                 />
               </div>
 
+              </div>
+
+              {/* Right: how much, and why. */}
+              <div className={FORM_COL}>
               <FieldLine
                 label="Amount"
                 type="number"
@@ -106,19 +112,14 @@ export function MovementsSection({
                 {...movementForm.register("note")}
               />
 
-              {editingMovement ? (
-                <div className={`flex gap-2 flex-wrap ${FORM_FULL}`}>
-                  <Button type="button" onClick={onCancelEdit}>
-                    Cancel edit
-                  </Button>
-                </div>
-              ) : null}
+              </div>
             </div>
+
             <div className="flex justify-end pt-2">
               <Button
                 type="submit"
                 variant={movementMutationState.isSuccess ? "success" : "primary"}
-                className="mb-5"
+               
               >
                 {movementMutationState.isSuccess ? "✓ Saved" : editingMovement ? "Update movement" : "Save movement"}
               </Button>

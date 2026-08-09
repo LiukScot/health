@@ -21,8 +21,8 @@ import {
   DETAIL_ACTION_BTN,
   DetailGroup,
   EntriesHeading,
-  FORM_FULL,
-  FORM_GRID,
+  FORM_COL,
+  FORM_SPLIT,
   ENTRY_CHEVRON,
   ENTRY_DATE,
   ENTRY_EXPANDED,
@@ -77,29 +77,20 @@ export function DiarySection({
 
 
   return (
-    <section className="@container p-2">
-      <h1 className="m-0 mb-3 text-title font-bold tracking-tight text-text">Diary</h1>
-      <div className="grid gap-8">
+    <section className="@container">
+      <h1 className="m-0 mb-10 [text-box:trim-both_cap_alphabetic] text-title font-bold tracking-tight text-text">Diary</h1>
+      <div className="grid gap-10">
         <div className="min-w-0 border-b border-border">
           <EntriesHeading className="mt-0">New entry</EntriesHeading>
-          <form className="mb-2" onSubmit={diaryForm.handleSubmit(onSubmit)}>
-            <div className={FORM_GRID}>
+          <form onSubmit={diaryForm.handleSubmit(onSubmit)}>
+            <div className={FORM_SPLIT}>
               <div className="sr-only" aria-hidden="true">
                 <input type="hidden" {...diaryForm.register("moodLevel", { valueAsNumber: true })} />
                 <input type="hidden" {...diaryForm.register("depressionLevel", { valueAsNumber: true })} />
                 <input type="hidden" {...diaryForm.register("anxietyLevel", { valueAsNumber: true })} />
               </div>
-              <FieldLine
-                label="Date & time"
-                type="datetime-local"
-                className={DATETIME_FIELD}
-                {...diaryForm.register("dateTime")}
-                aria-label="Date/time"
-                onClick={(e) => {
-                  const el = e.currentTarget as HTMLInputElement & { showPicker?: () => void };
-                  el.showPicker?.();
-                }}
-              />
+              {/* Wide column: what you fill on every entry. */}
+              <div className={FORM_COL}>
               <div className="grid gap-2 content-start">
                 <span className={FIELD_LINE_LABEL}>Values</span>
                 <BarMetric
@@ -136,16 +127,22 @@ export function DiarySection({
                 placeholder="One small thing you're glad about…"
                 aria-label="Gratitude"
               />
-              {editingDiary ? (
-                <div className={`flex gap-2 flex-wrap ${FORM_FULL}`}>
-                  <Button type="button" onClick={onCancelEdit}>
-                    Cancel edit
-                  </Button>
-                </div>
-              ) : null}
-            </div>
+              </div>
 
-            <div className="grid gap-5 min-w-0 pt-5">
+              {/* Narrow column: the date is usually already right, and the
+                  emotion picker is where you go when something changed. */}
+              <div className={FORM_COL}>
+              <FieldLine
+                label="Date & time"
+                type="datetime-local"
+                className={DATETIME_FIELD}
+                {...diaryForm.register("dateTime")}
+                aria-label="Date/time"
+                onClick={(e) => {
+                  const el = e.currentTarget as HTMLInputElement & { showPicker?: () => void };
+                  el.showPicker?.();
+                }}
+              />
               <div className="grid gap-3">
                 <SectionHead title="Emotions" variant="tags" />
                 <TagTabs tabs={moodTabs} active={moodTab} onSelect={setMoodTab} ariaLabel="Mood categories" />
@@ -185,11 +182,18 @@ export function DiarySection({
                   ) : null}
                 </div>
               </div>
-              <div className="flex justify-end pt-2">
-                <Button type="submit" variant={diaryMutationState.isSuccess ? "success" : "primary"} className="mb-5">
-                  {diaryMutationState.isSuccess ? "✓ Saved" : editingDiary ? "Update entry" : "Save entry"}
-                </Button>
               </div>
+            </div>
+
+            <div className="flex justify-end items-center gap-3 pt-2">
+              {editingDiary ? (
+                <Button type="button" onClick={onCancelEdit}>
+                  Cancel edit
+                </Button>
+              ) : null}
+              <Button type="submit" variant={diaryMutationState.isSuccess ? "success" : "primary"} >
+                {diaryMutationState.isSuccess ? "✓ Saved" : editingDiary ? "Update entry" : "Save entry"}
+              </Button>
             </div>
           </form>
         </div>

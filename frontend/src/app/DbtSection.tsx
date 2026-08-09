@@ -15,8 +15,8 @@ import {
   DETAIL_ACTION_BTN,
   DetailGroup,
   EntriesHeading,
-  FORM_FULL,
-  FORM_GRID,
+  FORM_COL,
+  FORM_SPLIT,
   ENTRY_CHEVRON,
   ENTRY_DATE,
   ENTRY_EXPANDED,
@@ -118,13 +118,16 @@ export function DbtSection({
   ];
 
   return (
-    <section className="@container p-2">
-      <h1 className="m-0 mb-3 text-title font-bold tracking-tight text-text">DBT Distress Tolerance</h1>
-      <div className="grid gap-8">
+    <section className="@container">
+      <h1 className="m-0 mb-10 [text-box:trim-both_cap_alphabetic] text-title font-bold tracking-tight text-text">DBT Distress Tolerance</h1>
+      <div className="grid gap-10">
         <div className="min-w-0 border-b border-border">
           <EntriesHeading className="mt-0">New entry</EntriesHeading>
-          <form className="mb-2" onSubmit={dbtForm.handleSubmit(onSubmit)}>
-            <div className={FORM_GRID}>
+          <form onSubmit={dbtForm.handleSubmit(onSubmit)}>
+            <div className={FORM_SPLIT}>
+              {/* The groups are already ordered steps, so half go in each
+                  column and it reads down one then the other. */}
+              <div className={FORM_COL}>
               <FieldLine
                 label="Date & time"
                 type="datetime-local"
@@ -136,7 +139,31 @@ export function DbtSection({
                   el.showPicker?.();
                 }}
               />
-              {dbtGroups.map((g) => (
+              {dbtGroups.slice(0, Math.ceil(dbtGroups.length / 2)).map((g) => (
+                <div key={g.title} className="flex flex-col gap-3">
+                  <SectionHead title={g.title} variant="ds" />
+                  {g.callouts?.map((c) => (
+                    <p key={c} className={THERAPY_CALLOUT}>{c}</p>
+                  ))}
+                  {g.fields.map((f) => (
+                    <FieldLine
+                      key={f.key}
+                      label={f.label}
+                      multiline={f.multiline}
+                      compact={f.multiline}
+                      rows={f.multiline ? 2 : undefined}
+                      type={f.multiline ? undefined : "text"}
+                      placeholder={f.hint}
+                      aria-label={f.label}
+                      {...dbtForm.register(f.key)}
+                    />
+                  ))}
+                </div>
+              ))}
+              </div>
+
+              <div className={FORM_COL}>
+              {dbtGroups.slice(Math.ceil(dbtGroups.length / 2)).map((g) => (
                 <div key={g.title} className="flex flex-col gap-3">
                   <SectionHead title={g.title} variant="ds" />
                   {g.callouts?.map((c) => (
@@ -160,16 +187,16 @@ export function DbtSection({
               <p className={`${THERAPY_CALLOUT} mt-3`}>
                 When the emotion comes back, that's ok. Emotions come and go — watch it again, float with the wave.
               </p>
-              {editingDbt ? (
-                <div className={`flex gap-2 flex-wrap ${FORM_FULL}`}>
-                  <Button type="button" onClick={onCancelEdit}>
-                    Cancel edit
-                  </Button>
-                </div>
-              ) : null}
+              </div>
             </div>
-            <div className="flex justify-end pt-2">
-              <Button type="submit" variant={dbtMutationState.isSuccess ? "success" : "primary"} className="mb-5">
+
+            <div className="flex justify-end items-center gap-3 pt-2">
+              {editingDbt ? (
+                <Button type="button" onClick={onCancelEdit}>
+                  Cancel edit
+                </Button>
+              ) : null}
+              <Button type="submit" variant={dbtMutationState.isSuccess ? "success" : "primary"} >
                 {dbtMutationState.isSuccess ? "✓ Saved" : editingDbt ? "Update entry" : "Save entry"}
               </Button>
             </div>

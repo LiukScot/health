@@ -25,10 +25,10 @@ const SECTION_HEAD: Record<SectionHeadVariant, string> = {
   tags: "flex justify-between gap-3 mb-0",
 };
 const SECTION_TITLE: Record<SectionHeadVariant, string> = {
-  default: "text-nano font-bold tracking-[0.16em] uppercase text-muted",
-  dashboard: "text-control font-bold tracking-[0.16em] uppercase text-accent",
-  ds: "text-nano font-bold tracking-[0.16em] uppercase text-muted",
-  tags: "text-nano font-bold tracking-[0.16em] uppercase text-muted",
+  default: "[text-box:trim-both_cap_alphabetic] text-xs font-bold tracking-[0.16em] uppercase text-muted",
+  dashboard: "[text-box:trim-both_cap_alphabetic] text-control font-bold tracking-[0.16em] uppercase text-accent",
+  ds: "[text-box:trim-both_cap_alphabetic] text-xs font-bold tracking-[0.16em] uppercase text-muted",
+  tags: "[text-box:trim-both_cap_alphabetic] text-xs font-bold tracking-[0.16em] uppercase text-muted",
 };
 const SECTION_ASIDE: Record<SectionHeadVariant, string> = {
   default: "text-micro text-muted-soft tabular-nums",

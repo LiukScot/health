@@ -315,7 +315,7 @@ function App() {
         mobileOpen={mobileSidebarOpen}
       />
 
-      <main className={`max-w-[1500px] w-full overflow-y-auto [padding:clamp(12px,3vw,48px)_clamp(12px,3vw,48px)_20px] max-mobile:p-3 ${mobileSidebarOpen ? "max-mobile:overflow-hidden" : ""}`}>
+      <main className={`max-w-[1500px] w-full overflow-y-auto [padding:clamp(20px,4vw,40px)] max-mobile:p-5 ${mobileSidebarOpen ? "max-mobile:overflow-hidden" : ""}`}>
         <button
           type="button"
           className="mobile-menu-btn hidden max-mobile:flex max-mobile:items-center max-mobile:justify-center w-[40px] h-[40px] max-mobile:mb-3 max-mobile:ml-2 p-0 border-0 rounded-sm bg-card-soft text-muted cursor-pointer shadow-none hover:text-text hover:bg-card-strong"
