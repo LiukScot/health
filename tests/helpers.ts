@@ -15,7 +15,10 @@ export async function loginUi(page: Page, password = e2eUser.password) {
   await page.getByLabel("Email").fill(e2eUser.email);
   await page.getByLabel("Password").fill(password);
   await page.getByRole("button", { name: "Sign in" }).click();
-  await expect(page.getByRole("heading", { name: "Dashboard" })).toBeVisible();
+  // The realm switcher only exists once signed in, and unlike a named heading
+  // it does not assume which realm the app restores — that is remembered in
+  // localStorage and survives a logout, the same way the theme does.
+  await expect(page.getByRole("group", { name: "Switch app" })).toBeVisible();
 }
 
 export async function loginApi(request: APIRequestContext, password = e2eUser.password) {
@@ -109,6 +112,20 @@ export async function seedPainEntry(
     },
   });
   expect(response.ok(), "expected pain seed to succeed").toBeTruthy();
+}
+
+/** Settings is its own realm: its sections are sidebar entries reached from
+ *  the switcher tile, not tabs inside a page. */
+export async function openSettingsRealm(page: Page) {
+  await page.getByRole("group", { name: "Switch app" }).getByRole("button", { name: "Settings" }).click();
+  await expect(page.getByRole("heading", { name: "Account" })).toBeVisible();
+}
+
+/** Scoped to the sections nav: "Health" and "Money" name both a settings
+ *  section and a realm tile. */
+export async function openSettingsSection(page: Page, name: string) {
+  await page.getByRole("navigation", { name: "Sections" }).getByRole("button", { name }).click();
+  await expect(page.getByRole("heading", { name })).toBeVisible();
 }
 
 export async function openAccountPanel(page: Page) {

@@ -1,13 +1,11 @@
-import { useState } from "react";
 import { Button, buttonClass } from "../../components/ui/Button";
 import { Select } from "../../components/ui/select";
 import { InlineFeedback, SectionHead } from "../shared";
 import { EmptyState } from "../screen-helpers";
-import { TAG_TAB_BTN } from "../entries";
 import type { InlineMessage } from "../core";
 import { RISK_LEVELS, type RiskLevel, type StylesMap } from "./core";
 
-type MoneySettingsProps = {
+export type MoneySettingsProps = {
   showZeroAssets: boolean;
   onToggleShowZeroAssets: (next: boolean) => void;
   styles: StylesMap;
@@ -26,14 +24,6 @@ type MoneySettingsProps = {
   onPurgeConfirm: () => void;
   onPurgeCancel: () => void;
 };
-
-type Tab = "preferences" | "assets" | "backup" | "danger";
-const TABS: { id: Tab; label: string; danger?: boolean }[] = [
-  { id: "preferences", label: "Preferences" },
-  { id: "assets", label: "Assets" },
-  { id: "backup", label: "Backup" },
-  { id: "danger", label: "Danger zone", danger: true },
-];
 
 const RISK_OPTIONS = [{ value: "", label: "not set" }, ...RISK_LEVELS.map((r) => ({ value: r, label: r }))];
 const DEFAULT_SWATCH = "#34d399";
@@ -190,35 +180,17 @@ function DangerBlock({ purgeConfirmArmed, purgePending, purgeError, onPurgeArm, 
   );
 }
 
-export function MoneySettingsSection(props: MoneySettingsProps) {
-  const [tab, setTab] = useState<Tab>("preferences");
-  const active = TABS.find((t) => t.id === tab);
-
+export function MoneySettings(props: MoneySettingsProps) {
   return (
-    <section className="@container p-2">
-      <h1 className="m-0 mb-3 text-title font-bold tracking-tight text-text">Settings</h1>
-      <div className="grid gap-5">
-        <nav className="flex flex-wrap gap-y-1 gap-x-5 pb-2" aria-label="Money settings sections">
-          {TABS.map((t) => {
-            const isActive = tab === t.id;
-            const color = t.danger ? "text-danger" : isActive ? "text-text" : "text-muted hover:text-text";
-            const border = isActive ? (t.danger ? "border-b-danger" : "border-b-accent") : "border-b-transparent";
-            return (
-              <button key={t.id} type="button" className={`${TAG_TAB_BTN} ${color} ${border}`} onClick={() => setTab(t.id)}>
-                {t.label}
-              </button>
-            );
-          })}
-        </nav>
-
-        <div className="flex flex-col gap-3">
-          <SectionHead title={active?.label ?? ""} />
-          {tab === "preferences" ? <PreferencesBlock {...props} /> : null}
-          {tab === "assets" ? <AssetsBlock {...props} /> : null}
-          {tab === "backup" ? <BackupBlock {...props} /> : null}
-          {tab === "danger" ? <DangerBlock {...props} /> : null}
-        </div>
-      </div>
-    </section>
+    <div className="grid gap-5">
+      <SectionHead title="Preferences" />
+      <PreferencesBlock {...props} />
+      <SectionHead title="Assets" />
+      <AssetsBlock {...props} />
+      <SectionHead title="Backup" />
+      <BackupBlock {...props} />
+      <SectionHead title="Danger zone" />
+      <DangerBlock {...props} />
+    </div>
   );
 }

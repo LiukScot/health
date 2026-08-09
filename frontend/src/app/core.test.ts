@@ -33,10 +33,10 @@ describe("formatDocumentTitle", () => {
 });
 
 describe("realms", () => {
-  test("realmOf routes money-prefixed items to money, everything else to health", () => {
+  test("realmOf routes each prefix to its realm, unprefixed items to health", () => {
     expect(realmOf("money-dashboard")).toBe("money");
+    expect(realmOf("settings-account")).toBe("settings");
     expect(realmOf("dashboard")).toBe("health");
-    expect(realmOf("design-system")).toBe("health");
   });
 
   test("every nav item is reachable from exactly one realm", () => {

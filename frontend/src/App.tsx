@@ -23,12 +23,10 @@ const PainSection = lazy(() => import("./app/PainSection").then((m) => ({ defaul
 const CbtSection = lazy(() => import("./app/CbtSection").then((m) => ({ default: m.CbtSection })));
 const DbtSection = lazy(() => import("./app/DbtSection").then((m) => ({ default: m.DbtSection })));
 const SettingsSection = lazy(() => import("./app/SettingsSection").then((m) => ({ default: m.SettingsSection })));
-const DesignSystemSection = lazy(() => import("./app/DesignSystemSection").then((m) => ({ default: m.DesignSystemSection })));
 const MemorableDaysSection = lazy(() => import("./app/memorable-days").then((m) => ({ default: m.MemorableDaysSection })));
 const TransactionsSection = lazy(() => import("./app/money/TransactionsSection").then((m) => ({ default: m.TransactionsSection })));
 const MovementsSection = lazy(() => import("./app/money/MovementsSection").then((m) => ({ default: m.MovementsSection })));
 const SnapshotsSection = lazy(() => import("./app/money/SnapshotsSection").then((m) => ({ default: m.SnapshotsSection })));
-const MoneySettingsSection = lazy(() => import("./app/money/MoneySettingsSection").then((m) => ({ default: m.MoneySettingsSection })));
 const MoneyDashboardSection = lazy(() => import("./app/money/MoneyDashboardSection").then((m) => ({ default: m.MoneyDashboardSection })));
 
 function App() {
@@ -136,7 +134,7 @@ function App() {
   const moneyTx = useMoneyTransactions(loggedIn && realm === "money");
   const moneyMovements = useMoneyMovements(loggedIn && nav === "money-movements");
   const moneySnapshots = useMoneySnapshots(loggedIn && nav === "money-snapshots");
-  const moneySettings = useMoneySettings(loggedIn && nav === "money-settings");
+  const moneySettings = useMoneySettings(loggedIn && nav === "settings-money");
   const moneyDashboard = useMoneyDashboard(loggedIn && nav === "money-dashboard");
 
   // Interactive swipe gestures: the sidebar follows the finger 1:1 during
@@ -387,22 +385,6 @@ function App() {
           />
         )}
 
-        {nav === "settings" && (
-          <SettingsSection auth={auth}
-            birthday={settings.prefsValue.birthday ?? null}
-            birthdayPending={settings.prefsMutation.isPending}
-            onSaveBirthday={settings.onSaveBirthday}
-            purgeConfirmArmed={settings.purgeConfirmArmed}
-            purgePending={settings.purgePending} purgeError={settings.purgeError}
-            onPurgeArm={settings.onPurgeArm} onPurgeConfirm={settings.onPurgeConfirm}
-            onPurgeCancel={settings.onPurgeCancel} onExportJson={settings.onExportJson}
-            onImportJson={settings.onImportJson} onExportXlsx={settings.onExportXlsx}
-            onImportXlsx={settings.onImportXlsx}
-          />
-        )}
-
-        {nav === "design-system" && <DesignSystemSection />}
-
         {nav === "money-transactions" && (
           <TransactionsSection
             txForm={moneyTx.txForm} txMutationState={{ isSuccess: moneyTx.txMutation.isSuccess }}
@@ -440,7 +422,19 @@ function App() {
 
         {nav === "money-dashboard" && <MoneyDashboardSection {...moneyDashboard} />}
 
-        {nav === "money-settings" && <MoneySettingsSection {...moneySettings} />}
+        {realm === "settings" && (
+          <SettingsSection nav={nav} money={moneySettings} auth={auth}
+            birthday={settings.prefsValue.birthday ?? null}
+            birthdayPending={settings.prefsMutation.isPending}
+            onSaveBirthday={settings.onSaveBirthday}
+            purgeConfirmArmed={settings.purgeConfirmArmed}
+            purgePending={settings.purgePending} purgeError={settings.purgeError}
+            onPurgeArm={settings.onPurgeArm} onPurgeConfirm={settings.onPurgeConfirm}
+            onPurgeCancel={settings.onPurgeCancel} onExportJson={settings.onExportJson}
+            onImportJson={settings.onImportJson} onExportXlsx={settings.onExportXlsx}
+            onImportXlsx={settings.onImportXlsx}
+          />
+        )}
 
         </Suspense>
         </SectionErrorBoundary>

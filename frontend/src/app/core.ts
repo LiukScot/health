@@ -228,8 +228,9 @@ export type CbtFormValues = z.infer<typeof cbtFormSchema>;
 export type DbtFormValues = z.infer<typeof dbtFormSchema>;
 
 export const navItems = [
-  "dashboard", "memorable-days", "diary", "pain", "cbt", "dbt", "settings", "design-system",
-  "money-dashboard", "money-transactions", "money-movements", "money-snapshots", "money-settings",
+  "dashboard", "memorable-days", "diary", "pain", "cbt", "dbt",
+  "money-dashboard", "money-transactions", "money-movements", "money-snapshots",
+  "settings-account", "settings-appearance", "settings-health", "settings-money", "settings-design-system",
 ] as const;
 export type NavItem = (typeof navItems)[number];
 
@@ -240,35 +241,44 @@ export const navLabels: Record<NavItem, string> = {
   pain: "Pain",
   cbt: "CBT",
   dbt: "DBT",
-  settings: "Settings",
-  "design-system": "Design System",
   "money-dashboard": "Dashboard",
   "money-transactions": "Transactions",
   "money-movements": "Movements",
   "money-snapshots": "Snapshots",
-  "money-settings": "Settings",
+  "settings-account": "Account",
+  "settings-appearance": "Appearance",
+  "settings-health": "Health",
+  "settings-money": "Money",
+  "settings-design-system": "Design System",
 };
 
 /*
- * The app hosts two realms behind one shell and one login. A realm owns its
+ * The app is a set of realms behind one shell and one login. A realm owns its
  * nav list, its accent (see :root[data-realm] in styles.css) and its title.
- * Money's nav items carry a `money-` prefix so the realm is derivable from
- * the current nav item — there is no second piece of state to keep in sync.
+ * Settings is a realm too, rather than a page hanging off the others: that
+ * keeps every nav item inside exactly one realm, so the active realm stays
+ * derivable from the nav item and there is no second piece of state that
+ * could drift out of sync with it.
  */
-export const realms = ["health", "money"] as const;
+export const realms = ["health", "money", "settings"] as const;
 export type Realm = (typeof realms)[number];
 export const DEFAULT_REALM: Realm = "health";
 export const REALM_STORAGE_KEY = "world-realm";
 
-export const realmLabels: Record<Realm, string> = { health: "Health", money: "Money" };
+export const realmLabels: Record<Realm, string> = { health: "Health", money: "Money", settings: "Settings" };
 
 export const navItemsByRealm: Record<Realm, NavItem[]> = {
-  health: ["dashboard", "pain", "diary", "cbt", "dbt", "memorable-days", "settings", "design-system"],
-  money: ["money-dashboard", "money-transactions", "money-movements", "money-snapshots", "money-settings"],
+  health: ["dashboard", "pain", "diary", "cbt", "dbt", "memorable-days"],
+  money: ["money-dashboard", "money-transactions", "money-movements", "money-snapshots"],
+  settings: ["settings-account", "settings-appearance", "settings-health", "settings-money", "settings-design-system"],
 };
 
+// Health owns the unprefixed items because it was here first; every realm
+// added since carries its own prefix.
 export function realmOf(nav: NavItem): Realm {
-  return nav.startsWith("money-") ? "money" : "health";
+  if (nav.startsWith("money-")) return "money";
+  if (nav.startsWith("settings-")) return "settings";
+  return "health";
 }
 
 export function readStoredRealm(): Realm {

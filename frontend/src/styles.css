@@ -112,6 +112,13 @@
 /* Per-realm accent. Themes own the surfaces, the realm owns the accent, so
    the two compose: any theme × any realm. --ring is color-mixed from --accent
    above, so it re-resolves here for free. */
+/* Settings is a realm without a brand colour of its own: it borrows the text
+   token so the active state reads as neutral rather than claiming a third
+   identity next to Health's pink and Money's green. */
+:root[data-realm="settings"] {
+  --accent: var(--text);
+}
+
 :root[data-realm="money"] {
   --accent: #34d399;
 

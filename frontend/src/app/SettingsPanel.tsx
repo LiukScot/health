@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import type { InlineMessage } from "./core";
+import type { InlineMessage, NavItem } from "./core";
 import { THEMES } from "./core";
 import type { useAuth } from "../hooks/use-auth";
 import { useTheme } from "../hooks/use-theme";
@@ -10,7 +10,7 @@ import { MedicinePreselectionSection } from "./MedicinePreselectionSection";
 import { DateInput } from "../components/ui/DateInput";
 import { Button, buttonClass } from "../components/ui/Button";
 import { FieldLine } from "../components/ui/FieldLine";
-import { TAG_TAB_BTN } from "./entries";
+import { MoneySettings, type MoneySettingsProps } from "./money/MoneySettings";
 
 type SettingsSectionProps = {
   auth: ReturnType<typeof useAuth>;
@@ -247,61 +247,41 @@ function AccountIdentity({ auth }: Pick<SettingsSectionProps, "auth">) {
   );
 }
 
-/* ── Variant B — Sub-tabs ── */
-type SettingsTab = "account" | "preferences" | "backup" | "mcp" | "danger";
-const settingsTabs: { id: SettingsTab; label: string; danger?: boolean }[] = [
-  { id: "account", label: "Account" },
-  { id: "preferences", label: "Preferences" },
-  { id: "backup", label: "Backup" },
-  { id: "mcp", label: "MCP access" },
-  { id: "danger", label: "Danger zone", danger: true },
-];
-
-export function SettingsPanel(props: SettingsSectionProps) {
-  const [tab, setTab] = useState<SettingsTab>("account");
-  return (
-    <div className="flex flex-col gap-5">
-      <AccountIdentity auth={props.auth} />
-      <nav className="flex flex-wrap gap-y-1 gap-x-5 mb-[-10px] pb-2" aria-label="Settings sections">
-        {settingsTabs.map((t) => {
-          const isActive = tab === t.id;
-          const color = t.danger ? "text-danger" : isActive ? "text-text" : "text-muted hover:text-text";
-          const border = isActive ? (t.danger ? "border-b-danger" : "border-b-accent") : "border-b-transparent";
-          return (
-            <button
-              key={t.id}
-              type="button"
-              className={`${TAG_TAB_BTN} ${color} ${border}`}
-              onClick={() => setTab(t.id)}
-            >
-              {t.label}
-            </button>
-          );
-        })}
-      </nav>
-      <div className="pt-[4px] flex flex-col gap-3">
-        {tab === "account" ? <AccountBlock auth={props.auth} /> : null}
-        {tab === "preferences" ? (
-          <div className="grid gap-3">
-            <ThemeBlock />
-            <BirthdayBlock
-              birthday={props.birthday}
-              birthdayPending={props.birthdayPending}
-              onSaveBirthday={props.onSaveBirthday}
-            />
-            <MedicinePreselectionSection enabled />
-          </div>
-        ) : null}
-        {tab === "backup" ? (
+// One screen per nav item of the Settings realm. The tab strip is gone: the
+// sections are sidebar entries now, which is what made Settings a realm.
+export function SettingsScreen({ nav, money, ...props }: SettingsSectionProps & {
+  nav: NavItem;
+  money: MoneySettingsProps;
+}) {
+  switch (nav) {
+    case "settings-account":
+      return (
+        <div className="flex flex-col gap-5">
+          <AccountIdentity auth={props.auth} />
+          <AccountBlock auth={props.auth} />
+        </div>
+      );
+    case "settings-appearance":
+      return <ThemeBlock />;
+    case "settings-health":
+      return (
+        <div className="grid gap-5">
+          <SectionHead title="Birthday" />
+          <BirthdayBlock
+            birthday={props.birthday}
+            birthdayPending={props.birthdayPending}
+            onSaveBirthday={props.onSaveBirthday}
+          />
+          <MedicinePreselectionSection enabled />
+          <SectionHead title="Backup" />
           <BackupBlock
             onExportJson={props.onExportJson}
             onImportJson={props.onImportJson}
             onExportXlsx={props.onExportXlsx}
             onImportXlsx={props.onImportXlsx}
           />
-        ) : null}
-        {tab === "mcp" ? <McpAccessSection enabled /> : null}
-        {tab === "danger" ? (
+          <McpAccessSection enabled />
+          <SectionHead title="Danger zone" />
           <DangerBlock
             purgeConfirmArmed={props.purgeConfirmArmed}
             purgePending={props.purgePending}
@@ -310,8 +290,11 @@ export function SettingsPanel(props: SettingsSectionProps) {
             onPurgeConfirm={props.onPurgeConfirm}
             onPurgeCancel={props.onPurgeCancel}
           />
-        ) : null}
-      </div>
-    </div>
-  );
+        </div>
+      );
+    case "settings-money":
+      return <MoneySettings {...money} />;
+    default:
+      return null;
+  }
 }
