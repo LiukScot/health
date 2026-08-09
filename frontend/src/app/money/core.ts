@@ -165,18 +165,108 @@ export function computeRiskTotals(
   transactions: readonly Transaction[],
   styles: StylesMap,
 ): Record<RiskLevel, number> {
-  const currentByAsset = new Map<string, number>();
-  for (const row of transactions) {
-    currentByAsset.set(row.asset, (currentByAsset.get(row.asset) ?? 0) + row.currentValue);
-  }
-
   const totals: Record<RiskLevel, number> = { low: 0, medium: 0, high: 0 };
-  for (const [asset, current] of currentByAsset) {
-    const level = styles[asset]?.riskLevel;
-    if (level && (RISK_LEVELS as readonly string[]).includes(level)) {
-      totals[level as RiskLevel] += current;
-    }
+  for (const stat of computePerAsset(transactions, styles)) {
+    // computePerAsset already normalises an unknown level to null.
+    if (stat.riskLevel) totals[stat.riskLevel] += stat.current;
+  }
+  return { low: round2(totals.low), medium: round2(totals.medium), high: round2(totals.high) };
+}
+
+// ── Dashboard ────────────────────────────────────────────────────────────
+
+// Used when an asset has no colour of its own, so a chart still tells assets
+// apart. Indexed by position, hence stable for a given asset ordering.
+const FALLBACK_PALETTE = ["#5de2a5", "#7fc3ff", "#ffd57f", "#ff8da1", "#c6a3ff", "#9bd8ff"] as const;
+export const DEFAULT_ASSET_COLOR = FALLBACK_PALETTE[0];
+
+export function assetColor(asset: string, index: number, styles: StylesMap): string {
+  const chosen = styles[asset]?.colorHex;
+  if (chosen && /^#[0-9a-fA-F]{6}$/.test(chosen)) return chosen;
+  return FALLBACK_PALETTE[index % FALLBACK_PALETTE.length] ?? DEFAULT_ASSET_COLOR;
+}
+
+export type AssetStats = {
+  asset: string;
+  buyTotal: number;
+  pnl: number;
+  current: number;
+  allocationPct: number;
+  pnlPct: number;
+  color: string;
+  riskLevel: RiskLevel | null;
+};
+
+/** Folds the transaction log into one row per asset. */
+export function computePerAsset(transactions: readonly Transaction[], styles: StylesMap): AssetStats[] {
+  const totals = new Map<string, { buy: number; pnl: number; current: number }>();
+  for (const row of transactions) {
+    const entry = totals.get(row.asset) ?? { buy: 0, pnl: 0, current: 0 };
+    entry.buy += row.buyValue;
+    entry.pnl += row.pnl;
+    entry.current += row.currentValue;
+    totals.set(row.asset, entry);
   }
 
-  return { low: round2(totals.low), medium: round2(totals.medium), high: round2(totals.high) };
+  const totalCurrent = Array.from(totals.values()).reduce((sum, v) => sum + v.current, 0);
+
+  return Array.from(totals.entries()).map(([asset, stats], index) => {
+    const rawRisk = styles[asset]?.riskLevel;
+    return {
+      asset,
+      buyTotal: stats.buy,
+      pnl: stats.pnl,
+      current: stats.current,
+      allocationPct: totalCurrent > 0 ? (stats.current / totalCurrent) * 100 : 0,
+      pnlPct: stats.buy > 0 ? (stats.pnl / stats.buy) * 100 : 0,
+      color: assetColor(asset, index, styles),
+      riskLevel: (RISK_LEVELS as readonly string[]).includes(rawRisk ?? "") ? (rawRisk as RiskLevel) : null,
+    };
+  });
+}
+
+// Rounding noise means a fully sold-off asset lands near zero rather than on
+// it, so "zero" is a threshold, not an equality.
+const NEAR_ZERO = 0.0001;
+
+export function filterVisibleAssets(stats: readonly AssetStats[], showZero: boolean): AssetStats[] {
+  return showZero ? [...stats] : stats.filter((s) => Math.abs(s.current) > NEAR_ZERO);
+}
+
+/** The API returns transactions newest first, so the head is the latest. */
+export function findLastTxDate(transactions: readonly Transaction[]): string | null {
+  return transactions[0]?.txDate ?? null;
+}
+
+export type DashboardKpis = {
+  totalCurrent: number;
+  totalPnl: number;
+  assetsCount: number;
+  txCount: number;
+  monthlyIncome: number;
+  monthlyExpense: number;
+  monthlyNet: number;
+  lastTxDate: string | null;
+};
+
+export function computeKpis(
+  transactions: readonly Transaction[],
+  movements: readonly Movement[],
+): DashboardKpis {
+  let income = 0;
+  let expense = 0;
+  for (const row of movements) {
+    if (row.direction === "income") income += row.amount;
+    else expense += row.amount;
+  }
+  return {
+    totalCurrent: transactions.reduce((sum, row) => sum + row.currentValue, 0),
+    totalPnl: transactions.reduce((sum, row) => sum + row.pnl, 0),
+    assetsCount: new Set(transactions.map((row) => row.asset)).size,
+    txCount: transactions.length,
+    monthlyIncome: income,
+    monthlyExpense: expense,
+    monthlyNet: income - expense,
+    lastTxDate: findLastTxDate(transactions),
+  };
 }

@@ -1,6 +1,9 @@
 import { describe, expect, test } from "vitest";
 import {
+  computeKpis,
+  computePerAsset,
   computeRiskTotals,
+  filterVisibleAssets,
   formatCurrency,
   formatTxDate,
   freshMovementDefaults,
@@ -156,5 +159,95 @@ describe("movement and snapshot forms", () => {
 
   test("snapshot defaults start on today", () => {
     expect(freshSnapshotDefaults().snapshotDate).toBe(todayIso());
+  });
+});
+
+describe("computePerAsset", () => {
+  const tx = (asset: string, buyValue: number, pnl: number, currentValue: number) => ({
+    id: `tx-${asset}-${currentValue}`, txDate: "2026-01-01", asset, tipo: "nuovo vincolo",
+    derivedType: "buy", buyValue, pnl, currentValue, note: "", createdAt: "", updatedAt: "",
+  });
+
+  test("folds several transactions into one row per asset", () => {
+    const stats = computePerAsset([tx("A", 100, 10, 110), tx("A", 50, -5, 45), tx("B", 200, 0, 200)], {});
+    expect(stats).toHaveLength(2);
+    const a = stats.find((s) => s.asset === "A")!;
+    expect(a).toMatchObject({ buyTotal: 150, pnl: 5, current: 155 });
+  });
+
+  test("allocation is the share of total current value", () => {
+    const stats = computePerAsset([tx("A", 0, 0, 750), tx("B", 0, 0, 250)], {});
+    expect(stats.find((s) => s.asset === "A")!.allocationPct).toBe(75);
+    expect(stats.find((s) => s.asset === "B")!.allocationPct).toBe(25);
+  });
+
+  test("PnL percent is relative to what was put in", () => {
+    expect(computePerAsset([tx("A", 200, 50, 250)], {})[0]!.pnlPct).toBe(25);
+  });
+
+  // Dividing by a zero total or a zero buy would give NaN/Infinity, which
+  // would then render as "NaN%" in the cards.
+  test("no division by zero when nothing was bought or everything is at zero", () => {
+    expect(computePerAsset([tx("A", 0, 0, 0)], {})[0]).toMatchObject({ allocationPct: 0, pnlPct: 0 });
+  });
+
+  test("uses the asset's own colour when set, a palette colour otherwise", () => {
+    const stats = computePerAsset([tx("A", 0, 0, 1), tx("B", 0, 0, 1)], {
+      A: { colorHex: "#123456", riskLevel: null },
+    });
+    expect(stats.find((s) => s.asset === "A")!.color).toBe("#123456");
+    expect(stats.find((s) => s.asset === "B")!.color).toMatch(/^#[0-9a-f]{6}$/i);
+  });
+
+  test("ignores a malformed colour rather than passing it to chart.js", () => {
+    const stats = computePerAsset([tx("A", 0, 0, 1)], { A: { colorHex: "red", riskLevel: null } });
+    expect(stats[0]!.color).toMatch(/^#[0-9a-f]{6}$/i);
+  });
+});
+
+describe("filterVisibleAssets", () => {
+  const stat = (asset: string, current: number) => ({
+    asset, buyTotal: 0, pnl: 0, current, allocationPct: 0, pnlPct: 0, color: "#000000", riskLevel: null,
+  });
+
+  test("hides assets sitting at zero unless asked to show them", () => {
+    const stats = [stat("A", 100), stat("B", 0)];
+    expect(filterVisibleAssets(stats, false).map((s) => s.asset)).toEqual(["A"]);
+    expect(filterVisibleAssets(stats, true)).toHaveLength(2);
+  });
+
+  // A sold-off asset lands a hair off zero after rounding, not exactly on it.
+  test("treats a rounding remainder as zero", () => {
+    expect(filterVisibleAssets([stat("A", 0.00001)], false)).toHaveLength(0);
+    expect(filterVisibleAssets([stat("A", 0.01)], false)).toHaveLength(1);
+  });
+
+  test("keeps a negative balance visible", () => {
+    expect(filterVisibleAssets([stat("A", -50)], false)).toHaveLength(1);
+  });
+});
+
+describe("computeKpis", () => {
+  const tx = (asset: string, pnl: number, currentValue: number) => ({
+    id: `tx-${asset}-${currentValue}`, txDate: "2026-03-0" + (currentValue % 9), asset, tipo: "x",
+    derivedType: "buy", buyValue: 0, pnl, currentValue, note: "", createdAt: "", updatedAt: "",
+  });
+  const mm = (direction: string, amount: number) => ({
+    id: `mm-${direction}-${amount}`, name: "x", direction, amount, note: "", createdAt: "", updatedAt: "",
+  });
+
+  test("totals value, PnL and counts distinct assets", () => {
+    const k = computeKpis([tx("A", 10, 100), tx("A", 5, 50), tx("B", -2, 20)], []);
+    expect(k).toMatchObject({ totalCurrent: 170, totalPnl: 13, assetsCount: 2, txCount: 3 });
+  });
+
+  test("monthly net is income minus expense", () => {
+    const k = computeKpis([], [mm("income", 2000), mm("expense", 850), mm("expense", 45)]);
+    expect(k).toMatchObject({ monthlyIncome: 2000, monthlyExpense: 895, monthlyNet: 1105 });
+  });
+
+  test("last transaction is the head, since the API returns newest first", () => {
+    expect(computeKpis([tx("A", 0, 3), tx("B", 0, 1)], []).lastTxDate).toBe("2026-03-03");
+    expect(computeKpis([], []).lastTxDate).toBeNull();
   });
 });

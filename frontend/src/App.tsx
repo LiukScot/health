@@ -2,7 +2,7 @@ import { lazy, Suspense, useEffect, useRef, useState } from "react";
 import { Toaster } from "sonner";
 import {
   useAuth, useDiary, usePain, useCbt, useDbt, useDashboard, useMemorableDays,
-  useMoneyMovements, useMoneySettings, useMoneySnapshots, useMoneyTransactions, useSettings,
+  useMoneyDashboard, useMoneyMovements, useMoneySettings, useMoneySnapshots, useMoneyTransactions, useSettings,
 } from "./hooks";
 import { LoginScreen } from "./app/LoginScreen";
 import { Sidebar } from "./app/Sidebar";
@@ -25,15 +25,11 @@ const DbtSection = lazy(() => import("./app/DbtSection").then((m) => ({ default:
 const SettingsSection = lazy(() => import("./app/SettingsSection").then((m) => ({ default: m.SettingsSection })));
 const DesignSystemSection = lazy(() => import("./app/DesignSystemSection").then((m) => ({ default: m.DesignSystemSection })));
 const MemorableDaysSection = lazy(() => import("./app/memorable-days").then((m) => ({ default: m.MemorableDaysSection })));
-const MoneySection = lazy(() => import("./app/money/MoneySection").then((m) => ({ default: m.MoneySection })));
 const TransactionsSection = lazy(() => import("./app/money/TransactionsSection").then((m) => ({ default: m.TransactionsSection })));
 const MovementsSection = lazy(() => import("./app/money/MovementsSection").then((m) => ({ default: m.MovementsSection })));
 const SnapshotsSection = lazy(() => import("./app/money/SnapshotsSection").then((m) => ({ default: m.SnapshotsSection })));
 const MoneySettingsSection = lazy(() => import("./app/money/MoneySettingsSection").then((m) => ({ default: m.MoneySettingsSection })));
-
-// Money panels that have their own screen; the rest still fall through to
-// the placeholder.
-const PORTED_MONEY_NAV = new Set<NavItem>(["money-transactions", "money-movements", "money-snapshots", "money-settings"]);
+const MoneyDashboardSection = lazy(() => import("./app/money/MoneyDashboardSection").then((m) => ({ default: m.MoneyDashboardSection })));
 
 function App() {
   const auth = useAuth();
@@ -141,6 +137,7 @@ function App() {
   const moneyMovements = useMoneyMovements(loggedIn && nav === "money-movements");
   const moneySnapshots = useMoneySnapshots(loggedIn && nav === "money-snapshots");
   const moneySettings = useMoneySettings(loggedIn && nav === "money-settings");
+  const moneyDashboard = useMoneyDashboard(loggedIn && nav === "money-dashboard");
 
   // Interactive swipe gestures: the sidebar follows the finger 1:1 during
   // the drag, then snaps open or closed on release based on how far it moved.
@@ -441,9 +438,10 @@ function App() {
           />
         )}
 
+        {nav === "money-dashboard" && <MoneyDashboardSection {...moneyDashboard} />}
+
         {nav === "money-settings" && <MoneySettingsSection {...moneySettings} />}
 
-        {realm === "money" && !PORTED_MONEY_NAV.has(nav) && <MoneySection nav={nav} />}
         </Suspense>
         </SectionErrorBoundary>
       </main>
