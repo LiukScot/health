@@ -3,7 +3,7 @@ import {
   type CbtEntry,
   type CbtFormValues,
 } from "./core";
-import { AnimatedEditingLabel, SectionHead, useDiaryColumnCap } from "./shared";
+import { AnimatedEditingLabel } from "./shared";
 import { EmptyState } from "./screen-helpers";
 import { formatEntrySummaryDate } from "./screen-format";
 import { Button } from "../components/ui/Button";
@@ -15,6 +15,8 @@ import {
   DETAIL_ACTION_BTN,
   DetailGroup,
   EntriesHeading,
+  FORM_COL,
+  FORM_SPLIT,
   ENTRY_CHEVRON,
   ENTRY_DATE,
   ENTRY_EXPANDED,
@@ -22,7 +24,7 @@ import {
   ENTRY_ROW,
   ENTRY_SUMMARY,
   PainBadge,
-  PastEntriesColumn,
+  PastEntries,
 } from "./entries";
 
 export function CbtSection({
@@ -107,21 +109,18 @@ export function CbtSection({
     },
   ];
 
-  const {
-    leftColRef,
-    pastColRef,
-    pastEntriesBodyRef,
-    overflow: pastEntriesOverflow,
-  } = useDiaryColumnCap(cbtEntries, isLoading);
 
   return (
-    <section className="@container p-2">
-      <h1 className="m-0 mb-3 text-title font-bold tracking-tight text-text">CBT Thought Response</h1>
-      <div className="grid gap-8 wide:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] wide:gap-12 wide:items-start">
-        <div className="min-w-0 max-wide:border-b max-wide:border-border" ref={leftColRef}>
-          <EntriesHeading className="wide:mt-0">New entry</EntriesHeading>
-          <form className="mb-2" onSubmit={cbtForm.handleSubmit(onSubmit)}>
-            <div className="grid gap-3 content-start min-w-0">
+    <section className="@container">
+      <h1 className="m-0 mb-10 [text-box:trim-both_cap_alphabetic] text-title font-bold tracking-tight text-text">CBT Thought Response</h1>
+      <div className="grid gap-10">
+        <div className="min-w-0 border-b border-border">
+          <EntriesHeading className="mt-0">New entry</EntriesHeading>
+          <form onSubmit={cbtForm.handleSubmit(onSubmit)}>
+            <div className={FORM_SPLIT}>
+              {/* Left: the date and the first half of the worksheet; the
+                  order matters, so it reads down one column then the other. */}
+              <div className={FORM_COL}>
               <FieldLine
                 label="Date & time"
                 type="datetime-local"
@@ -133,8 +132,7 @@ export function CbtSection({
                   el.showPicker?.();
                 }}
               />
-              <SectionHead title="Thought record" />
-              {cbtFields.map((f) => (
+              {cbtFields.slice(0, Math.ceil(cbtFields.length / 2)).map((f) => (
                 <FieldLine
                   key={f.key}
                   label={f.label}
@@ -147,22 +145,38 @@ export function CbtSection({
                   {...cbtForm.register(f.key)}
                 />
               ))}
-              {editingCbt ? (
-                <div className="flex gap-2 flex-wrap">
-                  <Button type="button" onClick={onCancelEdit}>
-                    Cancel edit
-                  </Button>
-                </div>
-              ) : null}
+              </div>
+
+              <div className={FORM_COL}>
+              {cbtFields.slice(Math.ceil(cbtFields.length / 2)).map((f) => (
+                <FieldLine
+                  key={f.key}
+                  label={f.label}
+                  multiline={f.multiline}
+                  compact={f.multiline}
+                  rows={f.multiline ? 2 : undefined}
+                  type={f.multiline ? undefined : "text"}
+                  placeholder={f.hint}
+                  aria-label={f.label}
+                  {...cbtForm.register(f.key)}
+                />
+              ))}
+              </div>
             </div>
-            <div className="flex justify-end pt-2">
-              <Button type="submit" variant={cbtMutationState.isSuccess ? "success" : "primary"} className="mb-5">
+
+            <div className="flex justify-end items-center gap-3 pt-2">
+              {editingCbt ? (
+                <Button type="button" onClick={onCancelEdit}>
+                  Cancel edit
+                </Button>
+              ) : null}
+              <Button type="submit" variant={cbtMutationState.isSuccess ? "success" : "primary"} >
                 {cbtMutationState.isSuccess ? "✓ Saved" : editingCbt ? "Update entry" : "Save entry"}
               </Button>
             </div>
           </form>
         </div>
-        <PastEntriesColumn
+        <PastEntries
           title="Past entries"
           isLoading={isLoading}
           loadingText="Loading CBT entries..."
@@ -173,9 +187,6 @@ export function CbtSection({
               description="Use the prompts above to record your first thought response. Completed reflections will appear here."
             />
           }
-          overflow={pastEntriesOverflow}
-          colRef={pastColRef}
-          bodyRef={pastEntriesBodyRef}
         >
           {cbtEntries.map((entry) => (
             <details key={entry.id} className={ENTRY_ROW}>
@@ -196,14 +207,14 @@ export function CbtSection({
                     type="button"
                     className={DETAIL_ACTION_BTN}
                     onClick={() => {
-                      if (editingCbt) {
+                      if (editingCbt?.id === entry.id) {
                         onCancelEdit();
                         return;
                       }
                       onStartEdit(entry);
                     }}
                   >
-                    <AnimatedEditingLabel active={Boolean(editingCbt)} />
+                    <AnimatedEditingLabel active={editingCbt?.id === entry.id} />
                   </button>
                   <button
                     type="button"
@@ -217,7 +228,7 @@ export function CbtSection({
               </div>
             </details>
           ))}
-        </PastEntriesColumn>
+        </PastEntries>
       </div>
     </section>
   );

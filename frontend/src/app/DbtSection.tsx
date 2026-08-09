@@ -3,7 +3,7 @@ import {
   type DbtEntry,
   type DbtFormValues,
 } from "./core";
-import { AnimatedEditingLabel, SectionHead, useDiaryColumnCap } from "./shared";
+import { AnimatedEditingLabel, SectionHead } from "./shared";
 import { EmptyState } from "./screen-helpers";
 import { formatEntrySummaryDate } from "./screen-format";
 import { Button } from "../components/ui/Button";
@@ -15,6 +15,8 @@ import {
   DETAIL_ACTION_BTN,
   DetailGroup,
   EntriesHeading,
+  FORM_COL,
+  FORM_SPLIT,
   ENTRY_CHEVRON,
   ENTRY_DATE,
   ENTRY_EXPANDED,
@@ -22,7 +24,7 @@ import {
   ENTRY_ROW,
   ENTRY_SUMMARY,
   PainBadge,
-  PastEntriesColumn,
+  PastEntries,
 } from "./entries";
 const THERAPY_CALLOUT =
   "m-0 px-3 py-2 bg-card-soft border-l-2 border-[color-mix(in_srgb,var(--accent)_50%,transparent)] rounded-sm text-muted text-hint leading-normal";
@@ -105,12 +107,6 @@ export function DbtSection({
     },
   ];
 
-  const {
-    leftColRef,
-    pastColRef,
-    pastEntriesBodyRef,
-    overflow: pastEntriesOverflow,
-  } = useDiaryColumnCap(dbtEntries, isLoading);
 
   const dbtDetails: { label: string; key: keyof DbtEntry }[] = [
     { label: "Emotion", key: "emotionName" },
@@ -122,13 +118,16 @@ export function DbtSection({
   ];
 
   return (
-    <section className="@container p-2">
-      <h1 className="m-0 mb-3 text-title font-bold tracking-tight text-text">DBT Distress Tolerance</h1>
-      <div className="grid gap-8 wide:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] wide:gap-12 wide:items-start">
-        <div className="min-w-0 max-wide:border-b max-wide:border-border" ref={leftColRef}>
-          <EntriesHeading className="wide:mt-0">New entry</EntriesHeading>
-          <form className="mb-2" onSubmit={dbtForm.handleSubmit(onSubmit)}>
-            <div className="grid gap-3 content-start min-w-0">
+    <section className="@container">
+      <h1 className="m-0 mb-10 [text-box:trim-both_cap_alphabetic] text-title font-bold tracking-tight text-text">DBT Distress Tolerance</h1>
+      <div className="grid gap-10">
+        <div className="min-w-0 border-b border-border">
+          <EntriesHeading className="mt-0">New entry</EntriesHeading>
+          <form onSubmit={dbtForm.handleSubmit(onSubmit)}>
+            <div className={FORM_SPLIT}>
+              {/* The groups are already ordered steps, so half go in each
+                  column and it reads down one then the other. */}
+              <div className={FORM_COL}>
               <FieldLine
                 label="Date & time"
                 type="datetime-local"
@@ -140,7 +139,31 @@ export function DbtSection({
                   el.showPicker?.();
                 }}
               />
-              {dbtGroups.map((g) => (
+              {dbtGroups.slice(0, Math.ceil(dbtGroups.length / 2)).map((g) => (
+                <div key={g.title} className="flex flex-col gap-3">
+                  <SectionHead title={g.title} variant="ds" />
+                  {g.callouts?.map((c) => (
+                    <p key={c} className={THERAPY_CALLOUT}>{c}</p>
+                  ))}
+                  {g.fields.map((f) => (
+                    <FieldLine
+                      key={f.key}
+                      label={f.label}
+                      multiline={f.multiline}
+                      compact={f.multiline}
+                      rows={f.multiline ? 2 : undefined}
+                      type={f.multiline ? undefined : "text"}
+                      placeholder={f.hint}
+                      aria-label={f.label}
+                      {...dbtForm.register(f.key)}
+                    />
+                  ))}
+                </div>
+              ))}
+              </div>
+
+              <div className={FORM_COL}>
+              {dbtGroups.slice(Math.ceil(dbtGroups.length / 2)).map((g) => (
                 <div key={g.title} className="flex flex-col gap-3">
                   <SectionHead title={g.title} variant="ds" />
                   {g.callouts?.map((c) => (
@@ -164,22 +187,22 @@ export function DbtSection({
               <p className={`${THERAPY_CALLOUT} mt-3`}>
                 When the emotion comes back, that's ok. Emotions come and go — watch it again, float with the wave.
               </p>
-              {editingDbt ? (
-                <div className="flex gap-2 flex-wrap">
-                  <Button type="button" onClick={onCancelEdit}>
-                    Cancel edit
-                  </Button>
-                </div>
-              ) : null}
+              </div>
             </div>
-            <div className="flex justify-end pt-2">
-              <Button type="submit" variant={dbtMutationState.isSuccess ? "success" : "primary"} className="mb-5">
+
+            <div className="flex justify-end items-center gap-3 pt-2">
+              {editingDbt ? (
+                <Button type="button" onClick={onCancelEdit}>
+                  Cancel edit
+                </Button>
+              ) : null}
+              <Button type="submit" variant={dbtMutationState.isSuccess ? "success" : "primary"} >
                 {dbtMutationState.isSuccess ? "✓ Saved" : editingDbt ? "Update entry" : "Save entry"}
               </Button>
             </div>
           </form>
         </div>
-        <PastEntriesColumn
+        <PastEntries
           title="Past entries"
           isLoading={isLoading}
           loadingText="Loading DBT entries..."
@@ -190,9 +213,6 @@ export function DbtSection({
               description="Work through the steps above to log your first distress-tolerance practice. Saved entries will appear here."
             />
           }
-          overflow={pastEntriesOverflow}
-          colRef={pastColRef}
-          bodyRef={pastEntriesBodyRef}
         >
           {dbtEntries.map((entry) => (
             <details key={entry.id} className={ENTRY_ROW}>
@@ -212,14 +232,14 @@ export function DbtSection({
                     type="button"
                     className={DETAIL_ACTION_BTN}
                     onClick={() => {
-                      if (editingDbt) {
+                      if (editingDbt?.id === entry.id) {
                         onCancelEdit();
                         return;
                       }
                       onStartEdit(entry);
                     }}
                   >
-                    <AnimatedEditingLabel active={Boolean(editingDbt)} />
+                    <AnimatedEditingLabel active={editingDbt?.id === entry.id} />
                   </button>
                   <button
                     type="button"
@@ -233,7 +253,7 @@ export function DbtSection({
               </div>
             </details>
           ))}
-        </PastEntriesColumn>
+        </PastEntries>
       </div>
     </section>
   );

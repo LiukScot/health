@@ -69,7 +69,7 @@ describe("POST /auth/login", () => {
     expect(body.data.email).toBe("user@example.com");
     const cookie = res.headers.get("set-cookie");
     expect(cookie).toBeTruthy();
-    expect(cookie).toContain("HEALTH_SESSID=");
+    expect(cookie).toContain("WORLD_SESSID=");
     expect(cookie).toContain("HttpOnly");
   });
 
@@ -107,7 +107,7 @@ describe("POST /auth/logout", () => {
     const res = await app.request("/auth/logout", { method: "POST" });
     expect(res.status).toBe(200);
     const cookie = res.headers.get("set-cookie");
-    expect(cookie).toContain("HEALTH_SESSID=");
+    expect(cookie).toContain("WORLD_SESSID=");
     expect(cookie).toContain("Max-Age=0");
   });
 
@@ -340,7 +340,7 @@ describe("POST /auth/change-password", () => {
     });
     expect(res.status).toBe(200);
     const newCookie = res.headers.get("set-cookie");
-    expect(newCookie).toContain("HEALTH_SESSID=");
+    expect(newCookie).toContain("WORLD_SESSID=");
 
     const loginAgain = await app.request("/auth/login", {
       method: "POST",

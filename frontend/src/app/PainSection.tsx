@@ -10,7 +10,6 @@ import {
   AnimatedEditingLabel,
   MultiSelectField,
   SectionHead,
-  useDiaryColumnCap,
 } from "./shared";
 import { BarMetric, CoffeeStepper, EmptyState } from "./screen-helpers";
 import { bandNine, painPreview, formatEntrySummaryDate } from "./screen-format";
@@ -23,6 +22,8 @@ import {
   DETAIL_ACTION_BTN,
   DetailGroup,
   EntriesHeading,
+  FORM_COL,
+  FORM_SPLIT,
   ENTRY_CHEVRON,
   ENTRY_DATE,
   ENTRY_EXPANDED,
@@ -30,7 +31,7 @@ import {
   ENTRY_ROW,
   ENTRY_SUMMARY,
   PainBadge,
-  PastEntriesColumn,
+  PastEntries,
   TagList,
   TagTabs,
 } from "./entries";
@@ -87,12 +88,6 @@ export function PainSection({
 
   const painOptionsForTab = (id: PainFieldKey) => painFieldOptions[id];
 
-  const {
-    leftColRef,
-    pastColRef,
-    pastEntriesBodyRef,
-    overflow: pastEntriesOverflow,
-  } = useDiaryColumnCap(painEntries, isLoading);
 
   const tabLabel = PAIN_TABS.find((t) => t.id === painTab)?.label ?? "";
   const painDetails: { label: string; key: PainFieldKey }[] = [
@@ -105,62 +100,36 @@ export function PainSection({
   ];
 
   return (
-    <section className="@container p-2">
-      <h1 className="m-0 mb-3 text-title font-bold tracking-tight text-text">Pain</h1>
-      <div className="grid gap-8 wide:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] wide:gap-12 wide:items-start">
-        <div className="min-w-0 max-wide:border-b max-wide:border-border" ref={leftColRef}>
-          <EntriesHeading className="wide:mt-0">New entry</EntriesHeading>
-          <form className="mb-2" onSubmit={painForm.handleSubmit(onSubmit)}>
-            <div className="grid gap-3 content-start min-w-0">
+    <section className="@container">
+      <h1 className="m-0 mb-10 [text-box:trim-both_cap_alphabetic] text-title font-bold tracking-tight text-text">Pain</h1>
+      <div className="grid gap-10">
+        <div className="min-w-0 border-b border-border">
+          <EntriesHeading className="mt-0">New entry</EntriesHeading>
+          <form onSubmit={painForm.handleSubmit(onSubmit)}>
+            <div className={FORM_SPLIT}>
               <div className="sr-only" aria-hidden="true">
                 <input type="hidden" {...painForm.register("painLevel", { valueAsNumber: true })} />
                 <input type="hidden" {...painForm.register("fatigueLevel", { valueAsNumber: true })} />
                 <input type="hidden" {...painForm.register("coffeeCount", { valueAsNumber: true })} />
               </div>
-              <FieldLine
-                label="Date & time"
-                type="datetime-local"
-                className={DATETIME_FIELD}
-                {...painForm.register("dateTime")}
-                aria-label="Date/time"
-                onClick={(e) => {
-                  const el = e.currentTarget as HTMLInputElement & { showPicker?: () => void };
-                  el.showPicker?.();
-                }}
-              />
+              {/* Wide column: the metrics and the tag strip, whose six tabs
+                  need the room to stay on one line. */}
+              <div className={FORM_COL}>
               <div className="grid gap-2 content-start">
                 <span className={FIELD_LINE_LABEL}>Values</span>
+                <BarMetric
+                  label="Pain level"
+                  value={painLevel ?? null}
+                  onChange={(next) => painForm.setValue("painLevel", next, { shouldDirty: true })}
+                />
+                <BarMetric
+                  label="Fatigue"
+                  value={fatigueLevel ?? null}
+                  onChange={(next) => painForm.setValue("fatigueLevel", next, { shouldDirty: true })}
+                />
+                <CoffeeStepper value={coffeeCount ?? null} onChange={(next) => painForm.setValue("coffeeCount", next, { shouldDirty: true })} />
               </div>
-              <BarMetric
-                label="Pain level"
-                value={painLevel ?? null}
-                onChange={(next) => painForm.setValue("painLevel", next, { shouldDirty: true })}
-              />
-              <BarMetric
-                label="Fatigue"
-                value={fatigueLevel ?? null}
-                onChange={(next) => painForm.setValue("fatigueLevel", next, { shouldDirty: true })}
-              />
-              <CoffeeStepper value={coffeeCount ?? null} onChange={(next) => painForm.setValue("coffeeCount", next, { shouldDirty: true })} />
-              <FieldLine
-                label="Note"
-                multiline
-                rows={2}
-                {...painForm.register("note")}
-                placeholder="Anything worth remembering about this flare…"
-                aria-label="Note"
-              />
-              {editingPain ? (
-                <div className="flex gap-2 flex-wrap">
-                  <Button type="button" onClick={onCancelEdit}>
-                    Cancel edit
-                  </Button>
-                </div>
-              ) : null}
-            </div>
-
-            <div className="grid gap-5 min-w-0 pt-5">
-              <div className="grid gap-3">
+              <div className="grid gap-3 content-start min-w-0">
                 <SectionHead title="Factors" variant="tags" />
                 <TagTabs
                   tabs={PAIN_TABS.map((t) => ({ id: t.id, label: t.label, count: painTabCounts[t.id] }))}
@@ -179,15 +148,45 @@ export function PainSection({
                   />
                 </div>
               </div>
-              <div className="flex justify-end pt-2">
-                <Button type="submit" variant={painMutationState.isSuccess ? "success" : "primary"} className="mb-5">
-                  {painMutationState.isSuccess ? "✓ Saved" : editingPain ? "Update entry" : "Save entry"}
-                </Button>
               </div>
+
+              {/* Narrow column: a date and free text both read fine narrow. */}
+              <div className={FORM_COL}>
+              <FieldLine
+                label="Date & time"
+                type="datetime-local"
+                className={DATETIME_FIELD}
+                {...painForm.register("dateTime")}
+                aria-label="Date/time"
+                onClick={(e) => {
+                  const el = e.currentTarget as HTMLInputElement & { showPicker?: () => void };
+                  el.showPicker?.();
+                }}
+              />
+              <FieldLine
+                label="Note"
+                multiline
+                rows={2}
+                {...painForm.register("note")}
+                placeholder="Anything worth remembering about this flare…"
+                aria-label="Note"
+              />
+              </div>
+            </div>
+
+            <div className="flex justify-end items-center gap-3 pt-2">
+              {editingPain ? (
+                <Button type="button" onClick={onCancelEdit}>
+                  Cancel edit
+                </Button>
+              ) : null}
+              <Button type="submit" variant={painMutationState.isSuccess ? "success" : "primary"} >
+                {painMutationState.isSuccess ? "✓ Saved" : editingPain ? "Update entry" : "Save entry"}
+              </Button>
             </div>
           </form>
         </div>
-        <PastEntriesColumn
+        <PastEntries
           title="Past entries"
           isLoading={isLoading}
           loadingText="Loading pain entries..."
@@ -198,9 +197,6 @@ export function PainSection({
               description="Track your first session with the form above. Your pain history will show up here once you save it."
             />
           }
-          overflow={pastEntriesOverflow}
-          colRef={pastColRef}
-          bodyRef={pastEntriesBodyRef}
         >
           {painEntries.map((entry) => {
             const painBand = bandNine(entry.painLevel ?? undefined);
@@ -232,14 +228,14 @@ export function PainSection({
                       type="button"
                       className={DETAIL_ACTION_BTN}
                       onClick={() => {
-                        if (editingPain) {
+                        if (editingPain?.id === entry.id) {
                           onCancelEdit();
                           return;
                         }
                         onStartEdit(entry);
                       }}
                     >
-                      <AnimatedEditingLabel active={Boolean(editingPain)} />
+                      <AnimatedEditingLabel active={editingPain?.id === entry.id} />
                     </button>
                     <button
                       type="button"
@@ -254,7 +250,7 @@ export function PainSection({
               </details>
             );
           })}
-        </PastEntriesColumn>
+        </PastEntries>
       </div>
     </section>
   );

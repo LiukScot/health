@@ -52,6 +52,9 @@ function ensureUserPreferenceColumns(db: SQLiteDB): void {
   if (!columnExists(db, "user_preferences", "birthday")) {
     db.exec(`ALTER TABLE user_preferences ADD COLUMN birthday TEXT`);
   }
+  if (!columnExists(db, "user_preferences", "show_zero_assets")) {
+    db.exec(`ALTER TABLE user_preferences ADD COLUMN show_zero_assets INTEGER NOT NULL DEFAULT 0`);
+  }
 }
 
 function ensurePainOptionColumns(db: SQLiteDB): void {

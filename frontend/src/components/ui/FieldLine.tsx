@@ -4,7 +4,7 @@ import type { InputHTMLAttributes, ReactNode, TextareaHTMLAttributes } from "rea
 // a borderless tinted input/textarea. Renders the control itself so the input
 // styling lives in one place; spread rhf register() props straight onto it.
 export const FIELD_LINE_LABEL =
-  "pt-3 pb-2 text-nano font-bold tracking-[0.16em] uppercase text-muted";
+  "[text-box:trim-both_cap_alphabetic] pt-3 pb-2 text-xs font-bold tracking-[0.16em] uppercase text-muted";
 export const FIELD_LINE_INPUT =
   "w-full bg-[color-mix(in_srgb,white_3%,var(--bg))] border-0 rounded-sm px-3 py-2 text-text text-control font-medium font-body shadow-none outline-none transition-[background,box-shadow] duration-150 ease-[ease] hover:bg-[color-mix(in_srgb,white_5%,var(--bg))] focus:bg-[color-mix(in_srgb,white_5%,var(--bg))] focus:shadow-[inset_0_0_0_1px_var(--accent)] placeholder:text-muted-soft [[data-theme=oled]_&]:bg-card-soft [[data-theme=oled]_&]:hover:bg-[color-mix(in_srgb,white_6%,var(--card-soft))] [[data-theme=oled]_&]:focus:bg-[color-mix(in_srgb,white_6%,var(--card-soft))]";
 

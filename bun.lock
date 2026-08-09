@@ -3,7 +3,7 @@
   "configVersion": 1,
   "workspaces": {
     "": {
-      "name": "health",
+      "name": "world",
       "dependencies": {
         "@modelcontextprotocol/sdk": "^1.29.0",
       },

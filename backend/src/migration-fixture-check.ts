@@ -11,9 +11,9 @@ function text(out: Uint8Array): string {
   return Buffer.from(out).toString("utf8");
 }
 
-const workDir = fs.mkdtempSync(path.join(os.tmpdir(), "health-migration-fixture-"));
+const workDir = fs.mkdtempSync(path.join(os.tmpdir(), "world-migration-fixture-"));
 const sourcePath = path.join(workDir, "legacy.sqlite");
-const targetPath = path.join(workDir, "health.sqlite");
+const targetPath = path.join(workDir, "world.sqlite");
 const reportPath = path.join(workDir, "report.json");
 
 const source = new Database(sourcePath);
@@ -156,4 +156,4 @@ assert(painRow.habits === "low sleep", "Habits migration mismatch");
 assert(painRow.other === "windy", "Other migration mismatch");
 target.close();
 
-console.log("Health migration fixture check passed");
+console.log("World migration fixture check passed");

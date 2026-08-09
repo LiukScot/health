@@ -43,7 +43,7 @@ function Wrapper({
 describe("<LoginScreen />", () => {
   test("renders email + password fields and submit button", () => {
     render(<Wrapper />);
-    expect(screen.getByText("Health")).toBeInTheDocument();
+    expect(screen.getByText("World")).toBeInTheDocument();
     expect(screen.getByLabelText(/Email/i)).toBeInTheDocument();
     expect(screen.getByLabelText(/Password/i)).toBeInTheDocument();
     expect(screen.getByRole("button", { name: /Sign in/i })).toBeInTheDocument();

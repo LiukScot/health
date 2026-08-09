@@ -9,7 +9,6 @@ import {
   AnimatedEditingLabel,
   MultiSelectField,
   SectionHead,
-  useDiaryColumnCap,
 } from "./shared";
 import { BarMetric, EmptyState } from "./screen-helpers";
 import { bandNine, diaryPreview, formatEntrySummaryDate } from "./screen-format";
@@ -22,6 +21,8 @@ import {
   DETAIL_ACTION_BTN,
   DetailGroup,
   EntriesHeading,
+  FORM_COL,
+  FORM_SPLIT,
   ENTRY_CHEVRON,
   ENTRY_DATE,
   ENTRY_EXPANDED,
@@ -29,7 +30,7 @@ import {
   ENTRY_ROW,
   ENTRY_SUMMARY,
   PainBadge,
-  PastEntriesColumn,
+  PastEntries,
   TagList,
   TagTabs,
 } from "./entries";
@@ -74,57 +75,42 @@ export function DiarySection({
     { id: "general" as const, label: "General", count: csvToList(generalMoods).length },
   ];
 
-  const {
-    leftColRef,
-    pastColRef,
-    pastEntriesBodyRef,
-    overflow: pastEntriesOverflow,
-  } = useDiaryColumnCap(diaryEntries, isLoading);
 
   return (
-    <section className="@container p-2">
-      <h1 className="m-0 mb-3 text-title font-bold tracking-tight text-text">Diary</h1>
-      <div className="grid gap-8 wide:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] wide:gap-12 wide:items-start">
-        <div className="min-w-0 max-wide:border-b max-wide:border-border" ref={leftColRef}>
-          <EntriesHeading className="wide:mt-0">New entry</EntriesHeading>
-          <form className="mb-2" onSubmit={diaryForm.handleSubmit(onSubmit)}>
-            <div className="grid gap-3 content-start min-w-0">
+    <section className="@container">
+      <h1 className="m-0 mb-10 [text-box:trim-both_cap_alphabetic] text-title font-bold tracking-tight text-text">Diary</h1>
+      <div className="grid gap-10">
+        <div className="min-w-0 border-b border-border">
+          <EntriesHeading className="mt-0">New entry</EntriesHeading>
+          <form onSubmit={diaryForm.handleSubmit(onSubmit)}>
+            <div className={FORM_SPLIT}>
               <div className="sr-only" aria-hidden="true">
                 <input type="hidden" {...diaryForm.register("moodLevel", { valueAsNumber: true })} />
                 <input type="hidden" {...diaryForm.register("depressionLevel", { valueAsNumber: true })} />
                 <input type="hidden" {...diaryForm.register("anxietyLevel", { valueAsNumber: true })} />
               </div>
-              <FieldLine
-                label="Date & time"
-                type="datetime-local"
-                className={DATETIME_FIELD}
-                {...diaryForm.register("dateTime")}
-                aria-label="Date/time"
-                onClick={(e) => {
-                  const el = e.currentTarget as HTMLInputElement & { showPicker?: () => void };
-                  el.showPicker?.();
-                }}
-              />
+              {/* Wide column: what you fill on every entry. */}
+              <div className={FORM_COL}>
               <div className="grid gap-2 content-start">
                 <span className={FIELD_LINE_LABEL}>Values</span>
+                <BarMetric
+                  label="Mood"
+                  value={moodLevel ?? null}
+                  fractionDigits={1}
+                  higherIsBetter
+                  onChange={(next) => diaryForm.setValue("moodLevel", next, { shouldDirty: true })}
+                />
+                <BarMetric
+                  label="Depression"
+                  value={depressionLevel ?? null}
+                  onChange={(next) => diaryForm.setValue("depressionLevel", next, { shouldDirty: true })}
+                />
+                <BarMetric
+                  label="Anxiety"
+                  value={anxietyLevel ?? null}
+                  onChange={(next) => diaryForm.setValue("anxietyLevel", next, { shouldDirty: true })}
+                />
               </div>
-              <BarMetric
-                label="Mood"
-                value={moodLevel ?? null}
-                fractionDigits={1}
-                higherIsBetter
-                onChange={(next) => diaryForm.setValue("moodLevel", next, { shouldDirty: true })}
-              />
-              <BarMetric
-                label="Depression"
-                value={depressionLevel ?? null}
-                onChange={(next) => diaryForm.setValue("depressionLevel", next, { shouldDirty: true })}
-              />
-              <BarMetric
-                label="Anxiety"
-                value={anxietyLevel ?? null}
-                onChange={(next) => diaryForm.setValue("anxietyLevel", next, { shouldDirty: true })}
-              />
               <FieldLine
                 label="Description"
                 multiline
@@ -141,16 +127,22 @@ export function DiarySection({
                 placeholder="One small thing you're glad about…"
                 aria-label="Gratitude"
               />
-              {editingDiary ? (
-                <div className="flex gap-2 flex-wrap">
-                  <Button type="button" onClick={onCancelEdit}>
-                    Cancel edit
-                  </Button>
-                </div>
-              ) : null}
-            </div>
+              </div>
 
-            <div className="grid gap-5 min-w-0 pt-5">
+              {/* Narrow column: the date is usually already right, and the
+                  emotion picker is where you go when something changed. */}
+              <div className={FORM_COL}>
+              <FieldLine
+                label="Date & time"
+                type="datetime-local"
+                className={DATETIME_FIELD}
+                {...diaryForm.register("dateTime")}
+                aria-label="Date/time"
+                onClick={(e) => {
+                  const el = e.currentTarget as HTMLInputElement & { showPicker?: () => void };
+                  el.showPicker?.();
+                }}
+              />
               <div className="grid gap-3">
                 <SectionHead title="Emotions" variant="tags" />
                 <TagTabs tabs={moodTabs} active={moodTab} onSelect={setMoodTab} ariaLabel="Mood categories" />
@@ -190,15 +182,22 @@ export function DiarySection({
                   ) : null}
                 </div>
               </div>
-              <div className="flex justify-end pt-2">
-                <Button type="submit" variant={diaryMutationState.isSuccess ? "success" : "primary"} className="mb-5">
-                  {diaryMutationState.isSuccess ? "✓ Saved" : editingDiary ? "Update entry" : "Save entry"}
-                </Button>
               </div>
+            </div>
+
+            <div className="flex justify-end items-center gap-3 pt-2">
+              {editingDiary ? (
+                <Button type="button" onClick={onCancelEdit}>
+                  Cancel edit
+                </Button>
+              ) : null}
+              <Button type="submit" variant={diaryMutationState.isSuccess ? "success" : "primary"} >
+                {diaryMutationState.isSuccess ? "✓ Saved" : editingDiary ? "Update entry" : "Save entry"}
+              </Button>
             </div>
           </form>
         </div>
-        <PastEntriesColumn
+        <PastEntries
           title="Past entries"
           isLoading={isLoading}
           loadingText="Loading diary entries..."
@@ -209,9 +208,6 @@ export function DiarySection({
               description="Use the form above to log your first mood entry. Once you save it, it will appear here."
             />
           }
-          overflow={pastEntriesOverflow}
-          colRef={pastColRef}
-          bodyRef={pastEntriesBodyRef}
         >
           {diaryEntries.map((entry) => {
             const moodBand = bandNine(entry.moodLevel ?? undefined, true);
@@ -242,14 +238,14 @@ export function DiarySection({
                       type="button"
                       className={DETAIL_ACTION_BTN}
                       onClick={() => {
-                        if (editingDiary) {
+                        if (editingDiary?.id === entry.id) {
                           onCancelEdit();
                           return;
                         }
                         onStartEdit(entry);
                       }}
                     >
-                      <AnimatedEditingLabel active={Boolean(editingDiary)} />
+                      <AnimatedEditingLabel active={editingDiary?.id === entry.id} />
                     </button>
                     <button
                       type="button"
@@ -264,7 +260,7 @@ export function DiarySection({
               </details>
             );
           })}
-        </PastEntriesColumn>
+        </PastEntries>
       </div>
     </section>
   );

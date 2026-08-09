@@ -177,7 +177,7 @@ export function MemorableDaysSection({ memorable }: Props) {
     <section className="@container p-2 relative">
       <div>
         <div>
-          <h1 className="m-0 mb-3 text-title font-bold tracking-tight text-text">Memorable days</h1>
+          <h1 className="m-0 mb-10 [text-box:trim-both_cap_alphabetic] text-title font-bold tracking-tight text-text">Memorable days</h1>
           <SectionHead title="Calendar" variant="dashboard" />
         </div>
       </div>

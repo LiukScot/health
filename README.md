@@ -1,8 +1,11 @@
-# Health
+# World
 
-A personal health tracking app for logging daily mood, pain, and habits — with optional AI assistance via the Model Context Protocol (MCP).
+A personal tracking app behind one login. World is split into **realms** —
+self-contained areas you switch between from the sidebar, each with its own
+navigation and accent colour.
 
-**Features:**
+**Health** — logging daily mood, pain, and habits, with optional AI assistance
+via the Model Context Protocol (MCP):
 
 - Mood diary (mood, depression, anxiety levels + free text)
 - Pain journal (pain area, symptoms, activities, medicines, habits, and more)
@@ -10,6 +13,9 @@ A personal health tracking app for logging daily mood, pain, and habits — with
 - Graphs and history over time
 - Built-in MCP server: connect any MCP-compatible AI client (Claude Desktop, Claude Code, …) and let it read your health data with full-text search and aggregate statistics
 - Backup and restore your data
+
+**Money** — portfolio, transactions, monthly movements and snapshots. Being
+folded in from its own repo; the panels land one at a time.
 
 ---
 
@@ -70,7 +76,7 @@ For a production-style local run, use Docker directly.
 3. Create your user account:
 
    ```bash
-   docker exec health bun --cwd backend src/user-cli.ts create \
+   docker exec world bun --cwd backend src/user-cli.ts create \
      --email=you@example.com \
      --password=YourPassword \
      --name=YourName
@@ -82,7 +88,13 @@ For a production-style local run, use Docker directly.
 
 ## Data & backup
 
-Your data is stored in `data/health.sqlite`. The app runs migrations automatically on startup — no manual steps needed.
+Your data is stored in `data/world.sqlite`. The app runs migrations automatically on startup — no manual steps needed.
+
+> **Upgrading from a release named `health`:** rename the database file to
+> `world.sqlite` **together with its `-wal` and `-shm` companions** before
+> starting the new version, or SQLite creates an empty database and the app
+> comes up with no data. The session cookie is also renamed, so everyone is
+> signed out once on the first start; MCP tokens are unaffected.
 
 To back up or restore your data:
 
@@ -97,7 +109,7 @@ You can also export and import data as JSON or Excel from within the app itself 
 
 ## MCP server (AI assistant)
 
-Health exposes a built-in MCP server on `/mcp` that lets any MCP-compatible AI client read your health data over an authenticated HTTPS connection. Tools are read-only — the AI can search, list, and aggregate but cannot create or modify entries.
+The Health realm exposes a built-in MCP server on `/mcp` that lets any MCP-compatible AI client read your health data over an authenticated HTTPS connection. Tools are read-only — the AI can search, list, and aggregate but cannot create or modify entries.
 
 ### What the AI can do
 

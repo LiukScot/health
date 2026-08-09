@@ -1,11 +1,17 @@
 import { lazy, Suspense, useEffect, useRef, useState } from "react";
 import { Toaster } from "sonner";
-import { useAuth, useDiary, usePain, useCbt, useDbt, useDashboard, useMemorableDays, useSettings } from "./hooks";
+import {
+  useAuth, useDiary, usePain, useCbt, useDbt, useDashboard, useMemorableDays,
+  useMoneyDashboard, useMoneyMovements, useMoneySettings, useMoneySnapshots, useMoneyTransactions, useSettings,
+} from "./hooks";
 import { LoginScreen } from "./app/LoginScreen";
 import { Sidebar } from "./app/Sidebar";
 import { DashboardSection } from "./app/DashboardSection";
 import { SectionErrorBoundary } from "./app/ErrorBoundary";
-import { formatDocumentTitle, navLabels, type NavItem } from "./app/core";
+import {
+  formatDocumentTitle, navItemsByRealm, navLabels, readStoredRealm, realmOf,
+  REALM_STORAGE_KEY, type NavItem,
+} from "./app/core";
 
 // The Dashboard is the default view and stays eager so the first paint after
 // login has no loading flash. The other sections are reached only via nav, so
@@ -17,13 +23,20 @@ const PainSection = lazy(() => import("./app/PainSection").then((m) => ({ defaul
 const CbtSection = lazy(() => import("./app/CbtSection").then((m) => ({ default: m.CbtSection })));
 const DbtSection = lazy(() => import("./app/DbtSection").then((m) => ({ default: m.DbtSection })));
 const SettingsSection = lazy(() => import("./app/SettingsSection").then((m) => ({ default: m.SettingsSection })));
-const DesignSystemSection = lazy(() => import("./app/DesignSystemSection").then((m) => ({ default: m.DesignSystemSection })));
 const MemorableDaysSection = lazy(() => import("./app/memorable-days").then((m) => ({ default: m.MemorableDaysSection })));
+const TransactionsSection = lazy(() => import("./app/money/TransactionsSection").then((m) => ({ default: m.TransactionsSection })));
+const MovementsSection = lazy(() => import("./app/money/MovementsSection").then((m) => ({ default: m.MovementsSection })));
+const SnapshotsSection = lazy(() => import("./app/money/SnapshotsSection").then((m) => ({ default: m.SnapshotsSection })));
+const MoneyDashboardSection = lazy(() => import("./app/money/MoneyDashboardSection").then((m) => ({ default: m.MoneyDashboardSection })));
 
 function App() {
   const auth = useAuth();
   const loggedIn = !!auth.user;
-  const [nav, setNav] = useState<NavItem>("dashboard");
+  // The realm is derived from the nav item (money's items are `money-`
+  // prefixed), so there is only one piece of state to keep straight. The
+  // last realm is remembered so a reload lands you back where you were.
+  const [nav, setNav] = useState<NavItem>(() => navItemsByRealm[readStoredRealm()][0]);
+  const realm = realmOf(nav);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
   // Mirror of mobileSidebarOpen for the swipe handler closure to read,
@@ -92,8 +105,22 @@ function App() {
   }, [nav]);
 
   useEffect(() => {
-    document.title = loggedIn ? formatDocumentTitle(navLabels[nav]) : formatDocumentTitle("Sign in");
-  }, [loggedIn, nav]);
+    document.title = loggedIn
+      ? formatDocumentTitle(navLabels[nav], realm)
+      : formatDocumentTitle("Sign in");
+  }, [loggedIn, nav, realm]);
+
+  // Drive the accent (see :root[data-realm] in styles.css) and remember the
+  // choice. index.html replays it before first paint to avoid a flash of the
+  // wrong accent; keep the two lists of realm ids in sync.
+  useEffect(() => {
+    document.documentElement.dataset.realm = realm;
+    try {
+      localStorage.setItem(REALM_STORAGE_KEY, realm);
+    } catch {
+      // Persisting is best-effort; the live attribute change still applies.
+    }
+  }, [realm]);
 
   const diary = useDiary(loggedIn);
   const pain = usePain(loggedIn);
@@ -102,6 +129,13 @@ function App() {
   const dashboard = useDashboard(loggedIn);
   const memorable = useMemorableDays(loggedIn);
   const settings = useSettings(loggedIn);
+  // Only fetched once you're actually in the Money realm — the health realm
+  // has no use for it and shouldn't pay for the request.
+  const moneyTx = useMoneyTransactions(loggedIn && realm === "money");
+  const moneyMovements = useMoneyMovements(loggedIn && nav === "money-movements");
+  const moneySnapshots = useMoneySnapshots(loggedIn && nav === "money-snapshots");
+  const moneySettings = useMoneySettings(loggedIn && nav === "settings-money");
+  const moneyDashboard = useMoneyDashboard(loggedIn && nav === "money-dashboard");
 
   // Interactive swipe gestures: the sidebar follows the finger 1:1 during
   // the drag, then snaps open or closed on release based on how far it moved.
@@ -273,13 +307,15 @@ function App() {
       <Sidebar
         nav={nav}
         onNav={(item) => { setNav(item); setMobileSidebarOpen(false); }}
+        realm={realm}
+        onRealmChange={(next) => setNav(navItemsByRealm[next][0])}
         collapsed={sidebarCollapsed}
         onToggle={() => setSidebarCollapsed((c) => !c)}
         onCloseMobile={() => setMobileSidebarOpen(false)}
         mobileOpen={mobileSidebarOpen}
       />
 
-      <main className={`max-w-[1500px] w-full overflow-y-auto [padding:clamp(12px,3vw,48px)_clamp(12px,3vw,48px)_20px] max-mobile:p-3 ${mobileSidebarOpen ? "max-mobile:overflow-hidden" : ""}`}>
+      <main className={`max-w-[1500px] w-full overflow-y-auto [padding:clamp(20px,4vw,40px)] max-mobile:p-5 ${mobileSidebarOpen ? "max-mobile:overflow-hidden" : ""}`}>
         <button
           type="button"
           className="mobile-menu-btn hidden max-mobile:flex max-mobile:items-center max-mobile:justify-center w-[40px] h-[40px] max-mobile:mb-3 max-mobile:ml-2 p-0 border-0 rounded-sm bg-card-soft text-muted cursor-pointer shadow-none hover:text-text hover:bg-card-strong"
@@ -349,8 +385,45 @@ function App() {
           />
         )}
 
-        {nav === "settings" && (
-          <SettingsSection auth={auth}
+        {nav === "money-transactions" && (
+          <TransactionsSection
+            txForm={moneyTx.txForm} txMutationState={{ isSuccess: moneyTx.txMutation.isSuccess }}
+            isLoading={moneyTx.isLoading} editingTx={moneyTx.editingTx}
+            transactions={moneyTx.transactions} assetOptions={moneyTx.assetOptions}
+            confirmDeleteTx={moneyTx.confirmDeleteTx}
+            onSubmit={(v) => moneyTx.txMutation.mutate(v)} onCancelEdit={moneyTx.resetTxForm}
+            onStartEdit={moneyTx.startTxEdit} onDeleteClick={moneyTx.onDeleteClick}
+            onDeleteBlur={moneyTx.onDeleteBlur}
+          />
+        )}
+
+        {nav === "money-movements" && (
+          <MovementsSection
+            movementForm={moneyMovements.movementForm}
+            movementMutationState={{ isSuccess: moneyMovements.movementMutation.isSuccess }}
+            isLoading={moneyMovements.isLoading} editingMovement={moneyMovements.editingMovement}
+            movements={moneyMovements.movements} confirmDeleteMovement={moneyMovements.confirmDeleteMovement}
+            onSubmit={(v) => moneyMovements.movementMutation.mutate(v)}
+            onCancelEdit={moneyMovements.resetMovementForm} onStartEdit={moneyMovements.startMovementEdit}
+            onDeleteClick={moneyMovements.onDeleteClick} onDeleteBlur={moneyMovements.onDeleteBlur}
+          />
+        )}
+
+        {nav === "money-snapshots" && (
+          <SnapshotsSection
+            snapshotForm={moneySnapshots.snapshotForm}
+            snapshotMutationState={{ isSuccess: moneySnapshots.snapshotMutation.isSuccess }}
+            isLoading={moneySnapshots.isLoading} canSave={moneySnapshots.canSave}
+            snapshots={moneySnapshots.snapshots} confirmDeleteSnapshot={moneySnapshots.confirmDeleteSnapshot}
+            onSubmit={(v) => moneySnapshots.snapshotMutation.mutate(v)}
+            onDeleteClick={moneySnapshots.onDeleteClick} onDeleteBlur={moneySnapshots.onDeleteBlur}
+          />
+        )}
+
+        {nav === "money-dashboard" && <MoneyDashboardSection {...moneyDashboard} />}
+
+        {realm === "settings" && (
+          <SettingsSection nav={nav} money={moneySettings} auth={auth}
             birthday={settings.prefsValue.birthday ?? null}
             birthdayPending={settings.prefsMutation.isPending}
             onSaveBirthday={settings.onSaveBirthday}
@@ -363,7 +436,6 @@ function App() {
           />
         )}
 
-        {nav === "design-system" && <DesignSystemSection />}
         </Suspense>
         </SectionErrorBoundary>
       </main>

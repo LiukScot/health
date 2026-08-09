@@ -1,5 +1,5 @@
 services:
-  health:
+  world:
     command: ["bun", "--cwd", "backend", "--watch", "src/server.ts"]
     # Under bridge networking the host's Vite dev server is reached via the
     # host-gateway alias, not the container's own 127.0.0.1.

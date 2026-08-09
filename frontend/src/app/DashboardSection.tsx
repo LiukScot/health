@@ -14,16 +14,12 @@ import {
 } from "./core";
 import { SectionHead } from "./shared";
 import { EmptyState } from "./screen-helpers";
+import { CARD_GRID, DASH_CARD, CARD_H3, CARD_VALUE } from "./cards";
 import { FIELD_LINE_LABEL } from "../components/ui/FieldLine";
 import { DateInput } from "../components/ui/DateInput";
 
 const WellbeingChart = lazy(() => import("./WellbeingChart"));
 
-const DASH_CARD =
-  "grid grid-rows-[auto_auto_22px] gap-2 content-start w-full max-w-[200px] justify-self-start rounded-md p-3 bg-card-soft";
-const CARD_H3 =
-  "m-0 text-nano font-bold tracking-[0.12em] uppercase text-muted leading-tight whitespace-nowrap overflow-hidden text-ellipsis translate-y-0.5";
-const CARD_VALUE = "text-lg font-bold text-text translate-y-0.5";
 const DELTA_SLOT = "min-h-6 flex items-end translate-y-0.5";
 const DELTA_BASE = "inline-flex items-center rounded-full px-2 py-0.5 text-micro font-bold self-end";
 const QUICK_RANGE_BASE =
@@ -73,8 +69,8 @@ export function DashboardSection({
   anniversaryCards: MemorableDay[];
 }) {
   return (
-    <section className="@container p-2">
-      <h1 className="m-0 mb-3 text-title font-bold tracking-tight text-text">Dashboard</h1>
+    <section className="@container">
+      <h1 className="m-0 mb-10 [text-box:trim-both_cap_alphabetic] text-title font-bold tracking-tight text-text">Dashboard</h1>
 
       <div className="flex flex-wrap gap-3 items-end mb-5">
         <label className="flex flex-col gap-2">
@@ -116,7 +112,7 @@ export function DashboardSection({
           {anniversaryCards.length > 0 ? (
             <>
               <SectionHead title="Anniversaries today" variant="dashboard" />
-              <div className="grid grid-cols-[repeat(auto-fit,minmax(128px,1fr))] gap-3">
+              <div className={CARD_GRID}>
                 {anniversaryCards.map((card) => (
                   <article key={`${card.source}-${card.id}-${card.date}`} className={DASH_CARD}>
                     <h3 className={CARD_H3}>
@@ -125,7 +121,7 @@ export function DashboardSection({
                       </span>
                       {card.title}
                     </h3>
-                    <strong className={CARD_VALUE}>{card.occurrenceLabel}</strong>
+                    <strong className={`${CARD_VALUE} text-text`}>{card.occurrenceLabel}</strong>
                     {!card.locked && (
                       <span className={`${DELTA_SLOT} text-muted`}>{card.repeatMode}</span>
                     )}
@@ -136,7 +132,7 @@ export function DashboardSection({
           ) : null}
 
           <SectionHead title="Averages" variant="dashboard" />
-          <div data-testid="averages" className="grid grid-cols-[repeat(auto-fit,minmax(128px,1fr))] gap-3">
+          <div data-testid="averages" className={CARD_GRID}>
             {dashboardCards.map((card) => {
               const deltaPct = calcDeltaPercent(card.value, card.previous);
               const delta = deltaPct === null ? null : formatDelta(deltaPct, Boolean(card.invertDelta));
@@ -150,14 +146,14 @@ export function DashboardSection({
                     </span>
                     {card.label}
                   </h3>
-                  <strong className={CARD_VALUE}>{card.formattedValue}</strong>
-                  <span className={`${DELTA_SLOT} justify-start`} aria-hidden={delta ? undefined : true}>
-                    {delta ? (
+                  <strong className={`${CARD_VALUE} text-text`}>{card.formattedValue}</strong>
+                  {delta ? (
+                    <span className={`${DELTA_SLOT} justify-start`}>
                       <span className={DELTA_BASE} style={deltaStyle}>
                         {delta.text}
                       </span>
-                    ) : null}
-                  </span>
+                    </span>
+                  ) : null}
                 </article>
               );
             })}

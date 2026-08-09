@@ -1,23 +1,20 @@
+import { lazy, Suspense } from "react";
 import type { useAuth } from "../hooks/use-auth";
-import { type InlineMessage } from "./core";
-import { SettingsPanel } from "./SettingsPanel";
+import { navLabels, type InlineMessage, type NavItem } from "./core";
+import { SettingsScreen } from "./SettingsPanel";
+import type { MoneySettingsProps } from "./money/MoneySettings";
+
+const DesignSystemSection = lazy(() =>
+  import("./DesignSystemSection").then((m) => ({ default: m.DesignSystemSection })),
+);
 
 export function SettingsSection({
-  auth,
-  birthday,
-  birthdayPending,
-  onSaveBirthday,
-  purgeConfirmArmed,
-  purgePending,
-  purgeError,
-  onPurgeArm,
-  onPurgeConfirm,
-  onPurgeCancel,
-  onExportJson,
-  onImportJson,
-  onExportXlsx,
-  onImportXlsx,
+  nav,
+  money,
+  ...rest
 }: {
+  nav: NavItem;
+  money: MoneySettingsProps;
   auth: ReturnType<typeof useAuth>;
   birthday: string | null;
   birthdayPending: boolean;
@@ -33,26 +30,22 @@ export function SettingsSection({
   onExportXlsx: () => void;
   onImportXlsx: (file: File) => void;
 }) {
-  const variantProps = {
-    auth,
-    birthday,
-    birthdayPending,
-    onSaveBirthday,
-    purgeConfirmArmed,
-    purgePending,
-    purgeError,
-    onPurgeArm,
-    onPurgeConfirm,
-    onPurgeCancel,
-    onExportJson,
-    onImportJson,
-    onExportXlsx,
-    onImportXlsx,
-  };
+  // The design system is a page of its own rather than a settings form, and
+  // it is the heaviest thing in the realm, so it stays lazy.
+  if (nav === "settings-design-system") {
+    return (
+      <Suspense fallback={<p className="text-muted text-control">Loading…</p>}>
+        <DesignSystemSection />
+      </Suspense>
+    );
+  }
+
   return (
-    <section className="@container p-0">
-      <h1 className="m-0 mb-3 text-title font-bold tracking-tight text-text">Settings</h1>
-      <SettingsPanel {...variantProps} />
+    <section className="@container">
+      <h1 className="m-0 mb-10 [text-box:trim-both_cap_alphabetic] text-title font-bold tracking-tight text-text">{navLabels[nav]}</h1>
+      <div className="max-w-[80ch]">
+        <SettingsScreen nav={nav} money={money} {...rest} />
+      </div>
     </section>
   );
 }

@@ -1,5 +1,4 @@
-import type { ReactNode, Ref } from "react";
-import { Button } from "../components/ui/Button";
+import type { ReactNode } from "react";
 
 // Past-entries primitives shared by CBT/DBT/Diary/Pain. The summary layout
 // differs per screen (badges, mood, preview), so these expose styled wrappers
@@ -22,30 +21,54 @@ export const DETAIL_ACTION_BTN =
   "px-2 py-1 text-xs font-medium text-muted bg-transparent border-0 rounded-[6px] shadow-none cursor-pointer font-[inherit] transition-[color,background] duration-150 ease-[ease] hover:text-text hover:bg-[color-mix(in_srgb,var(--text)_8%,transparent)]";
 export const DELETE_CONFIRM = "text-danger-strong bg-danger-strong/18 font-extrabold";
 
+// Forms whose fields are all much the same shape (CBT, DBT, the money forms)
+// flow into as many columns as fit. auto-fit reacts to the container, not the
+// viewport, so collapsing the sidebar reflows them with no breakpoint
+// involved; min(100%,…) keeps one column from overflowing a narrow container.
+export const FORM_GRID =
+  "grid gap-3 content-start min-w-0 grid-cols-[repeat(auto-fit,minmax(min(100%,28rem),1fr))]";
+// For rows that head or close a group and would read wrong beside a field.
+export const FORM_FULL = "[grid-column:1/-1]";
+
+// Forms built from blocks of genuinely different size get placed by hand:
+// letting an algorithm guess produced a different ragged result at every
+// width. The wide column takes the blocks that need room to read — a nine-step
+// metric, a six-tab strip — and the narrow one takes what stays legible small,
+// like a date or free text. No rule between them; the gap is the separation.
+// Container query, so collapsing the sidebar reflows it too.
+export const FORM_SPLIT =
+  "grid gap-10 min-w-0 @3xl:grid-cols-2 @3xl:items-start";
+// One number, 40px, for every gap on the page — columns, blocks, the page
+// margin, the headings. That only works because the labels and headings are
+// text-box trimmed, so a text box is exactly as tall as its letters and a
+// declared 40 is 40 on screen. Without the trim (Firefox, for now) vertical
+// gaps read a few px larger than horizontal ones; that is the whole reason
+// this used to be six different numbers compensating for leading.
+// The pt-0/mt-0 below cancel the padding blocks carry for the tight forms,
+// where the gap is 12px and that padding is the only separation.
+export const FORM_COL = "grid gap-10 content-start min-w-0 [&>*>:first-child]:pt-0 [&>*>:first-child]:mt-0";
+
 export const DATETIME_FIELD =
   "!w-auto max-w-full justify-self-start cursor-pointer tabular-nums [&::-webkit-calendar-picker-indicator]:cursor-pointer [&::-webkit-calendar-picker-indicator]:ml-2 [&::-webkit-calendar-picker-indicator]:invert [&::-webkit-calendar-picker-indicator]:opacity-60 hover:[&::-webkit-calendar-picker-indicator]:opacity-100";
 
 export function EntriesHeading({ children, className = "" }: { children: ReactNode; className?: string }) {
   return (
-    <h2 className={`text-control text-accent uppercase tracking-[0.16em] font-bold mt-8 mb-3 ${className}`}>
+    <h2 className={`[text-box:trim-both_cap_alphabetic] text-control text-accent uppercase tracking-[0.16em] font-bold mb-10 ${className}`}>
       {children}
     </h2>
   );
 }
 
-// Right column of the split form (CBT/DBT/Diary/Pain). Owns the wide-screen
-// height-cap layout (--diary-past-col-max-h is set by useDiaryColumnCap) that
-// clips overflow rows behind a fade + "Show more". leftColRef stays on the form
-// column in the screen; this takes the past column + body refs.
-export function PastEntriesColumn({
+// The entry log, stacked under the form it belongs to. Every row is rendered:
+// the list used to sit in a right-hand column capped to the form's height,
+// which clipped the overflow behind a fade and a "Show more" button that was
+// never wired to anything, so the clipped rows had no way back.
+export function PastEntries({
   title,
   isLoading,
   loadingText,
   isEmpty,
   emptyState,
-  overflow,
-  colRef,
-  bodyRef,
   children,
 }: {
   title: ReactNode;
@@ -53,36 +76,13 @@ export function PastEntriesColumn({
   loadingText: string;
   isEmpty: boolean;
   emptyState: ReactNode;
-  overflow: boolean;
-  colRef: Ref<HTMLDivElement>;
-  bodyRef: Ref<HTMLDivElement>;
   children: ReactNode;
 }) {
   return (
-    <div
-      ref={colRef}
-      className="min-w-0 wide:border-l wide:border-border wide:pl-12 wide:flex wide:flex-col wide:min-h-[var(--diary-past-col-max-h,0)] wide:max-h-[var(--diary-past-col-max-h,none)]"
-    >
+    <div className="min-w-0">
       {isLoading && <p className="text-muted text-control">{loadingText}</p>}
-      <EntriesHeading className="wide:mt-0">{title}</EntriesHeading>
-      {isEmpty ? (
-        emptyState
-      ) : (
-        <div className="wide:flex wide:flex-col wide:flex-1 wide:min-h-0">
-          <div
-            ref={bodyRef}
-            className="wide:flex-1 wide:min-h-0 wide:overflow-hidden wide:[mask-image:linear-gradient(to_bottom,#000_calc(100%-20px),transparent)]"
-          >
-            {children}
-          </div>
-          <div
-            aria-hidden={!overflow}
-            className="flex justify-end items-center pt-2 wide:flex-shrink-0 wide:box-border wide:min-h-[calc(8px+40px+20px)]"
-          >
-            {!isLoading && overflow ? <Button className="mb-5">Show more</Button> : null}
-          </div>
-        </div>
-      )}
+      <EntriesHeading className="mt-0">{title}</EntriesHeading>
+      {isEmpty ? emptyState : children}
     </div>
   );
 }

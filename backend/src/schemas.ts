@@ -159,3 +159,66 @@ export const optionPreselectSchema = z.object({
   value: z.string().min(1),
   preselected: z.boolean()
 });
+
+// ── Money realm ──────────────────────────────────────────────────────────
+
+const moneyIsoDate = z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Expected YYYY-MM-DD").refine(isoDateRefine, {
+  message: "Invalid calendar date"
+});
+
+export const txSchema = z.object({
+  txDate: moneyIsoDate,
+  asset: z.string().min(1).max(120),
+  tipo: z.string().min(1).max(60),
+  derivedType: z.string().max(40).optional(),
+  buyValue: z.coerce.number().default(0),
+  pnl: z.coerce.number().default(0),
+  currentValue: z.coerce.number().optional(),
+  note: z.string().max(2000).default("")
+});
+
+export const movementSchema = z.object({
+  name: z.string().min(1).max(120),
+  direction: z.enum(["income", "expense"]),
+  amount: z.coerce.number().nonnegative(),
+  note: z.string().max(2000).default("")
+});
+
+export const snapshotSchema = z.object({
+  snapshotDate: moneyIsoDate,
+  lowRisk: z.coerce.number().default(0),
+  mediumRisk: z.coerce.number().default(0),
+  highRisk: z.coerce.number().default(0),
+  liquid: z.coerce.number().default(0)
+});
+
+export const stylesSchema = z.object({
+  styles: z
+    .record(
+      z.string().min(1).max(120),
+      z.object({
+        colorHex: z.string().regex(/^#[0-9a-fA-F]{6}$/).optional().nullable(),
+        riskLevel: z.enum(["low", "medium", "high"]).optional().nullable()
+      })
+    )
+    .refine((v) => Object.keys(v).length <= 500, "Too many style entries (max 500)")
+});
+
+export const moneyPrefsSchema = z.object({ showZeroAssets: z.boolean() });
+
+// Import rows stay loosely typed on purpose: the fields are read defensively
+// by applyImport, and passthrough keeps unknown keys so a backup written by
+// an older or newer version still imports.
+const looseRow = z.looseObject({});
+
+export const moneyBackupImportSchema = z.object({
+  transactions: z.array(looseRow).max(50_000).optional(),
+  monthlyMovements: z.array(looseRow).max(50_000).optional(),
+  monthlySnapshots: z.array(looseRow).max(50_000).optional(),
+  // Same constraints as stylesSchema above: these land in the same columns and
+  // the colour is rendered as a CSS value, so the JSON import cannot be looser
+  // than the endpoint that writes them directly.
+  assetColors: z.record(z.string().min(1).max(120), z.string().regex(/^#[0-9a-fA-F]{6}$/)).optional(),
+  assetRisks: z.record(z.string().min(1).max(120), z.enum(["low", "medium", "high"])).optional(),
+  preferences: looseRow.optional()
+});

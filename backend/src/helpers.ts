@@ -168,7 +168,7 @@ interface HealthBackupSheet {
 
 export function rowsToHealthBackup(diaryRows: DiaryBackupRow[], painRows: PainBackupRow[]): { diary: HealthBackupSheet; pain: HealthBackupSheet } {
   const diary = {
-    source: "health-backend",
+    source: "world-backend",
     imported_at: new Date().toISOString(),
     headers: ["date", "hour", "mood level", "depression", "anxiety", "positive moods", "negative moods", "general moods", "description", "gratitude", "reflection"],
     rows: diaryRows.map((row) => ({
@@ -187,7 +187,7 @@ export function rowsToHealthBackup(diaryRows: DiaryBackupRow[], painRows: PainBa
   };
 
   const pain = {
-    source: "health-backend",
+    source: "world-backend",
     imported_at: new Date().toISOString(),
     headers: [
       "date", "hour", "pain level", "fatigue level", "symptoms", "area",

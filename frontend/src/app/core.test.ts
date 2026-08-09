@@ -12,17 +12,45 @@ import {
   isSameMonth,
   listToCsv,
   mergeOptions,
+  navItemsByRealm,
+  navLabels,
   normalizeQuickRange,
   previousRange,
+  realmOf,
+  realms,
 } from "./core";
 
 describe("formatDocumentTitle", () => {
-  test("appends Health when section provided", () => {
-    expect(formatDocumentTitle("Diary")).toBe("Diary - Health");
+  test("names the app when no realm is given", () => {
+    expect(formatDocumentTitle("Sign in")).toBe("Sign in - World");
+    expect(formatDocumentTitle()).toBe("World");
   });
 
-  test("returns Health alone when no section", () => {
-    expect(formatDocumentTitle()).toBe("Health");
+  test("names the realm when one is given", () => {
+    expect(formatDocumentTitle("Diary", "health")).toBe("Diary - Health");
+    expect(formatDocumentTitle("Snapshots", "money")).toBe("Snapshots - Money");
+  });
+});
+
+describe("realms", () => {
+  test("realmOf routes each prefix to its realm, unprefixed items to health", () => {
+    expect(realmOf("money-dashboard")).toBe("money");
+    expect(realmOf("settings-account")).toBe("settings");
+    expect(realmOf("dashboard")).toBe("health");
+  });
+
+  test("every nav item is reachable from exactly one realm", () => {
+    const listed = realms.flatMap((realm) => navItemsByRealm[realm]);
+    expect(new Set(listed).size).toBe(listed.length);
+    expect([...listed].sort()).toEqual(Object.keys(navLabels).sort());
+  });
+
+  test("realmOf agrees with the list each item is filed under", () => {
+    for (const realm of realms) {
+      for (const item of navItemsByRealm[realm]) {
+        expect(realmOf(item)).toBe(realm);
+      }
+    }
   });
 });
 

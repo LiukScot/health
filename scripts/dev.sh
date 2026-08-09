@@ -23,7 +23,7 @@ trap cleanup EXIT INT TERM
 ./scripts/run-bun.sh --cwd backend --watch src/server.ts &
 backend_pid=$!
 
-printf '%s\n' 'Health dev is starting on http://localhost:5555'
+printf '%s\n' 'World dev is starting on http://localhost:5555'
 printf '%s\n' 'Running backend and frontend locally for fast reload. Press Ctrl+C to stop both.'
 printf '%s\n' 'Use `bun run dev:docker` if you want the backend container instead.'
 

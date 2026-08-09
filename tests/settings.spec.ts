@@ -1,11 +1,10 @@
 import { expect, test } from "@playwright/test";
-import { e2eUser, loginUi, openAccountPanel, purgeUserData } from "./helpers";
+import { e2eUser, loginUi, openAccountPanel, openSettingsRealm, openSettingsSection, purgeUserData } from "./helpers";
 
 test.beforeEach(async ({ request, page }) => {
   await purgeUserData(request);
   await loginUi(page);
-  await page.getByRole("button", { name: "settings" }).click();
-  await expect(page.getByRole("heading", { name: "Settings" })).toBeVisible();
+  await openSettingsRealm(page);
 });
 
 test.afterEach(async ({ request }) => {
@@ -28,7 +27,7 @@ test("changes password and restores the original password", async ({ page }) => 
   await page.getByRole("button", { name: "Log out" }).click();
   await loginUi(page, temporaryPassword);
 
-  await page.getByRole("button", { name: "settings" }).click();
+  await openSettingsRealm(page);
   await openAccountPanel(page);
   await page.getByLabel("Current password").fill(temporaryPassword);
   await page.getByLabel("New password").fill(e2eUser.password);
@@ -44,7 +43,7 @@ test("changes password and restores the original password", async ({ page }) => 
 });
 
 test("switches theme and persists it across reload", async ({ page }) => {
-  await page.getByRole("button", { name: "Preferences" }).click();
+  await openSettingsSection(page, "Appearance");
 
   await page.getByRole("button", { name: "Grey" }).click();
   await expect(page.locator("html")).toHaveAttribute("data-theme", "grey");
@@ -54,7 +53,7 @@ test("switches theme and persists it across reload", async ({ page }) => {
 });
 
 test("saves birthday in settings", async ({ page }) => {
-  await page.getByRole("button", { name: "Preferences" }).click();
+  await openSettingsSection(page, "Health");
 
   // Birthday autosaves on change: register the response listener before filling
   // the native date input that triggers the PUT, otherwise it can land first.
@@ -65,7 +64,7 @@ test("saves birthday in settings", async ({ page }) => {
   await responsePromise;
 
   await page.reload();
-  await page.getByRole("button", { name: "settings" }).click();
-  await page.getByRole("button", { name: "Preferences" }).click();
+  await openSettingsRealm(page);
+  await openSettingsSection(page, "Health");
   await expect(page.getByLabel("Birthday")).toHaveValue("1995-06-12");
 });
