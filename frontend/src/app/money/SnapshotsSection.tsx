@@ -9,6 +9,7 @@ import {
   DETAIL_ACTION_BTN,
   DetailGroup,
   EntriesHeading,
+  FORM_GRID,
   ENTRY_CHEVRON,
   ENTRY_DATE,
   ENTRY_EXPANDED,
@@ -47,7 +48,7 @@ export function SnapshotsSection({
   return (
     <section className="@container p-2">
       <h1 className="m-0 mb-3 text-title font-bold tracking-tight text-text">Snapshots</h1>
-      <div className="grid gap-8 max-w-[80ch]">
+      <div className="grid gap-8">
         <div className="min-w-0 border-b border-border">
           <EntriesHeading className="mt-0">New snapshot</EntriesHeading>
           <p className="text-control text-muted m-0 mb-3 max-w-[60ch]">
@@ -55,7 +56,7 @@ export function SnapshotsSection({
             each asset. You only record the date and whatever is sitting liquid.
           </p>
           <form className="mb-2" onSubmit={snapshotForm.handleSubmit(onSubmit)}>
-            <div className="grid gap-3 content-start min-w-0">
+            <div className={FORM_GRID}>
               <FieldLine
                 label="Date"
                 type="date"

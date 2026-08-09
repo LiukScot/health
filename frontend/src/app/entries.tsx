@@ -21,6 +21,15 @@ export const DETAIL_ACTION_BTN =
   "px-2 py-1 text-xs font-medium text-muted bg-transparent border-0 rounded-[6px] shadow-none cursor-pointer font-[inherit] transition-[color,background] duration-150 ease-[ease] hover:text-text hover:bg-[color-mix(in_srgb,var(--text)_8%,transparent)]";
 export const DELETE_CONFIRM = "text-danger-strong bg-danger-strong/18 font-extrabold";
 
+// Form fields flow into as many columns as the width allows. auto-fit reacts
+// to the container, not the viewport, so collapsing the sidebar reflows the
+// form with no breakpoint involved. min(100%,…) keeps a single column from
+// overflowing when the container is narrower than one track.
+export const FORM_GRID =
+  "grid gap-3 content-start min-w-0 grid-cols-[repeat(auto-fit,minmax(min(100%,28rem),1fr))]";
+// For rows that head or close a group and would read wrong beside a field.
+export const FORM_FULL = "[grid-column:1/-1]";
+
 export const DATETIME_FIELD =
   "!w-auto max-w-full justify-self-start cursor-pointer tabular-nums [&::-webkit-calendar-picker-indicator]:cursor-pointer [&::-webkit-calendar-picker-indicator]:ml-2 [&::-webkit-calendar-picker-indicator]:invert [&::-webkit-calendar-picker-indicator]:opacity-60 hover:[&::-webkit-calendar-picker-indicator]:opacity-100";
 

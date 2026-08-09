@@ -73,8 +73,8 @@ function AssetsBlock({ styles, assets, stylesLoading, onChangeStyle }: Pick<Mone
   }
 
   return (
-    <div className="grid gap-2">
-      <p className="text-control text-muted m-0 max-w-[60ch]">
+    <div className="grid gap-2 grid-cols-[repeat(auto-fit,minmax(320px,1fr))]">
+      <p className="text-control text-muted m-0 max-w-[60ch] [grid-column:1/-1]">
         The risk level decides which bucket an asset lands in when a snapshot is taken. An asset
         left unset counts towards none of them.
       </p>
@@ -197,7 +197,7 @@ export function MoneySettingsSection(props: MoneySettingsProps) {
   return (
     <section className="@container p-2">
       <h1 className="m-0 mb-3 text-title font-bold tracking-tight text-text">Settings</h1>
-      <div className="grid gap-5 max-w-[80ch]">
+      <div className="grid gap-5">
         <nav className="flex flex-wrap gap-y-1 gap-x-5 pb-2" aria-label="Money settings sections">
           {TABS.map((t) => {
             const isActive = tab === t.id;

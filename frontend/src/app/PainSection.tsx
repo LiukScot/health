@@ -22,6 +22,8 @@ import {
   DETAIL_ACTION_BTN,
   DetailGroup,
   EntriesHeading,
+  FORM_FULL,
+  FORM_GRID,
   ENTRY_CHEVRON,
   ENTRY_DATE,
   ENTRY_EXPANDED,
@@ -100,11 +102,11 @@ export function PainSection({
   return (
     <section className="@container p-2">
       <h1 className="m-0 mb-3 text-title font-bold tracking-tight text-text">Pain</h1>
-      <div className="grid gap-8 max-w-[80ch]">
+      <div className="grid gap-8">
         <div className="min-w-0 border-b border-border">
           <EntriesHeading className="mt-0">New entry</EntriesHeading>
           <form className="mb-2" onSubmit={painForm.handleSubmit(onSubmit)}>
-            <div className="grid gap-3 content-start min-w-0">
+            <div className={FORM_GRID}>
               <div className="sr-only" aria-hidden="true">
                 <input type="hidden" {...painForm.register("painLevel", { valueAsNumber: true })} />
                 <input type="hidden" {...painForm.register("fatigueLevel", { valueAsNumber: true })} />
@@ -123,18 +125,18 @@ export function PainSection({
               />
               <div className="grid gap-2 content-start">
                 <span className={FIELD_LINE_LABEL}>Values</span>
+                <BarMetric
+                  label="Pain level"
+                  value={painLevel ?? null}
+                  onChange={(next) => painForm.setValue("painLevel", next, { shouldDirty: true })}
+                />
+                <BarMetric
+                  label="Fatigue"
+                  value={fatigueLevel ?? null}
+                  onChange={(next) => painForm.setValue("fatigueLevel", next, { shouldDirty: true })}
+                />
+                <CoffeeStepper value={coffeeCount ?? null} onChange={(next) => painForm.setValue("coffeeCount", next, { shouldDirty: true })} />
               </div>
-              <BarMetric
-                label="Pain level"
-                value={painLevel ?? null}
-                onChange={(next) => painForm.setValue("painLevel", next, { shouldDirty: true })}
-              />
-              <BarMetric
-                label="Fatigue"
-                value={fatigueLevel ?? null}
-                onChange={(next) => painForm.setValue("fatigueLevel", next, { shouldDirty: true })}
-              />
-              <CoffeeStepper value={coffeeCount ?? null} onChange={(next) => painForm.setValue("coffeeCount", next, { shouldDirty: true })} />
               <FieldLine
                 label="Note"
                 multiline
@@ -144,7 +146,7 @@ export function PainSection({
                 aria-label="Note"
               />
               {editingPain ? (
-                <div className="flex gap-2 flex-wrap">
+                <div className={`flex gap-2 flex-wrap ${FORM_FULL}`}>
                   <Button type="button" onClick={onCancelEdit}>
                     Cancel edit
                   </Button>

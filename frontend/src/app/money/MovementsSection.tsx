@@ -10,6 +10,8 @@ import {
   DETAIL_ACTION_BTN,
   DetailGroup,
   EntriesHeading,
+  FORM_FULL,
+  FORM_GRID,
   ENTRY_CHEVRON,
   ENTRY_DATE,
   ENTRY_EXPANDED,
@@ -53,11 +55,11 @@ export function MovementsSection({
   return (
     <section className="@container p-2">
       <h1 className="m-0 mb-3 text-title font-bold tracking-tight text-text">Movements</h1>
-      <div className="grid gap-8 max-w-[80ch]">
+      <div className="grid gap-8">
         <div className="min-w-0 border-b border-border">
           <EntriesHeading className="mt-0">New movement</EntriesHeading>
           <form className="mb-2" onSubmit={movementForm.handleSubmit(onSubmit)}>
-            <div className="grid gap-3 content-start min-w-0">
+            <div className={FORM_GRID}>
               <FieldLine
                 label="Name"
                 type="text"
@@ -105,7 +107,7 @@ export function MovementsSection({
               />
 
               {editingMovement ? (
-                <div className="flex gap-2 flex-wrap">
+                <div className={`flex gap-2 flex-wrap ${FORM_FULL}`}>
                   <Button type="button" onClick={onCancelEdit}>
                     Cancel edit
                   </Button>
