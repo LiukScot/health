@@ -68,7 +68,7 @@ export default function MonthlyRiskChart({ snapshots }: { snapshots: Snapshot[] 
   );
 
   return (
-    <div className="h-[260px]">
+    <div className="h-[260px] min-w-0">
       <Bar data={data} options={options} />
     </div>
   );

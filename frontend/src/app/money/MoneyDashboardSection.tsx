@@ -1,7 +1,7 @@
 import { lazy, Suspense } from "react";
 import { SectionHead } from "../shared";
 import { EmptyState } from "../screen-helpers";
-import { DASH_CARD, CARD_H3, CARD_VALUE } from "../cards";
+import { CARD_GRID, DASH_CARD, CARD_H3, CARD_VALUE } from "../cards";
 import { formatCurrency, formatTxDate, type AssetStats, type DashboardKpis } from "./core";
 
 const AssetCharts = lazy(() => import("./AssetCharts"));
@@ -43,7 +43,7 @@ export function MoneyDashboardSection({
       {isLoading ? <p className="text-muted text-control">Loading portfolio…</p> : null}
 
       <SectionHead title="Portfolio" variant="dashboard" />
-      <div className="grid grid-cols-[repeat(auto-fit,minmax(128px,1fr))] gap-3">
+      <div className={CARD_GRID}>
         <Kpi label="Current value" value={formatCurrency(kpis.totalCurrent)} />
         <Kpi label="Total PnL" value={formatCurrency(kpis.totalPnl)} tone={toneOf(kpis.totalPnl)} />
         <Kpi label="Assets" value={String(kpis.assetsCount)} />
@@ -52,7 +52,7 @@ export function MoneyDashboardSection({
       </div>
 
       <SectionHead title="Every month" variant="dashboard" />
-      <div className="grid grid-cols-[repeat(auto-fit,minmax(128px,1fr))] gap-3">
+      <div className={CARD_GRID}>
         <Kpi label="Income" value={formatCurrency(kpis.monthlyIncome)} />
         <Kpi label="Expense" value={formatCurrency(kpis.monthlyExpense)} />
         <Kpi label="Net" value={formatCurrency(kpis.monthlyNet)} tone={toneOf(kpis.monthlyNet)} />

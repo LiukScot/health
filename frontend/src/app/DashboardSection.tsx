@@ -14,7 +14,7 @@ import {
 } from "./core";
 import { SectionHead } from "./shared";
 import { EmptyState } from "./screen-helpers";
-import { DASH_CARD, CARD_H3, CARD_VALUE } from "./cards";
+import { CARD_GRID, DASH_CARD, CARD_H3, CARD_VALUE } from "./cards";
 import { FIELD_LINE_LABEL } from "../components/ui/FieldLine";
 import { DateInput } from "../components/ui/DateInput";
 
@@ -112,7 +112,7 @@ export function DashboardSection({
           {anniversaryCards.length > 0 ? (
             <>
               <SectionHead title="Anniversaries today" variant="dashboard" />
-              <div className="grid grid-cols-[repeat(auto-fit,minmax(128px,1fr))] gap-3">
+              <div className={CARD_GRID}>
                 {anniversaryCards.map((card) => (
                   <article key={`${card.source}-${card.id}-${card.date}`} className={DASH_CARD}>
                     <h3 className={CARD_H3}>
@@ -132,7 +132,7 @@ export function DashboardSection({
           ) : null}
 
           <SectionHead title="Averages" variant="dashboard" />
-          <div data-testid="averages" className="grid grid-cols-[repeat(auto-fit,minmax(128px,1fr))] gap-3">
+          <div data-testid="averages" className={CARD_GRID}>
             {dashboardCards.map((card) => {
               const deltaPct = calcDeltaPercent(card.value, card.previous);
               const delta = deltaPct === null ? null : formatDelta(deltaPct, Boolean(card.invertDelta));
@@ -147,13 +147,13 @@ export function DashboardSection({
                     {card.label}
                   </h3>
                   <strong className={`${CARD_VALUE} text-text`}>{card.formattedValue}</strong>
-                  <span className={`${DELTA_SLOT} justify-start`} aria-hidden={delta ? undefined : true}>
-                    {delta ? (
+                  {delta ? (
+                    <span className={`${DELTA_SLOT} justify-start`}>
                       <span className={DELTA_BASE} style={deltaStyle}>
                         {delta.text}
                       </span>
-                    ) : null}
-                  </span>
+                    </span>
+                  ) : null}
                 </article>
               );
             })}

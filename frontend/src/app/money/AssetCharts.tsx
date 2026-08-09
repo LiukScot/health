@@ -91,15 +91,15 @@ export default function AssetCharts({ visibleAssets }: { visibleAssets: AssetSta
 
   return (
     <div className="grid gap-5 grid-cols-[repeat(auto-fit,minmax(min(100%,20rem),1fr))]">
-      <div className="grid gap-2">
+      <div className="grid gap-2 min-w-0">
         <span className="text-nano font-bold tracking-[0.16em] uppercase text-muted">Allocation</span>
-        <div className="h-[260px]">
+        <div className="h-[260px] min-w-0">
           <Pie data={allocation} options={allocationOptions} />
         </div>
       </div>
-      <div className="grid gap-2">
+      <div className="grid gap-2 min-w-0">
         <span className="text-nano font-bold tracking-[0.16em] uppercase text-muted">PnL per asset</span>
-        <div className="h-[260px]">
+        <div className="h-[260px] min-w-0">
           <Bar data={pnl} options={pnlOptions} />
         </div>
       </div>
