@@ -13,11 +13,11 @@
     "test:coverage": "../scripts/run-bun.sh test --coverage src/"
   },
   "dependencies": {
-    "@modelcontextprotocol/sdk": "^1.29.0",
+    "@modelcontextprotocol/sdk": "^1.30.0",
     "cookie": "^2.0.1",
     "drizzle-orm": "^0.45.2",
     "exceljs": "^4.4.0",
-    "hono": "^4.12.32",
+    "hono": "^4.12.34",
     "zod": "^4.4.3"
   },
   "overrides": {
