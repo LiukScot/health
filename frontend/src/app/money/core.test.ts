@@ -1,5 +1,6 @@
 import { describe, expect, test } from "vitest";
 import {
+  amountIn,
   computeKpis,
   computePerAsset,
   computeRiskTotals,
@@ -9,7 +10,6 @@ import {
   freshMovementDefaults,
   freshSnapshotDefaults,
   freshTxDefaults,
-  monthlyAmount,
   movementFormSchema,
   snapshotFormSchema,
   toCadence,
@@ -171,9 +171,15 @@ describe("movement and snapshot forms", () => {
     expect(freshMovementDefaults()).toEqual({ name: "", direction: "income", amount: "", cadence: "monthly", note: "" });
   });
 
-  test("an annual amount counts as a twelfth of itself per month", () => {
-    expect(monthlyAmount({ amount: 1200, cadence: "annual" })).toBe(100);
-    expect(monthlyAmount({ amount: 1200, cadence: "monthly" })).toBe(1200);
+  test("converts a row into the period being shown, and leaves it alone otherwise", () => {
+    expect(amountIn({ amount: 1200, cadence: "annual" }, "monthly")).toBe(100);
+    expect(amountIn({ amount: 1200, cadence: "annual" }, "annual")).toBe(1200);
+    expect(amountIn({ amount: 100, cadence: "monthly" }, "annual")).toBe(1200);
+    expect(amountIn({ amount: 100, cadence: "monthly" }, "monthly")).toBe(100);
+  });
+
+  test("an unrecognised cadence converts as a monthly one", () => {
+    expect(amountIn({ amount: 100, cadence: "weekly" }, "annual")).toBe(1200);
   });
 
   // The API types cadence as a plain string, so an unexpected value must land

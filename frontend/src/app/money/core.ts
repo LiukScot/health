@@ -128,13 +128,16 @@ export function toCadence(raw: string): Cadence {
   return raw === "annual" ? "annual" : "monthly";
 }
 
+const MONTHS_PER_YEAR = 12;
+
 /**
- * Everything that adds up movements does so per month, so an annual amount is
- * spread over twelve. Rows are stored at the amount you actually pay, and the
- * conversion happens only when they are summed.
+ * A row is stored at the amount actually paid, so a monthly and an annual one
+ * are not comparable as they stand. Everything that sums or ranks movements
+ * picks a period first and converts into it here.
  */
-export function monthlyAmount(row: Pick<Movement, "amount" | "cadence">): number {
-  return row.cadence === "annual" ? row.amount / 12 : row.amount;
+export function amountIn(row: Pick<Movement, "amount" | "cadence">, period: Cadence): number {
+  if (toCadence(row.cadence) === period) return row.amount;
+  return period === "annual" ? row.amount * MONTHS_PER_YEAR : row.amount / MONTHS_PER_YEAR;
 }
 
 // ── Monthly snapshots ────────────────────────────────────────────────────
@@ -281,8 +284,8 @@ export function computeKpis(
   let income = 0;
   let expense = 0;
   for (const row of movements) {
-    if (row.direction === "income") income += monthlyAmount(row);
-    else expense += monthlyAmount(row);
+    if (row.direction === "income") income += amountIn(row, "monthly");
+    else expense += amountIn(row, "monthly");
   }
   const totalBuy = transactions.reduce((sum, row) => sum + row.buyValue, 0);
   const totalPnl = transactions.reduce((sum, row) => sum + row.pnl, 0);
