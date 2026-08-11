@@ -61,6 +61,7 @@ type MovementRow = {
   name: string;
   direction: string;
   amount: number;
+  cadence: string;
   note: string | null;
   createdAt: string;
   updatedAt: string;
@@ -99,6 +100,7 @@ export function normalizeMovement(row: MovementRow) {
     name: row.name,
     direction: row.direction,
     amount: Number(row.amount),
+    cadence: row.cadence,
     note: row.note ?? "",
     createdAt: row.createdAt,
     updatedAt: row.updatedAt,

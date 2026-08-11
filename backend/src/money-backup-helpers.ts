@@ -75,6 +75,7 @@ export function buildBackupPayload(db: DrizzleDB, userId: number) {
       name: row.name,
       direction: row.direction,
       amount: Number(row.amount),
+      cadence: row.cadence,
       note: row.note ?? "",
     })),
     monthlySnapshots: snapshotRows.map((row) => ({
@@ -167,6 +168,8 @@ export function applyImport(db: DrizzleDB, userId: number, payload: ImportPayloa
         name: String(row.name ?? "").slice(0, 120),
         direction,
         amount: Math.abs(toFiniteNumber(row.amount, 0)),
+        // Backups taken before cadence existed carry monthly rows only.
+        cadence: String(row.cadence ?? "") === "annual" ? "annual" : "monthly",
         note: String(row.note ?? "").slice(0, 2000),
       };
     })

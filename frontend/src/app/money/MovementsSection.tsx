@@ -21,9 +21,10 @@ import {
   PainBadge,
   PastEntries,
 } from "../entries";
-import { DIRECTIONS, formatCurrency, type Movement, type MovementFormValues } from "./core";
+import { CADENCES, DIRECTIONS, formatCurrency, monthlyAmount, type Movement, type MovementFormValues } from "./core";
 
 const DIRECTION_OPTIONS = DIRECTIONS.map((d) => ({ value: d, label: d }));
+const CADENCE_OPTIONS = CADENCES.map((c) => ({ value: c, label: c }));
 
 export function MovementsSection({
   movementForm,
@@ -50,7 +51,11 @@ export function MovementsSection({
   onDeleteClick: (id: string) => void;
   onDeleteBlur: () => void;
 }) {
-  const monthlyNet = movements.reduce((sum, m) => sum + (m.direction === "income" ? m.amount : -m.amount), 0);
+  const monthlyNet = movements.reduce(
+    (sum, m) => sum + (m.direction === "income" ? monthlyAmount(m) : -monthlyAmount(m)),
+    0,
+  );
+  const hasAnnual = movements.some((m) => m.cadence === "annual");
 
   return (
     <section className="@container">
@@ -83,6 +88,22 @@ export function MovementsSection({
                       value={field.value}
                       onValueChange={field.onChange}
                       options={DIRECTION_OPTIONS}
+                    />
+                  )}
+                />
+              </div>
+
+              <div className="grid gap-2 content-start">
+                <span className={FIELD_LINE_LABEL}>Cadence</span>
+                <Controller
+                  control={movementForm.control}
+                  name="cadence"
+                  render={({ field }) => (
+                    <Select
+                      ariaLabel="Cadence"
+                      value={field.value}
+                      onValueChange={field.onChange}
+                      options={CADENCE_OPTIONS}
                     />
                   )}
                 />
@@ -135,7 +156,7 @@ export function MovementsSection({
           emptyState={
             <EmptyState
               title="No movements yet"
-              description="Record what comes in and goes out every month — rent, salary, subscriptions. The running balance shows up here."
+              description="Record what comes in and goes out on a schedule — rent, salary, subscriptions, the yearly insurance. The running balance shows up here."
             />
           }
         >
@@ -145,16 +166,19 @@ export function MovementsSection({
               <span className={monthlyNet >= 0 ? "text-success font-semibold" : "text-danger font-semibold"}>
                 {formatCurrency(monthlyNet)}
               </span>
+              {hasAnnual ? " — annual amounts counted as a twelfth each month" : ""}
             </p>
           ) : null}
           {movements.map((row) => {
             const income = row.direction === "income";
+            const annual = row.cadence === "annual";
             return (
               <details key={row.id} className={ENTRY_ROW}>
                 <summary className={ENTRY_SUMMARY}>
                   {/* Sign and wording carry the meaning; colour reinforces it. */}
                   <span className={ENTRY_DATE}>{income ? "in" : "out"}</span>
                   <PainBadge variant="muted" sm>{row.direction}</PainBadge>
+                  <PainBadge variant="muted" sm>{annual ? "per year" : "per month"}</PainBadge>
                   <span className={ENTRY_PREVIEW}>{row.name}</span>
                   <span className={income ? "text-success" : "text-muted"}>
                     {income ? "+" : "−"}
@@ -164,7 +188,11 @@ export function MovementsSection({
                 </summary>
                 <div className={ENTRY_EXPANDED}>
                   <DetailGroup label="Direction">{row.direction}</DetailGroup>
+                  <DetailGroup label="Cadence">{annual ? "annual" : "monthly"}</DetailGroup>
                   <DetailGroup label="Amount">{formatCurrency(row.amount)}</DetailGroup>
+                  {annual ? (
+                    <DetailGroup label="Per month">{formatCurrency(monthlyAmount(row))}</DetailGroup>
+                  ) : null}
                   <DetailGroup label="Note">{row.note || "—"}</DetailGroup>
                   <div className={DETAIL_ACTIONS}>
                     <button

@@ -177,10 +177,14 @@ export const txSchema = z.object({
   note: z.string().max(2000).default("")
 });
 
+export const MOVEMENT_CADENCES = ["monthly", "annual"] as const;
+
 export const movementSchema = z.object({
   name: z.string().min(1).max(120),
   direction: z.enum(["income", "expense"]),
   amount: z.coerce.number().nonnegative(),
+  // Older clients and pre-cadence backups omit it; those rows are monthly.
+  cadence: z.enum(MOVEMENT_CADENCES).default("monthly"),
   note: z.string().max(2000).default("")
 });
 

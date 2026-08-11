@@ -47,6 +47,7 @@ export function MoneyDashboardSection({
       <div className={CARD_GRID}>
         <Kpi label="Current value" value={formatCurrency(kpis.totalCurrent)} />
         <Kpi label="Total PnL" value={formatCurrency(kpis.totalPnl)} tone={toneOf(kpis.totalPnl)} />
+        <Kpi label="Total PnL %" value={`${kpis.totalPnlPct.toFixed(2)}%`} tone={toneOf(kpis.totalPnl)} />
         <Kpi label="Assets" value={String(kpis.assetsCount)} />
         <Kpi label="Transactions" value={String(kpis.txCount)} />
         <Kpi label="Last transaction" value={kpis.lastTxDate ? formatTxDate(kpis.lastTxDate) : "—"} />

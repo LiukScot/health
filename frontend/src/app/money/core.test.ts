@@ -9,8 +9,10 @@ import {
   freshMovementDefaults,
   freshSnapshotDefaults,
   freshTxDefaults,
+  monthlyAmount,
   movementFormSchema,
   snapshotFormSchema,
+  toCadence,
   TIPO_OPTIONS,
   tipoShowsBuyValue,
   tipoShowsPnl,
@@ -150,17 +152,35 @@ describe("computeRiskTotals", () => {
 
 describe("movement and snapshot forms", () => {
   test("empty amount coerces to 0 on submit", () => {
-    expect(movementFormSchema.parse({ name: "Rent", direction: "expense", amount: "", note: "" }).amount).toBe(0);
+    expect(
+      movementFormSchema.parse({ name: "Rent", direction: "expense", amount: "", cadence: "monthly", note: "" }).amount,
+    ).toBe(0);
     expect(snapshotFormSchema.parse({ snapshotDate: "2026-01-31", liquid: "" }).liquid).toBe(0);
   });
 
   test("rejects an unknown direction and a negative amount", () => {
-    expect(movementFormSchema.safeParse({ name: "X", direction: "sideways", amount: 1 }).success).toBe(false);
-    expect(movementFormSchema.safeParse({ name: "X", direction: "income", amount: -1 }).success).toBe(false);
+    expect(movementFormSchema.safeParse({ name: "X", direction: "sideways", amount: 1, cadence: "monthly" }).success).toBe(false);
+    expect(movementFormSchema.safeParse({ name: "X", direction: "income", amount: -1, cadence: "monthly" }).success).toBe(false);
   });
 
-  test("movement defaults start on income with an empty amount", () => {
-    expect(freshMovementDefaults()).toEqual({ name: "", direction: "income", amount: "", note: "" });
+  test("rejects an unknown cadence", () => {
+    expect(movementFormSchema.safeParse({ name: "X", direction: "income", amount: 1, cadence: "weekly" }).success).toBe(false);
+  });
+
+  test("movement defaults start on a monthly income with an empty amount", () => {
+    expect(freshMovementDefaults()).toEqual({ name: "", direction: "income", amount: "", cadence: "monthly", note: "" });
+  });
+
+  test("an annual amount counts as a twelfth of itself per month", () => {
+    expect(monthlyAmount({ amount: 1200, cadence: "annual" })).toBe(100);
+    expect(monthlyAmount({ amount: 1200, cadence: "monthly" })).toBe(1200);
+  });
+
+  // The API types cadence as a plain string, so an unexpected value must land
+  // on the safe side rather than divide an amount it shouldn't.
+  test("an unknown cadence reads as monthly", () => {
+    expect(toCadence("weekly")).toBe("monthly");
+    expect(toCadence("annual")).toBe("annual");
   });
 
   test("snapshot defaults start on today", () => {
@@ -234,12 +254,13 @@ describe("filterVisibleAssets", () => {
 });
 
 describe("computeKpis", () => {
-  const tx = (asset: string, pnl: number, currentValue: number) => ({
+  const tx = (asset: string, pnl: number, currentValue: number, buyValue = 0) => ({
     id: `tx-${asset}-${currentValue}`, txDate: "2026-03-0" + (currentValue % 9), asset, tipo: "x",
-    derivedType: "buy", buyValue: 0, pnl, currentValue, note: "", createdAt: "", updatedAt: "",
+    derivedType: "buy", buyValue, pnl, currentValue, note: "", createdAt: "", updatedAt: "",
   });
-  const mm = (direction: string, amount: number) => ({
-    id: `mm-${direction}-${amount}`, name: "x", direction, amount, note: "", createdAt: "", updatedAt: "",
+  const mm = (direction: string, amount: number, cadence = "monthly") => ({
+    id: `mm-${direction}-${amount}-${cadence}`, name: "x", direction, amount, cadence, note: "",
+    createdAt: "", updatedAt: "",
   });
 
   test("totals value, PnL and counts distinct assets", () => {
@@ -247,9 +268,23 @@ describe("computeKpis", () => {
     expect(k).toMatchObject({ totalCurrent: 170, totalPnl: 13, assetsCount: 2, txCount: 3 });
   });
 
+  test("total PnL percent is the whole portfolio's PnL over what was put in", () => {
+    expect(computeKpis([tx("A", 50, 250, 200), tx("B", 50, 350, 300)], []).totalPnlPct).toBe(20);
+  });
+
+  test("total PnL percent stays 0 when nothing was bought", () => {
+    expect(computeKpis([tx("A", 50, 50)], []).totalPnlPct).toBe(0);
+    expect(computeKpis([], []).totalPnlPct).toBe(0);
+  });
+
   test("monthly net is income minus expense", () => {
     const k = computeKpis([], [mm("income", 2000), mm("expense", 850), mm("expense", 45)]);
     expect(k).toMatchObject({ monthlyIncome: 2000, monthlyExpense: 895, monthlyNet: 1105 });
+  });
+
+  test("an annual movement contributes a twelfth of itself to the monthly figures", () => {
+    const k = computeKpis([], [mm("expense", 1200, "annual"), mm("income", 1200, "monthly")]);
+    expect(k).toMatchObject({ monthlyIncome: 1200, monthlyExpense: 100, monthlyNet: 1100 });
   });
 
   test("last transaction is the head, since the API returns newest first", () => {

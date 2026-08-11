@@ -1,4 +1,4 @@
-export const SCHEMA_VERSION = 12;
+export const SCHEMA_VERSION = 13;
 
 export const METRIC_KINDS = ["scale", "counter", "tags", "text", "measure"] as const;
 export type MetricKind = (typeof METRIC_KINDS)[number];
@@ -482,6 +482,7 @@ export const migrationStatements: string[] = [
     name TEXT NOT NULL,
     direction TEXT NOT NULL,
     amount REAL NOT NULL DEFAULT 0,
+    cadence TEXT NOT NULL DEFAULT 'monthly',
     note TEXT,
     created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -489,6 +490,8 @@ export const migrationStatements: string[] = [
   )`,
   `CREATE INDEX IF NOT EXISTS idx_mm_user ON monthly_movements(user_id, direction)`,
   `CREATE INDEX IF NOT EXISTS idx_mm_user_name ON monthly_movements(user_id, name, id)`,
+  // schema-v13: cadence column added to CREATE TABLE above. ALTER TABLE for
+  // existing databases is handled separately in db.ts via columnExists guard.
   `CREATE TABLE IF NOT EXISTS monthly_snapshots (
     id TEXT PRIMARY KEY,
     user_id INTEGER NOT NULL,

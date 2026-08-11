@@ -88,13 +88,14 @@ export function formatTxDate(iso: string): string {
   return SHORT_DATE.format(date);
 }
 
-// ── Monthly movements ────────────────────────────────────────────────────
+// ── Recurring movements ──────────────────────────────────────────────────
 
 export const movementSchema = z.object({
   id: z.string(),
   name: z.string(),
   direction: z.string(),
   amount: z.number(),
+  cadence: z.string(),
   note: z.string(),
   createdAt: z.string(),
   updatedAt: z.string(),
@@ -106,17 +107,34 @@ export const movementListSchema = apiEnvelopeSchema(z.array(movementSchema));
 export const DIRECTIONS = ["income", "expense"] as const;
 export type Direction = (typeof DIRECTIONS)[number];
 
+export const CADENCES = ["monthly", "annual"] as const;
+export type Cadence = (typeof CADENCES)[number];
+
 export const movementFormSchema = z.object({
   name: z.string().min(1),
   direction: z.enum(DIRECTIONS),
   amount: z.coerce.number().finite().nonnegative(),
+  cadence: z.enum(CADENCES),
   note: z.string().default(""),
 });
 
 export type MovementFormValues = Omit<z.infer<typeof movementFormSchema>, "amount"> & { amount: number | "" };
 
 export function freshMovementDefaults(): MovementFormValues {
-  return { name: "", direction: "income", amount: "", note: "" };
+  return { name: "", direction: "income", amount: "", cadence: "monthly", note: "" };
+}
+
+export function toCadence(raw: string): Cadence {
+  return raw === "annual" ? "annual" : "monthly";
+}
+
+/**
+ * Everything that adds up movements does so per month, so an annual amount is
+ * spread over twelve. Rows are stored at the amount you actually pay, and the
+ * conversion happens only when they are summed.
+ */
+export function monthlyAmount(row: Pick<Movement, "amount" | "cadence">): number {
+  return row.cadence === "annual" ? row.amount / 12 : row.amount;
 }
 
 // ── Monthly snapshots ────────────────────────────────────────────────────
@@ -247,6 +265,7 @@ export function findLastTxDate(transactions: readonly Transaction[]): string | n
 export type DashboardKpis = {
   totalCurrent: number;
   totalPnl: number;
+  totalPnlPct: number;
   assetsCount: number;
   txCount: number;
   monthlyIncome: number;
@@ -262,12 +281,17 @@ export function computeKpis(
   let income = 0;
   let expense = 0;
   for (const row of movements) {
-    if (row.direction === "income") income += row.amount;
-    else expense += row.amount;
+    if (row.direction === "income") income += monthlyAmount(row);
+    else expense += monthlyAmount(row);
   }
+  const totalBuy = transactions.reduce((sum, row) => sum + row.buyValue, 0);
+  const totalPnl = transactions.reduce((sum, row) => sum + row.pnl, 0);
   return {
     totalCurrent: transactions.reduce((sum, row) => sum + row.currentValue, 0),
-    totalPnl: transactions.reduce((sum, row) => sum + row.pnl, 0),
+    totalPnl,
+    // Same guard as the per-asset rows: nothing bought means no percentage,
+    // not NaN%.
+    totalPnlPct: totalBuy > 0 ? (totalPnl / totalBuy) * 100 : 0,
     assetsCount: new Set(transactions.map((row) => row.asset)).size,
     txCount: transactions.length,
     monthlyIncome: income,

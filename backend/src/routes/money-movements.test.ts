@@ -26,20 +26,49 @@ describe("money monthly movements", () => {
     expect((await app.request("/movements")).status).toBe(401);
   });
 
-  test("round-trips a movement and lists it by name", async () => {
+  test("round-trips a movement and lists it by descending amount", async () => {
     const { app, cookie } = await setup();
     expect((await post(app, cookie, { ...VALID, name: "Salary", direction: "income", amount: 2000 })).status).toBe(201);
     expect((await post(app, cookie, VALID)).status).toBe(201);
 
     const list = await (await app.request("/movements", { headers: { cookie } })).json();
-    expect(list.data.map((m: { name: string }) => m.name)).toEqual(["Rent", "Salary"]);
-    expect(list.data[1]).toMatchObject({ direction: "income", amount: 2000 });
+    expect(list.data.map((m: { name: string }) => m.name)).toEqual(["Salary", "Rent"]);
+    expect(list.data[0]).toMatchObject({ direction: "income", amount: 2000 });
   });
 
   test("rejects an unknown direction and a negative amount", async () => {
     const { app, cookie } = await setup();
     expect((await post(app, cookie, { ...VALID, direction: "sideways" })).status).toBe(400);
     expect((await post(app, cookie, { ...VALID, amount: -1 })).status).toBe(400);
+  });
+
+  test("stores an annual cadence and defaults to monthly when it is omitted", async () => {
+    const { app, cookie } = await setup();
+    expect((await post(app, cookie, { ...VALID, name: "Insurance", cadence: "annual" })).status).toBe(201);
+    expect((await post(app, cookie, { ...VALID, name: "Rent", amount: 1 })).status).toBe(201);
+
+    const list = await (await app.request("/movements", { headers: { cookie } })).json();
+    const byName = Object.fromEntries(list.data.map((m: { name: string; cadence: string }) => [m.name, m.cadence]));
+    expect(byName).toEqual({ Insurance: "annual", Rent: "monthly" });
+  });
+
+  test("rejects an unknown cadence", async () => {
+    const { app, cookie } = await setup();
+    expect((await post(app, cookie, { ...VALID, cadence: "weekly" })).status).toBe(400);
+  });
+
+  test("updates the cadence of an existing movement", async () => {
+    const { app, cookie } = await setup();
+    const { data } = await (await post(app, cookie, VALID)).json();
+
+    const put = await app.request(`/movements/${data.id}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json", cookie },
+      body: JSON.stringify({ ...VALID, cadence: "annual" }),
+    });
+    expect(put.status).toBe(200);
+    const list = await (await app.request("/movements", { headers: { cookie } })).json();
+    expect(list.data[0].cadence).toBe("annual");
   });
 
   test("updates and deletes", async () => {
