@@ -72,8 +72,17 @@ export function freshTxDefaults(): TxFormValues {
 const CURRENCY = new Intl.NumberFormat(undefined, { style: "currency", currency: "EUR" });
 const SHORT_DATE = new Intl.DateTimeFormat(undefined, { year: "numeric", month: "2-digit", day: "2-digit" });
 
+const PERCENT_1 = new Intl.NumberFormat(undefined, { style: "percent", minimumFractionDigits: 1, maximumFractionDigits: 1 });
+const PERCENT_2 = new Intl.NumberFormat(undefined, { style: "percent", minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
 export function formatCurrency(value: number): string {
   return CURRENCY.format(Number.isFinite(value) ? value : 0);
+}
+
+/** Takes a percentage (12.5 → "12.50%"), not the ratio Intl expects. */
+export function formatPercent(value: number, fractionDigits: 1 | 2 = 2): string {
+  const format = fractionDigits === 1 ? PERCENT_1 : PERCENT_2;
+  return format.format((Number.isFinite(value) ? value : 0) / 100);
 }
 
 // txDate is a calendar day, not an instant. Date.parse reads a date-only

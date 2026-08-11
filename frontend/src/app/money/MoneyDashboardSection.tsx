@@ -2,7 +2,7 @@ import { lazy, Suspense, useId } from "react";
 import { SectionHead } from "../shared";
 import { EmptyState } from "../screen-helpers";
 import { CARD_GRID, DASH_CARD, CARD_H3, CARD_VALUE } from "../cards";
-import { formatCurrency, formatTxDate, type AssetStats, type DashboardKpis } from "./core";
+import { formatCurrency, formatPercent, formatTxDate, type AssetStats, type DashboardKpis } from "./core";
 
 const AssetCharts = lazy(() => import("./AssetCharts"));
 
@@ -47,7 +47,7 @@ export function MoneyDashboardSection({
       <div className={CARD_GRID}>
         <Kpi label="Current value" value={formatCurrency(kpis.totalCurrent)} />
         <Kpi label="Total PnL" value={formatCurrency(kpis.totalPnl)} tone={toneOf(kpis.totalPnl)} />
-        <Kpi label="Total PnL %" value={`${kpis.totalPnlPct.toFixed(2)}%`} tone={toneOf(kpis.totalPnl)} />
+        <Kpi label="Total PnL %" value={formatPercent(kpis.totalPnlPct)} tone={toneOf(kpis.totalPnl)} />
         <Kpi label="Assets" value={String(kpis.assetsCount)} />
         <Kpi label="Transactions" value={String(kpis.txCount)} />
         <Kpi label="Last transaction" value={kpis.lastTxDate ? formatTxDate(kpis.lastTxDate) : "—"} />
@@ -84,7 +84,7 @@ export function MoneyDashboardSection({
                   </div>
                   <div className="grid gap-1">
                     <dt className="text-micro text-muted uppercase tracking-wider">Allocation</dt>
-                    <dd className="m-0 text-control text-text">{stat.allocationPct.toFixed(1)}%</dd>
+                    <dd className="m-0 text-control text-text">{formatPercent(stat.allocationPct, 1)}</dd>
                   </div>
                   <div className="grid gap-1">
                     <dt className="text-micro text-muted uppercase tracking-wider">PnL</dt>
@@ -95,7 +95,7 @@ export function MoneyDashboardSection({
                   <div className="grid gap-1">
                     <dt className="text-micro text-muted uppercase tracking-wider">PnL %</dt>
                     <dd className={`m-0 text-control ${stat.pnl >= 0 ? "text-success" : "text-danger"}`}>
-                      {stat.pnlPct.toFixed(2)}%
+                      {formatPercent(stat.pnlPct)}
                     </dd>
                   </div>
                 </dl>

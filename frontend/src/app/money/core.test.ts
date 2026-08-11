@@ -6,6 +6,7 @@ import {
   computeRiskTotals,
   filterVisibleAssets,
   formatCurrency,
+  formatPercent,
   formatTxDate,
   freshMovementDefaults,
   freshSnapshotDefaults,
@@ -63,6 +64,15 @@ describe("formatting", () => {
   test("renders euros and survives a non-finite value", () => {
     expect(formatCurrency(1234.5)).toContain("€");
     expect(formatCurrency(Number.NaN)).toBe(formatCurrency(0));
+  });
+
+  test("renders a percentage the reader's locale agrees with", () => {
+    // The value is already a percentage, so it must not be multiplied again.
+    expect(formatPercent(12.5)).toBe(new Intl.NumberFormat(undefined, {
+      style: "percent", minimumFractionDigits: 2, maximumFractionDigits: 2,
+    }).format(0.125));
+    expect(formatPercent(12.34, 1)).toContain("12");
+    expect(formatPercent(Number.NaN)).toBe(formatPercent(0));
   });
 
   test("falls back to a dash on an unparseable date", () => {

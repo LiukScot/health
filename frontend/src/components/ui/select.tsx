@@ -143,13 +143,18 @@ export function Select({ value, onValueChange, options, ariaLabel, disabled, pla
             <li
               key={option.value}
               id={`${optionBaseId}-${index}`}
-              className="flex items-center px-3 py-2 rounded-sm text-text text-control font-medium font-body cursor-pointer select-none data-[active=true]:bg-[color-mix(in_srgb,white_6%,var(--bg))] aria-selected:bg-accent aria-selected:text-accent-fg [[data-theme=oled]_&]:data-[active=true]:bg-[color-mix(in_srgb,white_6%,var(--card-soft))]"
+              className="flex items-center gap-2 px-3 py-2 rounded-sm text-text text-control font-medium font-body cursor-pointer select-none data-[active=true]:bg-[color-mix(in_srgb,white_6%,var(--bg))] aria-selected:bg-accent aria-selected:text-accent-fg [[data-theme=oled]_&]:data-[active=true]:bg-[color-mix(in_srgb,white_6%,var(--card-soft))]"
               role="option"
               aria-selected={option.value === value}
               data-active={index === activeIndex ? "true" : undefined}
               onClick={() => commit(index)}
               onPointerMove={() => setActiveIndex(index)}
             >
+              {/* Always rendered, so picking an option does not shift the
+                  labels sideways. Colour is not the only signal. */}
+              <span className="w-3 flex-none text-micro" aria-hidden="true">
+                {option.value === value ? "✓" : ""}
+              </span>
               {option.label}
             </li>
           ))}
