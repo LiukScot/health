@@ -11,7 +11,9 @@ const CHIP_SHAPE =
   "inline-flex items-center gap-2 px-3 py-1 min-h-8 rounded-full text-hint leading-none border-0 shadow-none transition-[color,background] duration-150 ease-[ease]";
 const CHIP_IDLE = "text-muted bg-[color-mix(in_srgb,white_5%,var(--card))]";
 const CHIP_IDLE_HOVER = "hover:text-text hover:bg-[color-mix(in_srgb,white_9%,var(--card))]";
-const CHIP_ACTIVE = "text-accent bg-[color-mix(in_srgb,var(--accent)_10%,transparent)]";
+// A filled pill, not a tinted one: at 10% accent the selected state was
+// indistinguishable from idle in the Settings realm, where --accent is --text.
+const CHIP_ACTIVE = "text-accent-fg bg-accent font-semibold";
 const REMOVE_BTN =
   "inline-flex items-center justify-center w-[18px] h-[18px] min-h-[18px] p-0 rounded-full text-micro font-bold leading-none text-muted bg-[color-mix(in_srgb,var(--bg)_60%,transparent)] border-0 shadow-none flex-none cursor-pointer [@media(hover:hover)]:hover:text-danger [@media(hover:hover)]:hover:bg-[color-mix(in_srgb,var(--danger)_15%,transparent)]";
 const ADDER_BTN =

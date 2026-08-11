@@ -97,6 +97,29 @@ describe("money JSON backup", () => {
     expect(dump.data.monthlyMovements).toEqual([]);
   });
 
+  test("carries the movement cadence through import and export", async () => {
+    const { app, cookie } = await setup();
+    expect(
+      (
+        await importJson(app, cookie, {
+          monthlyMovements: [
+            { id: "mm-a", name: "Insurance", direction: "expense", amount: 1200, cadence: "annual" },
+            { id: "mm-b", name: "Rent", direction: "expense", amount: 850, cadence: "weekly" },
+            { id: "mm-c", name: "Salary", direction: "income", amount: 2000 },
+          ],
+        })
+      ).status,
+    ).toBe(200);
+
+    const dump = await (await app.request("/money/backup/json", { headers: { cookie } })).json();
+    const byName = Object.fromEntries(
+      dump.data.monthlyMovements.map((m: { name: string; cadence: string }) => [m.name, m.cadence]),
+    );
+    // A cadence nobody recognises, and one a pre-cadence backup never wrote,
+    // both land on monthly rather than dropping the row.
+    expect(byName).toEqual({ Insurance: "annual", Rent: "monthly", Salary: "monthly" });
+  });
+
   test("imports rows whose ids already belong to another account", async () => {
     const { ctx, app, cookie } = await setup();
     const other = await seedUser(ctx.db);

@@ -50,6 +50,10 @@
   --color-muted-soft: var(--muted-soft);
   --color-border: var(--border);
   --color-accent: var(--accent);
+  /* Foreground for anything filled with --accent. The page background is the
+     one colour guaranteed to contrast with every realm's accent, including
+     Settings, where the accent *is* --text and text-text would vanish. */
+  --color-accent-fg: var(--bg);
   --color-danger: var(--danger);
   --color-success: var(--success);
   --color-warning: var(--warning);

@@ -8,6 +8,7 @@ import {
   freshMovementDefaults,
   movementFormSchema,
   movementListSchema,
+  toCadence,
   type Movement,
   type MovementFormValues,
 } from "../app/money/core";
@@ -88,6 +89,7 @@ export function useMoneyMovements(enabled: boolean) {
         name: row.name,
         direction: row.direction === "expense" ? "expense" : "income",
         amount: row.amount,
+        cadence: toCadence(row.cadence),
         note: row.note,
       });
     },

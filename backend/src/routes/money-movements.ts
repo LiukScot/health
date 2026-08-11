@@ -22,7 +22,7 @@ moneyMovements.get("/", (c) => {
     .select()
     .from(monthlyMovements)
     .where(eq(monthlyMovements.userId, userId))
-    .orderBy(monthlyMovements.name, desc(monthlyMovements.id))
+    .orderBy(desc(monthlyMovements.amount), monthlyMovements.name, desc(monthlyMovements.id))
     .limit(limit)
     .offset(offset)
     .all();
@@ -35,7 +35,15 @@ moneyMovements.post("/", async (c) => {
   const body = await parseJson(c, movementSchema);
   const id = makeId("mm");
   db.insert(monthlyMovements)
-    .values({ id, userId, name: body.name, direction: body.direction, amount: body.amount, note: body.note })
+    .values({
+      id,
+      userId,
+      name: body.name,
+      direction: body.direction,
+      amount: body.amount,
+      cadence: body.cadence,
+      note: body.note,
+    })
     .run();
   return c.json({ data: { id } }, 201);
 });
@@ -51,6 +59,7 @@ moneyMovements.put("/:id", async (c) => {
       name: body.name,
       direction: body.direction,
       amount: body.amount,
+      cadence: body.cadence,
       note: body.note,
       updatedAt: sql`CURRENT_TIMESTAMP`,
     })

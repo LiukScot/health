@@ -250,6 +250,7 @@ export const monthlyMovements = sqliteTable(
     name: text("name").notNull(),
     direction: text("direction").notNull(),
     amount: real("amount").notNull().default(0),
+    cadence: text("cadence").notNull().default("monthly"),
     note: text("note"),
     createdAt: text("created_at").notNull().default(sql`CURRENT_TIMESTAMP`),
     updatedAt: text("updated_at").notNull().default(sql`CURRENT_TIMESTAMP`),

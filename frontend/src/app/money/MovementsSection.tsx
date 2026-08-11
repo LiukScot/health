@@ -1,3 +1,4 @@
+import { useMemo, useState } from "react";
 import { Controller, type UseFormReturn } from "react-hook-form";
 import { Button } from "../../components/ui/Button";
 import { FieldLine, FIELD_LINE_LABEL } from "../../components/ui/FieldLine";
@@ -13,17 +14,33 @@ import {
   FORM_COL,
   FORM_SPLIT,
   ENTRY_CHEVRON,
-  ENTRY_DATE,
   ENTRY_EXPANDED,
   ENTRY_PREVIEW,
   ENTRY_ROW,
   ENTRY_SUMMARY,
   PainBadge,
   PastEntries,
+  TAG_TAB_BTN,
 } from "../entries";
-import { DIRECTIONS, formatCurrency, type Movement, type MovementFormValues } from "./core";
+import {
+  amountIn,
+  CADENCES,
+  DIRECTIONS,
+  formatCurrency,
+  type Cadence,
+  type Movement,
+  type MovementFormValues,
+} from "./core";
 
 const DIRECTION_OPTIONS = DIRECTIONS.map((d) => ({ value: d, label: d }));
+const CADENCE_OPTIONS = CADENCES.map((c) => ({ value: c, label: c }));
+
+// The list mixes cadences, so an amount column can only be ranked once every
+// row is expressed in the same period. The tabs pick which one.
+const PERIOD_TABS: { id: Cadence; label: string; net: string }[] = [
+  { id: "monthly", label: "Per month", net: "Monthly net" },
+  { id: "annual", label: "Per year", net: "Annual net" },
+];
 
 export function MovementsSection({
   movementForm,
@@ -50,7 +67,18 @@ export function MovementsSection({
   onDeleteClick: (id: string) => void;
   onDeleteBlur: () => void;
 }) {
-  const monthlyNet = movements.reduce((sum, m) => sum + (m.direction === "income" ? m.amount : -m.amount), 0);
+  const [period, setPeriod] = useState<Cadence>("monthly");
+  // Ranking by the raw amount would put a yearly premium above a bigger
+  // monthly bill, so the sort follows whichever period is on screen.
+  const rows = useMemo(
+    () => [...movements].sort((a, b) => amountIn(b, period) - amountIn(a, period)),
+    [movements, period],
+  );
+  const net = rows.reduce(
+    (sum, m) => sum + (m.direction === "income" ? amountIn(m, period) : -amountIn(m, period)),
+    0,
+  );
+  const netLabel = PERIOD_TABS.find((t) => t.id === period)!.net;
 
   return (
     <section className="@container">
@@ -83,6 +111,22 @@ export function MovementsSection({
                       value={field.value}
                       onValueChange={field.onChange}
                       options={DIRECTION_OPTIONS}
+                    />
+                  )}
+                />
+              </div>
+
+              <div className="grid gap-2 content-start">
+                <span className={FIELD_LINE_LABEL}>Cadence</span>
+                <Controller
+                  control={movementForm.control}
+                  name="cadence"
+                  render={({ field }) => (
+                    <Select
+                      ariaLabel="Cadence"
+                      value={field.value}
+                      onValueChange={field.onChange}
+                      options={CADENCE_OPTIONS}
                     />
                   )}
                 />
@@ -135,35 +179,58 @@ export function MovementsSection({
           emptyState={
             <EmptyState
               title="No movements yet"
-              description="Record what comes in and goes out every month — rent, salary, subscriptions. The running balance shows up here."
+              description="Record what comes in and goes out on a schedule — rent, salary, subscriptions, the yearly insurance. The running balance shows up here."
             />
           }
         >
-          {movements.length > 0 ? (
-            <p className="text-control text-muted m-0 mb-3">
-              Monthly net{" "}
-              <span className={monthlyNet >= 0 ? "text-success font-semibold" : "text-danger font-semibold"}>
-                {formatCurrency(monthlyNet)}
-              </span>
-            </p>
+          {rows.length > 0 ? (
+            <div className="flex flex-wrap items-center justify-between gap-x-5 gap-y-1 mb-3">
+              <nav className="flex flex-wrap gap-x-5 gap-y-1" role="tablist" aria-label="Show amounts">
+                {PERIOD_TABS.map((tab) => (
+                  <button
+                    key={tab.id}
+                    type="button"
+                    role="tab"
+                    aria-selected={period === tab.id}
+                    className={`${TAG_TAB_BTN} ${period === tab.id ? "text-text border-b-accent" : "text-muted border-b-transparent hover:text-text"}`}
+                    onClick={() => setPeriod(tab.id)}
+                  >
+                    {tab.label}
+                  </button>
+                ))}
+              </nav>
+              <p className="text-control text-muted m-0">
+                {netLabel}{" "}
+                <span className={net >= 0 ? "text-success font-semibold" : "text-danger font-semibold"}>
+                  {formatCurrency(net)}
+                </span>
+              </p>
+            </div>
           ) : null}
-          {movements.map((row) => {
+          {rows.map((row) => {
             const income = row.direction === "income";
+            const annual = row.cadence === "annual";
             return (
               <details key={row.id} className={ENTRY_ROW}>
+                {/* Five children exactly: ENTRY_SUMMARY has five grid tracks,
+                    and a sixth one wraps the chevron onto its own row. */}
                 <summary className={ENTRY_SUMMARY}>
                   {/* Sign and wording carry the meaning; colour reinforces it. */}
-                  <span className={ENTRY_DATE}>{income ? "in" : "out"}</span>
                   <PainBadge variant="muted" sm>{row.direction}</PainBadge>
+                  <PainBadge variant="muted" sm>{annual ? "annual" : "monthly"}</PainBadge>
                   <span className={ENTRY_PREVIEW}>{row.name}</span>
+                  {/* The amount follows the tabs, so every row on screen is in
+                      the same period and the ranking means something. */}
                   <span className={income ? "text-success" : "text-muted"}>
                     {income ? "+" : "−"}
-                    {formatCurrency(row.amount)}
+                    {formatCurrency(amountIn(row, period))}
                   </span>
                   <span className={ENTRY_CHEVRON} aria-hidden="true">▶</span>
                 </summary>
                 <div className={ENTRY_EXPANDED}>
                   <DetailGroup label="Direction">{row.direction}</DetailGroup>
+                  <DetailGroup label="Cadence">{annual ? "annual" : "monthly"}</DetailGroup>
+                  {/* As entered, whichever period the list is showing. */}
                   <DetailGroup label="Amount">{formatCurrency(row.amount)}</DetailGroup>
                   <DetailGroup label="Note">{row.note || "—"}</DetailGroup>
                   <div className={DETAIL_ACTIONS}>
