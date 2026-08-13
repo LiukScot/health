@@ -179,17 +179,26 @@ export function StageRail({
   steps,
   current,
   onJump,
+  heading,
   children,
 }: {
   steps: RailStep[];
   current: number;
   /** -1 until the reader picks one: highlighting step 1 on arrival claims a position nobody took. */
   onJump: (index: number) => void;
+  /*
+   * The view tabs and the page title. They belong to this column rather
+   * than to the page above it: everything that says where you are should
+   * stay put while the thing you are reading moves, and a title that
+   * scrolls away takes the answer to "which screen is this" with it.
+   */
+  heading?: ReactNode;
   /** Date and the save button. */
   children: ReactNode;
 }) {
   return (
-    <nav className="grid gap-1 content-start min-w-0 wide:sticky wide:top-5" aria-label="Stages">
+    <nav className="grid gap-page content-start min-w-0 wide:sticky wide:top-5 wide:max-h-[calc(100dvh-80px)] wide:overflow-y-auto" aria-label="Stages">
+      {heading}
       {/* Named steps need the column beside the stages. Below `wide` there
           is only one column, so the nav becomes a plain block above the
           form and keeps only what it must carry: the date and Save. The
@@ -221,7 +230,7 @@ export function StageRail({
           );
         })}
       </div>
-      <div className="grid gap-2 wide:mt-3 wide:pt-3 wide:border-t wide:border-border">{children}</div>
+      <div className="grid gap-2 wide:pt-3 wide:border-t wide:border-border">{children}</div>
     </nav>
   );
 }

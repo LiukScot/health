@@ -12,7 +12,6 @@ import { Button } from "../components/ui/Button";
 import { FieldLine, FIELD_LINE_INPUT } from "../components/ui/FieldLine";
 import {
   DELETE_CONFIRM,
-  DATETIME_FIELD,
   DETAIL_ACTIONS,
   DETAIL_ACTION_BTN,
   DetailGroup,
@@ -108,8 +107,6 @@ export function CbtSection({
 
   return (
     <section className={PAGE}>
-      <EntryViewTabs view={view} onChange={onViewChange} className="inline-flex max-mobile:hidden" />
-      <h1 className={PAGE_TITLE}>CBT Thought Response</h1>
       {view === "new" ? (
       <form onSubmit={cbtForm.handleSubmit(onSubmit)} className={STAGE_SPLIT}>
         <StageProgress steps={steps} current={stage} />
@@ -117,11 +114,17 @@ export function CbtSection({
           steps={steps}
           current={stage}
           onJump={setStage}
+          heading={
+            <div className="grid gap-5 content-start">
+              <EntryViewTabs view={view} onChange={onViewChange} className="inline-flex max-mobile:hidden" />
+              <h1 className={PAGE_TITLE}>CBT Thought Response</h1>
+            </div>
+          }
         >
           <FieldLine
             label="Date & time"
             type="datetime-local"
-            className={DATETIME_FIELD}
+            className="w-full max-w-full cursor-pointer tabular-nums [&::-webkit-calendar-picker-indicator]:cursor-pointer [&::-webkit-calendar-picker-indicator]:invert [&::-webkit-calendar-picker-indicator]:opacity-60 hover:[&::-webkit-calendar-picker-indicator]:opacity-100"
             {...cbtForm.register("dateTime")}
             aria-label="Date/time"
             onClick={(e) => {
@@ -154,6 +157,11 @@ export function CbtSection({
         </div>
       </form>
       ) : (
+      <div className="grid gap-page content-start min-w-0">
+        <div className="grid gap-5 content-start">
+          <EntryViewTabs view={view} onChange={onViewChange} className="inline-flex max-mobile:hidden" />
+          <h1 className={PAGE_TITLE}>CBT Thought Response</h1>
+        </div>
       <PastEntries
         isLoading={isLoading}
         loadingText="Loading CBT entries..."
@@ -210,6 +218,7 @@ export function CbtSection({
         )}
         />
       </PastEntries>
+      </div>
       )}
     </section>
   );

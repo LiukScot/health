@@ -17,7 +17,6 @@ import { Button } from "../components/ui/Button";
 import { FieldLine, FIELD_LINE_INPUT } from "../components/ui/FieldLine";
 import {
   DELETE_CONFIRM,
-  DATETIME_FIELD,
   DETAIL_ACTIONS,
   DETAIL_ACTION_BTN,
   DetailGroup,
@@ -121,8 +120,6 @@ export function PainSection({
 
   return (
     <section className={PAGE}>
-      <EntryViewTabs view={view} onChange={onViewChange} className="inline-flex max-mobile:hidden" />
-      <h1 className={PAGE_TITLE}>Pain</h1>
       {view === "new" ? (
       <form onSubmit={painForm.handleSubmit(onSubmit)} className={STAGE_SPLIT}>
         <div className="sr-only" aria-hidden="true">
@@ -136,11 +133,17 @@ export function PainSection({
           steps={steps}
           current={stage}
           onJump={setStage}
+          heading={
+            <div className="grid gap-5 content-start">
+              <EntryViewTabs view={view} onChange={onViewChange} className="inline-flex max-mobile:hidden" />
+              <h1 className={PAGE_TITLE}>Pain</h1>
+            </div>
+          }
         >
           <FieldLine
             label="Date & time"
             type="datetime-local"
-            className={DATETIME_FIELD}
+            className="w-full max-w-full cursor-pointer tabular-nums [&::-webkit-calendar-picker-indicator]:cursor-pointer [&::-webkit-calendar-picker-indicator]:invert [&::-webkit-calendar-picker-indicator]:opacity-60 hover:[&::-webkit-calendar-picker-indicator]:opacity-100"
             {...painForm.register("dateTime")}
             aria-label="Date/time"
             onClick={(e) => {
@@ -213,6 +216,11 @@ export function PainSection({
         </div>
       </form>
       ) : (
+      <div className="grid gap-page content-start min-w-0">
+        <div className="grid gap-5 content-start">
+          <EntryViewTabs view={view} onChange={onViewChange} className="inline-flex max-mobile:hidden" />
+          <h1 className={PAGE_TITLE}>Pain</h1>
+        </div>
       <PastEntries
         isLoading={isLoading}
         loadingText="Loading pain entries..."
@@ -284,6 +292,7 @@ export function PainSection({
         }}
         />
       </PastEntries>
+      </div>
       )}
     </section>
   );
