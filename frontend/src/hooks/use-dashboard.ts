@@ -28,7 +28,7 @@ import type {
 } from "../app/core";
 import { usePrefs } from "./use-settings";
 
-type ChartThemeColors = { success: string; muted: string };
+type ChartThemeColors = { success: string; muted: string; grid: string };
 
 function readChartThemeColors(): ChartThemeColors {
   const style = getComputedStyle(document.documentElement);
@@ -36,6 +36,7 @@ function readChartThemeColors(): ChartThemeColors {
     // --success (#6fe1b0) is the only series color with a matching design token.
     success: style.getPropertyValue("--success").trim() || "#6fe1b0",
     muted: style.getPropertyValue("--muted").trim() || "#a1a1ad",
+    grid: style.getPropertyValue("--color-chart-grid").trim() || "rgba(255,255,255,0.08)",
   };
 }
 
@@ -411,20 +412,18 @@ export function useDashboard(enabled: boolean) {
               displayFormats: { day: "dd MMM", week: "dd MMM", month: "MMM yyyy" },
             },
             ticks: { color: chartThemeColors.muted, maxTicksLimit: 12 },
-            // rgba(255,255,255,0.08) has no design token; kept until one is added
-            grid: { color: "rgba(255,255,255,0.08)" },
+            grid: { color: chartThemeColors.grid },
           },
           y: {
             min: 0,
             max: 10,
             ticks: { color: chartThemeColors.muted, stepSize: 1 },
-            // rgba(255,255,255,0.08) has no design token; kept until one is added
-            grid: { color: "rgba(255,255,255,0.08)" },
+            grid: { color: chartThemeColors.grid },
           },
         },
       },
     };
-  }, [wellbeingSeries, graphSelection, chartThemeColors.muted]);
+  }, [wellbeingSeries, graphSelection, chartThemeColors.muted, chartThemeColors.grid]);
 
   const handleGraphToggle = (key: WellbeingSeriesKey, checked: boolean) => {
     const nextSelection = { ...graphSelection, [key]: checked };

@@ -1,5 +1,17 @@
 import { bandNine, formatMetricDisplay } from "./screen-format";
 
+/*
+ * Page shell. PAGE carries the rhythm as a container gap, so nothing
+ * inside sets an outer margin against a sibling — a heading that pushes
+ * its neighbour away and a container that also spaces its children give
+ * a gap nobody chose. PAGE_TITLE therefore has no margin of its own.
+ * The text-box trim matters: without it a declared vertical 40 renders
+ * a few px larger than the horizontal 40 beside it.
+ */
+export const PAGE = "@container grid gap-page content-start";
+export const PAGE_TITLE =
+  "m-0 [text-box:trim-both_cap_alphabetic] text-title font-bold tracking-tight text-text";
+
 const STEPPER_BTN =
   "w-6 h-6 min-h-6 p-0 text-sm text-muted bg-transparent border border-border rounded-full shadow-none cursor-pointer transition-[color,border-color] duration-150 ease-[ease] hover:text-accent hover:bg-transparent hover:border-accent";
 

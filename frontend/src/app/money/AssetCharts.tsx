@@ -13,7 +13,7 @@ import { formatCurrency, type AssetStats } from "./core";
 
 ChartJS.register(ArcElement, BarElement, CategoryScale, LinearScale, Tooltip, Legend);
 
-type ChartColors = { positive: string; negative: string; muted: string };
+type ChartColors = { positive: string; negative: string; muted: string; grid: string };
 
 function readChartColors(): ChartColors {
   const style = getComputedStyle(document.documentElement);
@@ -22,6 +22,7 @@ function readChartColors(): ChartColors {
     positive: token("--risk-low", "#34d399"),
     negative: token("--risk-high", "#fb7185"),
     muted: token("--muted", "#a1a1ad"),
+    grid: token("--color-chart-grid", "rgba(255,255,255,0.08)"),
   };
 }
 
@@ -79,14 +80,14 @@ export default function AssetCharts({ visibleAssets }: { visibleAssets: AssetSta
       maintainAspectRatio: false,
       plugins: { legend: { display: false } },
       scales: {
-        x: { ticks: { color: colors.muted }, grid: { color: "rgba(255,255,255,0.08)" } },
+        x: { ticks: { color: colors.muted }, grid: { color: colors.grid } },
         y: {
           ticks: { color: colors.muted, callback: (value: string | number) => formatCurrency(Number(value)) },
-          grid: { color: "rgba(255,255,255,0.08)" },
+          grid: { color: colors.grid },
         },
       },
     }),
-    [colors.muted],
+    [colors.muted, colors.grid],
   );
 
   return (

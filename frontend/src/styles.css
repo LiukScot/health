@@ -22,6 +22,13 @@
   --text-control: 13px; /* compact date/select control text */
   --text-title: 22px; /* page h1 */
 
+  /* Page rhythm — the single distance between sibling blocks, between
+     columns, and around the page. Named so the choice reads as intent
+     (gap-page) rather than as a number (gap-10 vs gap-9), and so the
+     value has one home. The component-internal scale stays on
+     Tailwind's numeric spacing; it is a scale, not one number. */
+  --spacing-page: 40px;
+
   /* Radius — single-sourced here (formerly duplicated in :root). */
   --radius-sm: 10px;
   --radius-md: 12px;
@@ -62,6 +69,11 @@
      a stronger delete-confirm red, the softer warning text hue, dark
      foregrounds for text on the success/warning badge fills, and the modal
      scrim. Defined as literals (no :root forward) since they never re-theme. */
+  /* Chart grid lines. chart.js takes a resolved colour, not a CSS var,
+     so the charts read this off the root; it is a token so the grey and
+     oled themes can move it without editing JS. */
+  --color-chart-grid: rgba(255, 255, 255, 0.08);
+
   --color-danger-strong: #ff3333;
   --color-warning-soft: #ffd38a;
   --color-success-fg: #0a2018;
