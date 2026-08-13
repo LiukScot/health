@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>World · Mockups</title>
+<link rel="stylesheet" href="tokens.css">
+<style>
+  .intro {
+    max-width: 720px;
+    margin-bottom: 40px;
+  }
+  .intro h1 {
+    font-size: 34px;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    margin: 0 0 10px;
+  }
+  .intro p {
+    font-size: 15px;
+    color: var(--muted);
+    line-height: 1.6;
+  }
+  .card-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 14px;
+  }
+  .mk-card {
+    display: grid;
+    gap: 10px;
+    padding: 22px;
+    background: var(--card-strong);
+    border: 1px solid var(--border-soft);
+    border-radius: var(--radius-md);
+    text-decoration: none;
+    color: var(--text);
+    transition: all 0.15s;
+  }
+  .mk-card:hover {
+    border-color: var(--accent);
+    transform: translateY(-2px);
+  }
+  .mk-card .letter {
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 0.12em;
+    color: var(--accent);
+    text-transform: uppercase;
+  }
+  .mk-card h2 {
+    font-size: 22px;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    margin: 0;
+  }
+  .mk-card .tagline {
+    font-size: 14px;
+    color: var(--muted);
+    font-style: italic;
+    margin: 0 0 6px;
+  }
+  .mk-card .desc {
+    font-size: 13px;
+    color: var(--muted);
+    line-height: 1.5;
+    margin: 0;
+  }
+  .mk-card .specs {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    margin-top: 8px;
+    font-size: 12px;
+    color: var(--muted-soft);
+  }
+  .mk-card .specs span::before { content: "· "; color: var(--accent); }
+  .mk-card .footer-link {
+    margin-top: 16px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--accent);
+  }
+  .mk-card.chosen {
+    border-color: var(--success);
+    background: color-mix(in srgb, var(--success) 6%, var(--card-strong));
+  }
+  .mk-card.chosen:hover { border-color: var(--success); }
+  .mk-card.chosen .letter { color: var(--success); }
+  .mk-card.chosen .footer-link { color: var(--success); }
+  .chosen-section-title {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    color: var(--success);
+    text-transform: uppercase;
+    margin: 20px 0 12px;
+  }
+  .alternatives-title {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    color: var(--muted);
+    text-transform: uppercase;
+    margin: 32px 0 12px;
+  }
+</style>
+</head>
+<body>
+<div class="mockup-frame">
+  <div class="intro">
+    <div class="mockup-tag">World mockups</div>
+    <h1>Design directions</h1>
+    <p>Mockup per il refactor UI (#196), archetipo per archetipo, più il vecchio set del Pain redesign.</p>
+  </div>
+
+  <p class="chosen-section-title" style="color:var(--accent)">Worksheet archetype (CBT / DBT) — #196, in review</p>
+  <div class="card-grid">
+    <a class="mk-card" href="worksheet-a.html">
+      <span class="letter">Worksheet A</span>
+      <h2>One column, numbered steps</h2>
+      <p class="tagline">"La sequenza è il layout"</p>
+      <p class="desc">Colonna unica a larghezza di lettura, step numerati, prompt sempre visibili sotto la label. Le stage DBT diventano heading veri (17px/800).</p>
+      <div class="specs">
+        <span>Ordine ovvio senza leggere il sorgente</span>
+        <span>Fix H1 + R2 con il minimo di struttura</span>
+        <span>Più scroll su desktop</span>
+      </div>
+      <div class="footer-link">Esplora A →</div>
+    </a>
+    <a class="mk-card" href="worksheet-b.html">
+      <span class="letter">Worksheet B</span>
+      <h2>Staged cards + rail</h2>
+      <p class="tagline">"Ogni stage è una superficie"</p>
+      <p class="desc">Stage su card con titolo grande e rail di progresso sticky. Il confine del gruppo lo dà la card, non la prossimità — risponde anche al sintomo 5 (Pain/Diary squished).</p>
+      <div class="specs">
+        <span>Progresso e posizione sempre visibili</span>
+        <span>Gerarchia a 4 livelli dimostrata</span>
+        <span>Più cromo; rail superflua per CBT piatto</span>
+      </div>
+      <div class="footer-link">Esplora B →</div>
+    </a>
+    <a class="mk-card" href="worksheet-c.html">
+      <span class="letter">Worksheet C</span>
+      <h2>Prompt / answer pairs</h2>
+      <p class="tagline">"Il worksheet come dialogo"</p>
+      <p class="desc">I prompt sono domande del terapeuta, le risposte collassano in testo una volta date. La pagina si riempie delle tue parole, non di box vuoti.</p>
+      <div class="specs">
+        <span>R2 risolto alla radice</span>
+        <span>Entry espansa riusa lo stesso layout (C5)</span>
+        <span>Più lontano dal resto dell'app</span>
+      </div>
+      <div class="footer-link">Esplora C →</div>
+    </a>
+  </div>
+
+  <p class="chosen-section-title" style="color:var(--accent)">Entry forms (Pain / Diary) — #196, in review</p>
+  <div class="card-grid">
+    <a class="mk-card" href="pain-staged.html">
+      <span class="letter">Pain · Staged</span>
+      <h2>Pain nel linguaggio di Worksheet B</h2>
+      <p class="tagline">"Il wizard, ma coerente"</p>
+      <p class="desc">I tre step del wizard (How bad → Where &amp; what → Details) diventano tre stage su card, con rail sticky. Data e Save vivono nella rail: salvare dopo lo stage 1 è normale, non una scorciatoia.</p>
+      <div class="specs">
+        <span>Stessa anatomia di CBT/DBT</span>
+        <span>Scale grandi 1–9 (fix R6)</span>
+        <span>Stage 2–3 marcati optional</span>
+      </div>
+      <div class="footer-link">Esplora →</div>
+    </a>
+    <a class="mk-card" href="diary-staged.html">
+      <span class="letter">Diary · Staged</span>
+      <h2>Diary nel linguaggio di Worksheet B</h2>
+      <p class="tagline">"Stesso guscio, bande invertite"</p>
+      <p class="desc">How you feel → Emotions → In your words. Mood legge verso l'alto: le bande colore si invertono (9 è il lato buono), la forma resta identica a Pain.</p>
+      <div class="specs">
+        <span>Stessa anatomia di Pain/CBT/DBT</span>
+        <span>Emozioni raggruppate pos/neg/general</span>
+        <span>Prompt persistenti (fix R2)</span>
+      </div>
+      <div class="footer-link">Esplora →</div>
+    </a>
+  </div>
+
+  <p class="alternatives-title">Pain redesign (shipped)</p>
+  <p class="chosen-section-title">✓ Chosen direction</p>
+  <div class="card-grid" style="grid-template-columns: 1fr; margin-bottom:12px;">
+    <a class="mk-card chosen" href="pain-d.html">
+      <span class="letter">Mockup D · Hybrid</span>
+      <h2>Dense form + expandable log</h2>
+      <p class="tagline">"Form di C, lista di B"</p>
+      <p class="desc">Form dashboard-style di C (bar scale colorate, tab per i tag) per inserire veloce. Lista espandibile di B per consultare le entries passate. Due task, due UI.</p>
+      <div class="specs">
+        <span>Inserimento veloce come C</span>
+        <span>Consultazione pulita come B</span>
+        <span>Nessuna sparkline (già c'è la Dashboard)</span>
+      </div>
+      <div class="footer-link">Esplora D →</div>
+    </a>
+  </div>
+
+  <p class="alternatives-title">Earlier alternatives (reference)</p>
+  <div class="card-grid">
+    <a class="mk-card" href="pain-a.html">
+      <span class="letter">Mockup A</span>
+      <h2>Progressive disclosure</h2>
+      <p class="tagline">"Mostra poco, espandi al bisogno"</p>
+      <p class="desc">Core metrics sempre visibili in alto. I 6 gruppi di tag diventano accordion: solo uno aperto di default. Entries come feed di card raggruppate per giorno.</p>
+      <div class="specs">
+        <span>Riduce cognitive load</span>
+        <span>Richiede click per espandere</span>
+        <span>Scale verticale sempre utile</span>
+      </div>
+      <div class="footer-link">Esplora A →</div>
+    </a>
+
+    <a class="mk-card" href="pain-b.html">
+      <span class="letter">Mockup B</span>
+      <h2>Guided wizard</h2>
+      <p class="tagline">"Una cosa alla volta"</p>
+      <p class="desc">Form suddiviso in 3 step: Come ti senti, Dove e cosa, Dettagli. Scale visuali grandi (Pain/Fatigue), zero overwhelm. Entries come righe espandibili.</p>
+      <div class="specs">
+        <span>Ideale mobile</span>
+        <span>Più focus ma più tap</span>
+        <span>Ottimo per nuovi utenti</span>
+      </div>
+      <div class="footer-link">Esplora B →</div>
+    </a>
+
+    <a class="mk-card" href="pain-c.html">
+      <span class="letter">Mockup C</span>
+      <h2>Dense dashboard</h2>
+      <p class="tagline">"Tutto in vista, nessuno scroll"</p>
+      <p class="desc">Due colonne: metriche con bar scale a sinistra, tag in tabs a destra. Entries raggruppate per giorno con sparkline di pain/fatigue. Per uso quotidiano.</p>
+      <div class="specs">
+        <span>Power user friendly</span>
+        <span>Intimidante al primo uso</span>
+        <span>Pattern visibili subito</span>
+      </div>
+      <div class="footer-link">Esplora C →</div>
+    </a>
+  </div>
+</div>
+</body>
+</html>

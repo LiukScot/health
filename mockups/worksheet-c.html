@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Worksheet C · Prompt / answer pairs</title>
+<link rel="stylesheet" href="tokens.css">
+<style>
+  .page {
+    display: grid;
+    gap: var(--gap-page);
+    max-width: 1240px;
+    margin: 0 auto;
+    padding: var(--gap-page);
+  }
+  h1.page-title {
+    margin: 0;
+    font-size: var(--text-title);
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    text-box: trim-both cap alphabetic;
+  }
+  .prose { max-width: 68ch; }
+
+  /* The worksheet as a dialogue: the prompt speaks, you answer under
+     it. Answered pairs collapse to text — the page fills up with your
+     words, not with empty boxes (audit C5's inverse). */
+  .thread { display: grid; gap: var(--gap-block); }
+  .pair { display: grid; gap: var(--gap-tight); }
+  .pair .who {
+    font-size: var(--text-nano);
+    font-weight: 800;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--muted-soft);
+  }
+  .pair .q {
+    margin: 0;
+    justify-self: start;
+    max-width: 52ch;
+    padding: 10px 14px;
+    border-radius: var(--radius-md) var(--radius-md) var(--radius-md) 4px;
+    background: color-mix(in srgb, var(--accent) 9%, transparent);
+    color: var(--text);
+    font-size: 14px;
+    line-height: 1.5;
+  }
+  .pair .q b { color: var(--accent); font-weight: 700; }
+  .pair textarea, .pair input[type="text"] {
+    background: var(--card-strong);
+  }
+  .pair.answered .a {
+    margin: 0;
+    padding: 10px 14px;
+    justify-self: end;
+    max-width: 52ch;
+    border-radius: var(--radius-md) var(--radius-md) 4px var(--radius-md);
+    background: var(--card-soft);
+    font-size: 14px;
+    line-height: 1.5;
+  }
+  .pair.answered .edit {
+    justify-self: end;
+    font-size: var(--text-micro);
+    color: var(--muted-soft);
+    background: none;
+    border: 0;
+    padding: 0;
+    cursor: pointer;
+    font-family: inherit;
+  }
+  .pair.answered .edit:hover { color: var(--text); }
+
+  .meta-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--gap-item);
+    align-items: end;
+    justify-content: space-between;
+  }
+  .field-narrow { display: grid; gap: var(--gap-tight); max-width: 240px; }
+  .actions { display: flex; gap: var(--gap-item); justify-content: flex-end; }
+
+  @media (max-width: 720px) {
+    .page { padding: var(--gap-block); gap: var(--gap-block); }
+    .pair .q, .pair.answered .a { max-width: 100%; }
+  }
+</style>
+</head>
+<body>
+<div class="mockup-frame" style="max-width:1240px;padding-bottom:0">
+  <div class="mockup-tag">Worksheet · Variant C</div>
+  <h1 class="mockup-title">Prompt / answer pairs</h1>
+  <p class="mockup-subtitle">The worksheet as a dialogue: prompts read like a therapist's questions, answers collapse to text once given. Answers: R2 radically, symptom 3, C5.</p>
+  <nav class="mockup-nav">
+    <a href="index.html">Index</a>
+    <a href="worksheet-a.html">A · Numbered steps</a>
+    <a href="worksheet-b.html">B · Staged cards</a>
+    <a class="current" href="worksheet-c.html">C · Prompt / answer pairs</a>
+  </nav>
+</div>
+
+<div class="page">
+  <h1 class="page-title">CBT Thought Response</h1>
+
+  <div class="meta-row prose" style="width:100%">
+    <label class="field-narrow">
+      <span class="field-label">Date &amp; time</span>
+      <input type="datetime-local" value="2026-08-13T12:34">
+    </label>
+    <span style="font-size:var(--text-control);color:var(--muted);font-variant-numeric:tabular-nums"><b style="color:var(--text)">2</b> of 10 answered</span>
+  </div>
+
+  <div class="thread prose">
+    <div class="pair answered">
+      <span class="who">1 · Situation</span>
+      <p class="q">What's the <b>situation</b>?</p>
+      <p class="a">Standup ran long, I got cut off mid-sentence.</p>
+      <button class="edit">edit answer</button>
+    </div>
+
+    <div class="pair answered">
+      <span class="who">2 · Thoughts</span>
+      <p class="q">What <b>thoughts</b> are running through your mind? How much do you believe each one?</p>
+      <p class="a">Everyone thinks I ramble — 80%. They'd rather I didn't speak — 45%.</p>
+      <button class="edit">edit answer</button>
+    </div>
+
+    <div class="pair">
+      <span class="who">3 · Helpful reasoning</span>
+      <p class="q">Any <b>helpful reasoning</b> to counter this thought pattern?</p>
+      <textarea rows="3" placeholder="Write here…"></textarea>
+    </div>
+
+    <div class="pair">
+      <span class="who">4 · Main unhelpful thought</span>
+      <p class="q">The <b>single thought</b> you want to work on.</p>
+      <input type="text" placeholder="Write here…">
+    </div>
+
+    <div class="pair" style="opacity:.55">
+      <span class="who">5 · Effect of believing it</span>
+      <p class="q">What would change if you <b>didn't believe it</b>?</p>
+      <textarea rows="2" placeholder="Write here…"></textarea>
+    </div>
+
+    <p style="margin:0;font-size:var(--text-hint);color:var(--muted-soft)">…prompts 6–10 follow the same shape: evidence for / against, alternative explanation, worst / best scenario, advice to a friend, productive response.</p>
+  </div>
+
+  <div class="actions prose" style="width:100%">
+    <button class="btn">Cancel edit</button>
+    <button class="btn btn-primary">Save entry</button>
+  </div>
+
+  <div>
+    <span class="section-heading">Past entries</span>
+    <p style="margin:8px 0 0;font-size:var(--text-hint);color:var(--muted)">Row anatomy is designed in the entries mockup — an expanded entry re-uses the same pair layout, showing only answered prompts.</p>
+  </div>
+</div>
+</body>
+</html>

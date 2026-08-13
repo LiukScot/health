@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Diary · Staged cards</title>
+<link rel="stylesheet" href="tokens.css">
+<style>
+  .page {
+    display: grid;
+    gap: var(--gap-page);
+    max-width: 1240px;
+    margin: 0 auto;
+    padding: var(--gap-page);
+  }
+  h1.page-title {
+    margin: 0;
+    font-size: var(--text-title);
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    text-box: trim-both cap alphabetic;
+  }
+
+  .split {
+    display: grid;
+    grid-template-columns: 220px minmax(0, 1fr);
+    gap: var(--gap-page);
+    align-items: start;
+  }
+
+  .rail {
+    position: sticky;
+    top: var(--gap-block);
+    display: grid;
+    gap: 4px;
+  }
+  .rail a {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 10px;
+    border-radius: var(--radius-sm);
+    text-decoration: none;
+    color: var(--muted);
+    font-size: var(--text-control);
+    font-weight: 600;
+  }
+  .rail a.current { color: var(--accent); background: color-mix(in srgb, var(--accent) 10%, transparent); }
+  .rail a.done { color: var(--text); }
+  .rail .dot {
+    display: grid;
+    place-items: center;
+    width: 22px;
+    height: 22px;
+    border-radius: 999px;
+    font-size: var(--text-micro);
+    font-weight: 800;
+    background: color-mix(in srgb, white 6%, var(--card));
+    color: var(--muted);
+    flex: none;
+  }
+  .rail a.current .dot { background: var(--accent); color: var(--accent-fg); }
+  .rail a.done .dot { background: var(--success); color: var(--success-fg); }
+  .rail .meta {
+    margin-top: var(--gap-item);
+    padding-top: var(--gap-item);
+    border-top: 1px solid var(--border);
+    display: grid;
+    gap: var(--gap-tight);
+  }
+  .rail .quick { display: flex; flex-wrap: wrap; gap: 6px; }
+  .rail .quick .chip { min-height: 26px; padding: 2px 10px; font-size: var(--text-micro); }
+
+  .stages { display: grid; gap: var(--gap-page); }
+  .stage {
+    display: grid;
+    gap: var(--gap-block);
+    padding: var(--gap-block);
+    background: var(--card-soft);
+    border-radius: var(--radius-md);
+  }
+  .stage-head { display: flex; align-items: baseline; gap: 10px; }
+  .stage-kicker {
+    font-size: var(--text-nano);
+    font-weight: 800;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--accent);
+    font-variant-numeric: tabular-nums;
+  }
+  .stage-title {
+    margin: 0;
+    font-size: 17px;
+    font-weight: 800;
+    letter-spacing: -0.01em;
+    text-box: trim-both cap alphabetic;
+  }
+  .stage-aside { margin-left: auto; font-size: var(--text-micro); color: var(--muted-soft); }
+  .field { display: grid; gap: var(--gap-tight); }
+  .field .prompt { margin: 0; font-size: var(--text-hint); color: var(--muted); line-height: 1.5; }
+  .stage input, .stage textarea { background: var(--card-strong); }
+
+  .scale { display: grid; gap: 6px; }
+  .scale .row {
+    display: grid;
+    grid-template-columns: repeat(9, 1fr);
+    gap: 5px;
+  }
+  .scale button {
+    height: 44px;
+    font-size: 16px;
+    font-weight: 700;
+    font-family: inherit;
+    color: var(--muted);
+    background: var(--card-strong);
+    border: 1px solid color-mix(in srgb, var(--border) 40%, transparent);
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+  }
+  .scale button:hover { border-color: var(--border); color: var(--text); }
+  .scale button.on.low  { background: var(--success); border-color: var(--success); color: var(--success-fg); }
+  .scale button.on.mid  { background: var(--warning); border-color: var(--warning); color: var(--warning-fg); }
+  .scale button.on.high { background: var(--danger); border-color: var(--danger); color: var(--text); }
+  .scale .labels {
+    display: flex;
+    justify-content: space-between;
+    font-size: var(--text-micro);
+    color: var(--muted-soft);
+    padding: 0 2px;
+  }
+
+  .chips { display: flex; flex-wrap: wrap; gap: var(--gap-tight); }
+  .add-new {
+    display: inline-flex;
+    align-items: center;
+    min-height: 32px;
+    padding: 4px 12px;
+    font-size: var(--text-hint);
+    font-family: inherit;
+    color: var(--muted);
+    background: transparent;
+    border: 1px dashed var(--border);
+    border-radius: 999px;
+    cursor: pointer;
+  }
+  .add-new:hover { border-color: var(--accent); color: var(--accent); }
+
+  .chip-group { display: grid; gap: 6px; }
+  .chip-group + .chip-group { margin-top: 4px; }
+
+  /* Desktop saves from the rail; this bar exists only where the rail meta is hidden. */
+  .actions { display: none; }
+
+  /* Page selector above the title: New entry | History. */
+  .page-tabs {
+    display: inline-flex;
+    gap: 4px;
+    padding: 4px;
+    background: var(--card-strong);
+    border-radius: 999px;
+    justify-self: start;
+  }
+  .page-tabs a {
+    padding: 6px 14px;
+    border-radius: 999px;
+    font-size: var(--text-control);
+    font-weight: 600;
+    color: var(--muted);
+    text-decoration: none;
+  }
+  .page-tabs a.current { background: var(--accent); color: var(--accent-fg); }
+
+  /* Mobile sticky head: title + progress dots + date, visible while
+     scrolling. Desktop keeps these in the rail instead. */
+  .m-head { display: none; }
+
+  @media (max-width: 900px) {
+    .split { grid-template-columns: minmax(0, 1fr); gap: var(--gap-block); }
+    .rail { position: static; grid-auto-flow: column; grid-auto-columns: max-content; overflow-x: auto; padding-bottom: 4px; }
+    .rail a { padding: 6px 10px; }
+    .rail .label-text { display: none; }
+    .rail .meta { display: none; }
+    .page { padding: var(--gap-block); gap: var(--gap-block); }
+    .actions { display: flex; gap: var(--gap-item); justify-content: flex-end; }
+    .page > .page-title { display: none; }
+    .rail { display: none; }
+    .m-head {
+      display: grid;
+      gap: var(--gap-tight);
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      background: color-mix(in srgb, var(--bg) 92%, transparent);
+      backdrop-filter: blur(8px);
+      margin: 0 calc(-1 * var(--gap-block));
+      padding: var(--gap-item) var(--gap-block);
+      border-bottom: 1px solid color-mix(in srgb, var(--border) 40%, transparent);
+    }
+    .m-head .m-title {
+      margin: 0;
+      font-size: var(--text-title);
+      font-weight: 700;
+      letter-spacing: -0.01em;
+    }
+    .m-head .m-row { display: flex; align-items: center; gap: 6px; }
+    .m-head .dot {
+      display: grid;
+      place-items: center;
+      width: 24px;
+      height: 24px;
+      border-radius: 999px;
+      font-size: var(--text-micro);
+      font-weight: 800;
+      background: color-mix(in srgb, white 6%, var(--card));
+      color: var(--muted);
+    }
+    .m-head .dot.current { background: var(--accent); color: var(--accent-fg); }
+    .m-head .dot.done { background: var(--success); color: var(--success-fg); }
+    .m-head .m-date { margin-left: auto; }
+    .scale button { height: 40px; }
+  }
+</style>
+</head>
+<body>
+<div class="mockup-frame" style="max-width:1240px;padding-bottom:0">
+  <div class="mockup-tag">Diary · Staged cards</div>
+  <h1 class="mockup-title">Diary in the worksheet-B language</h1>
+  <p class="mockup-subtitle">Same anatomy as Pain and CBT/DBT: rail with date + save, three stages on card surfaces. Mood reads upward — the scale bands invert (9 is the good end), the shape stays identical.</p>
+  <nav class="mockup-nav">
+    <a href="index.html">Index</a>
+    <a href="pain-staged.html">Pain · staged</a>
+    <a class="current" href="diary-staged.html">Diary · staged</a>
+    <a href="worksheet-b.html">Reference: Worksheet B</a>
+  </nav>
+</div>
+
+<div class="page">
+    <nav class="page-tabs">
+    <a class="current" href="#">New entry</a>
+    <a href="#">History</a>
+  </nav>
+  <header class="m-head">
+    <h1 class="m-title">Diary</h1>
+    <div class="m-row">
+      <span class="dot done">✓</span>
+      <span class="dot current">2</span>
+      <span class="dot">3</span>
+      <button class="chip m-date">Apr 18, 20:25</button>
+    </div>
+  </header>
+
+  <h1 class="page-title">Diary</h1>
+
+  <div class="split">
+    <nav class="rail">
+      <a class="done" href="#"><span class="dot">✓</span><span class="label-text">How you feel</span></a>
+      <a class="current" href="#"><span class="dot">2</span><span class="label-text">Emotions</span></a>
+      <a href="#"><span class="dot">3</span><span class="label-text">In your words</span></a>
+      <div class="meta">
+        <span class="field-label">Date &amp; time</span>
+        <input type="datetime-local" value="2026-04-18T20:25" style="background:var(--card-strong)">
+        <div class="quick">
+          <button class="chip active">Now</button>
+          <button class="chip">This morning</button>
+        </div>
+        <button class="btn btn-primary" style="margin-top:8px">Save entry</button>
+      </div>
+    </nav>
+
+    <div class="stages">
+      <section class="stage">
+        <div class="stage-head">
+          <span class="stage-kicker">Stage 1</span>
+          <h2 class="stage-title">How you feel</h2>
+        </div>
+        <div class="field">
+          <span class="field-label">Mood</span>
+          <div class="scale">
+            <div class="row">
+              <button class="on high">1</button>
+              <button class="on high">2</button>
+              <button class="on high">3</button>
+              <button class="on mid">4</button>
+              <button class="on mid">5</button>
+              <button class="on low">6</button>
+              <button>7</button>
+              <button>8</button>
+              <button>9</button>
+            </div>
+            <div class="labels"><span>heavy</span><span>okay</span><span>great</span></div>
+          </div>
+        </div>
+        <div class="field">
+          <span class="field-label">Depression</span>
+          <div class="scale">
+            <div class="row">
+              <button class="on low">1</button>
+              <button class="on low">2</button>
+              <button class="on low">3</button>
+              <button class="on mid">4</button>
+              <button>5</button>
+              <button>6</button>
+              <button>7</button>
+              <button>8</button>
+              <button>9</button>
+            </div>
+            <div class="labels"><span>none</span><span>present</span><span>crushing</span></div>
+          </div>
+        </div>
+        <div class="field">
+          <span class="field-label">Anxiety</span>
+          <div class="scale">
+            <div class="row">
+              <button class="on low">1</button>
+              <button class="on low">2</button>
+              <button class="on low">3</button>
+              <button class="on mid">4</button>
+              <button>5</button>
+              <button>6</button>
+              <button>7</button>
+              <button>8</button>
+              <button>9</button>
+            </div>
+            <div class="labels"><span>calm</span><span>tense</span><span>panicked</span></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="stage">
+        <div class="stage-head">
+          <span class="stage-kicker">Stage 2</span>
+          <h2 class="stage-title">Emotions</h2>
+          <span class="stage-aside">optional</span>
+        </div>
+        <div class="chip-group">
+          <span class="field-label">Positive</span>
+          <div class="chips">
+            <button class="chip active">happy</button>
+            <button class="chip">calm</button>
+            <button class="chip active">grateful</button>
+            <button class="chip">energetic</button>
+            <button class="chip">hopeful</button>
+            <button class="chip">relaxed</button>
+            <button class="chip">confident</button>
+            <button class="add-new">+ add</button>
+          </div>
+        </div>
+        <div class="chip-group">
+          <span class="field-label">Negative</span>
+          <div class="chips">
+            <button class="chip">sad</button>
+            <button class="chip">angry</button>
+            <button class="chip active">worried</button>
+            <button class="chip">lonely</button>
+            <button class="chip">overwhelmed</button>
+            <button class="add-new">+ add</button>
+          </div>
+        </div>
+        <div class="chip-group">
+          <span class="field-label">General</span>
+          <div class="chips">
+            <button class="chip">tired</button>
+            <button class="chip">focused</button>
+            <button class="chip">restless</button>
+            <button class="add-new">+ add</button>
+          </div>
+        </div>
+      </section>
+
+      <section class="stage">
+        <div class="stage-head">
+          <span class="stage-kicker">Stage 3</span>
+          <h2 class="stage-title">In your words</h2>
+          <span class="stage-aside">optional</span>
+        </div>
+        <div class="field">
+          <span class="field-label">Description</span>
+          <p class="prompt">What happened today? How did it feel?</p>
+          <textarea rows="4">Long day, but the walk after lunch helped more than I expected.</textarea>
+        </div>
+        <div class="field">
+          <span class="field-label">Gratitude</span>
+          <p class="prompt">One small thing you're glad about.</p>
+          <textarea rows="2"></textarea>
+        </div>
+      </section>
+
+      <div class="actions">
+        <button class="btn btn-primary">Save entry</button>
+      </div>
+    </div>
+  </div>
+
+</div>
+</body>
+</html>

@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Worksheet A · One column, numbered steps</title>
+<link rel="stylesheet" href="tokens.css">
+<style>
+  /* One page grid. Blocks claim a track width by name instead of
+     inheriting whatever the local grid happened to be. */
+  .page {
+    display: grid;
+    gap: var(--gap-page);
+    max-width: 1240px;
+    margin: 0 auto;
+    padding: var(--gap-page);
+  }
+  .prose { max-width: 62ch; }
+
+  h1.page-title {
+    margin: 0;
+    font-size: var(--text-title);
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    text-box: trim-both cap alphabetic;
+  }
+
+  .block { display: grid; gap: var(--gap-page); }
+
+  /* A step: number in the gutter, prompt as persistent text, then the
+     input. The prompt is content, not a placeholder (audit R2). */
+  .step {
+    display: grid;
+    grid-template-columns: 34px minmax(0, 1fr);
+    gap: var(--gap-tight) var(--gap-item);
+    align-items: start;
+  }
+  .step-num {
+    grid-row: 1 / span 3;
+    display: grid;
+    place-items: center;
+    width: 34px;
+    height: 34px;
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--accent) 12%, transparent);
+    color: var(--accent);
+    font-size: var(--text-control);
+    font-weight: 800;
+    font-variant-numeric: tabular-nums;
+  }
+  .step-label {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--text);
+    text-box: trim-both cap alphabetic;
+  }
+  .step-prompt {
+    margin: 0;
+    font-size: var(--text-hint);
+    color: var(--muted);
+    line-height: 1.5;
+  }
+  .step textarea, .step input[type="text"] { margin-top: 4px; }
+  .step.done .step-num { background: var(--success); color: var(--success-fg); }
+
+  /* Stage title outranks a field label by size and weight, not just by
+     tracking (audit H1). */
+  .stage {
+    display: grid;
+    gap: var(--gap-item);
+    padding-top: var(--gap-block);
+    border-top: 1px solid var(--border);
+  }
+  .stage-title {
+    margin: 0;
+    font-size: 17px;
+    font-weight: 800;
+    letter-spacing: -0.01em;
+    color: var(--text);
+    text-box: trim-both cap alphabetic;
+  }
+  .stage-note {
+    margin: 0;
+    font-size: var(--text-hint);
+    color: var(--muted);
+    line-height: 1.5;
+  }
+
+  .meta-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--gap-item);
+    align-items: end;
+    justify-content: space-between;
+  }
+  .field-narrow { display: grid; gap: var(--gap-tight); max-width: 240px; }
+  .progress {
+    font-size: var(--text-control);
+    color: var(--muted);
+    font-variant-numeric: tabular-nums;
+  }
+  .progress b { color: var(--text); }
+
+  .actions {
+    display: flex;
+    gap: var(--gap-item);
+    justify-content: flex-end;
+    align-items: center;
+  }
+
+  @media (max-width: 720px) {
+    .page { padding: var(--gap-block); gap: var(--gap-block); }
+    .block { gap: var(--gap-block); }
+    .step { grid-template-columns: 28px minmax(0, 1fr); }
+    .step-num { width: 28px; height: 28px; }
+  }
+</style>
+</head>
+<body>
+<div class="mockup-frame" style="max-width:1240px;padding-bottom:0">
+  <div class="mockup-tag">Worksheet · Variant A</div>
+  <h1 class="mockup-title">One column, numbered steps</h1>
+  <p class="mockup-subtitle">The sequence is the layout. Prompts stay visible. Answers: H1, R2, reported symptom 3.</p>
+  <nav class="mockup-nav">
+    <a href="index.html">Index</a>
+    <a class="current" href="worksheet-a.html">A · Numbered steps</a>
+    <a href="worksheet-b.html">B · Staged accordion</a>
+    <a href="worksheet-c.html">C · Prompt / answer pairs</a>
+  </nav>
+</div>
+
+<div class="page">
+  <h1 class="page-title">CBT Thought Response</h1>
+
+  <div class="block">
+    <div class="meta-row">
+      <label class="field-narrow">
+        <span class="field-label">Date &amp; time</span>
+        <input type="datetime-local" value="2026-08-13T12:34">
+      </label>
+      <span class="progress"><b>2</b> of 10 answered</span>
+    </div>
+
+    <div class="prose block">
+      <div class="step done">
+        <span class="step-num">1</span>
+        <span class="step-label">Situation</span>
+        <p class="step-prompt">What's the situation?</p>
+        <input type="text" value="Standup ran long, I got cut off mid-sentence.">
+      </div>
+
+      <div class="step done">
+        <span class="step-num">2</span>
+        <span class="step-label">Thoughts</span>
+        <p class="step-prompt">What thoughts are running through your mind? How much do you believe each one?</p>
+        <textarea rows="3">Everyone thinks I ramble — 80%. They'd rather I didn't speak — 45%.</textarea>
+      </div>
+
+      <div class="step">
+        <span class="step-num">3</span>
+        <span class="step-label">Helpful reasoning</span>
+        <p class="step-prompt">Any helpful reasoning to counter this thought pattern?</p>
+        <textarea rows="3"></textarea>
+      </div>
+
+      <div class="step">
+        <span class="step-num">4</span>
+        <span class="step-label">Main unhelpful thought</span>
+        <p class="step-prompt">The single thought you want to work on.</p>
+        <input type="text">
+      </div>
+
+      <div class="step">
+        <span class="step-num">5</span>
+        <span class="step-label">Effect of believing it</span>
+        <p class="step-prompt">What would change if you didn't believe it?</p>
+        <textarea rows="3"></textarea>
+      </div>
+
+      <div class="step">
+        <span class="step-num">6</span>
+        <span class="step-label">Evidence for / against</span>
+        <p class="step-prompt">What supports or rejects this thought?</p>
+        <textarea rows="3"></textarea>
+      </div>
+
+      <p class="step-prompt" style="padding-left:46px;opacity:.6">…steps 7–10 continue: alternative explanation, worst / best scenario, advice to a friend, productive response.</p>
+    </div>
+
+    <div class="actions">
+      <button class="btn">Cancel edit</button>
+      <button class="btn btn-primary">Save entry</button>
+    </div>
+  </div>
+
+  <div class="block">
+    <span class="section-heading">Past entries</span>
+    <p class="step-prompt">Row anatomy is designed in the entries mockup — unchanged here.</p>
+  </div>
+</div>
+
+<div class="page" style="padding-top:0">
+  <hr style="border:0;border-top:1px solid var(--border);width:100%">
+  <h1 class="page-title">DBT Distress Tolerance</h1>
+  <p class="step-prompt prose">Same archetype, but DBT's prompts are grouped into named stages. The stage title is a real heading (17px/800) — it can no longer be mistaken for a field label.</p>
+
+  <div class="block prose">
+    <section class="stage">
+      <h2 class="stage-title">Recognize the emotion</h2>
+      <p class="stage-note">Try naming a more intense form of your emotion — not just sad, maybe distraught; not just mad, maybe appalled.</p>
+      <div class="step">
+        <span class="step-num">1</span>
+        <span class="step-label">Emotion</span>
+        <p class="step-prompt">What emotion are you feeling?</p>
+        <input type="text">
+      </div>
+      <div class="step">
+        <span class="step-num">2</span>
+        <span class="step-label">Affirmation</span>
+        <p class="step-prompt">I can allow myself to feel this. I'm not bad because of it.</p>
+        <textarea rows="2"></textarea>
+      </div>
+    </section>
+
+    <section class="stage">
+      <h2 class="stage-title">Watch the emotion</h2>
+      <p class="stage-note">Watch the emotion and see what it does. It's a wave — float with it instead of getting caught.</p>
+      <div class="step">
+        <span class="step-num">3</span>
+        <span class="step-label">Call it what it is</span>
+        <p class="step-prompt">Name the emotion plainly.</p>
+        <input type="text">
+      </div>
+      <div class="step">
+        <span class="step-num">4</span>
+        <span class="step-label">Where in the body</span>
+        <p class="step-prompt">Where do you notice it?</p>
+        <input type="text">
+      </div>
+    </section>
+
+    <section class="stage">
+      <h2 class="stage-title">Be present</h2>
+      <p class="stage-note">Turn attention back to now. Use your five senses, or your breath, as the anchor.</p>
+      <div class="step">
+        <span class="step-num">5</span>
+        <span class="step-label">Right now</span>
+        <p class="step-prompt">What can you feel, hear, see, smell, or taste?</p>
+        <textarea rows="2"></textarea>
+      </div>
+    </section>
+
+    <p class="stage-note">When the emotion comes back, that's ok. Emotions come and go — watch it again, float with the wave.</p>
+  </div>
+</div>
+</body>
+</html>

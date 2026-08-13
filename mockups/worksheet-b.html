@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Worksheet B · Staged cards + rail</title>
+<link rel="stylesheet" href="tokens.css">
+<style>
+  .page {
+    display: grid;
+    gap: var(--gap-page);
+    max-width: 1240px;
+    margin: 0 auto;
+    padding: var(--gap-page);
+  }
+  h1.page-title {
+    margin: 0;
+    font-size: var(--text-title);
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    text-box: trim-both cap alphabetic;
+  }
+
+  /* Two named tracks: a rail and the content. Not "two halves". */
+  .split {
+    display: grid;
+    grid-template-columns: 220px minmax(0, 1fr);
+    gap: var(--gap-page);
+    align-items: start;
+  }
+
+  .rail {
+    position: sticky;
+    top: var(--gap-block);
+    display: grid;
+    gap: 4px;
+  }
+  .rail a {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 10px;
+    border-radius: var(--radius-sm);
+    text-decoration: none;
+    color: var(--muted);
+    font-size: var(--text-control);
+    font-weight: 600;
+  }
+  .rail a.current { color: var(--accent); background: color-mix(in srgb, var(--accent) 10%, transparent); }
+  .rail a.done { color: var(--text); }
+  .rail .dot {
+    display: grid;
+    place-items: center;
+    width: 22px;
+    height: 22px;
+    border-radius: 999px;
+    font-size: var(--text-micro);
+    font-weight: 800;
+    background: color-mix(in srgb, white 6%, var(--card));
+    color: var(--muted);
+    flex: none;
+  }
+  .rail a.current .dot { background: var(--accent); color: var(--accent-fg); }
+  .rail a.done .dot { background: var(--success); color: var(--success-fg); }
+  .rail .meta {
+    margin-top: var(--gap-item);
+    padding-top: var(--gap-item);
+    border-top: 1px solid var(--border);
+    display: grid;
+    gap: var(--gap-tight);
+  }
+
+  /* A stage is a surface. The card boundary — not proximity — says
+     where the group starts and ends (symptom 5). */
+  .stages { display: grid; gap: var(--gap-page); }
+  .stage {
+    display: grid;
+    gap: var(--gap-block);
+    padding: var(--gap-block);
+    background: var(--card-soft);
+    border-radius: var(--radius-md);
+  }
+  .stage-head { display: flex; align-items: baseline; gap: 10px; }
+  .stage-kicker {
+    font-size: var(--text-nano);
+    font-weight: 800;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--accent);
+    font-variant-numeric: tabular-nums;
+  }
+  .stage-title {
+    margin: 0;
+    font-size: 17px;
+    font-weight: 800;
+    letter-spacing: -0.01em;
+    text-box: trim-both cap alphabetic;
+  }
+  .stage-note {
+    margin: 0;
+    font-size: var(--text-hint);
+    color: var(--muted);
+    line-height: 1.5;
+    padding: 10px 12px;
+    border-radius: var(--radius-sm);
+    background: color-mix(in srgb, var(--accent) 7%, transparent);
+  }
+  .field { display: grid; gap: var(--gap-tight); }
+  .field .prompt { margin: 0; font-size: var(--text-hint); color: var(--muted); line-height: 1.5; }
+  .stage input, .stage textarea { background: var(--card-strong); }
+
+  /* Desktop saves from the rail; this bar exists only where the rail meta is hidden. */
+  .actions { display: none; }
+
+  /* Page selector above the title: New entry | History. */
+  .page-tabs {
+    display: inline-flex;
+    gap: 4px;
+    padding: 4px;
+    background: var(--card-strong);
+    border-radius: 999px;
+    justify-self: start;
+  }
+  .page-tabs a {
+    padding: 6px 14px;
+    border-radius: 999px;
+    font-size: var(--text-control);
+    font-weight: 600;
+    color: var(--muted);
+    text-decoration: none;
+  }
+  .page-tabs a.current { background: var(--accent); color: var(--accent-fg); }
+
+  /* Mobile sticky head: title + progress dots + date, visible while
+     scrolling. Desktop keeps these in the rail instead. */
+  .m-head { display: none; }
+
+  @media (max-width: 900px) {
+    .split { grid-template-columns: minmax(0, 1fr); gap: var(--gap-block); }
+    .rail { position: static; grid-auto-flow: column; grid-auto-columns: max-content; overflow-x: auto; padding-bottom: 4px; }
+    .rail a { padding: 6px 10px; }
+    .rail .label-text { display: none; }
+    .rail .meta { display: none; }
+    .page { padding: var(--gap-block); gap: var(--gap-block); }
+    .actions { display: flex; gap: var(--gap-item); justify-content: flex-end; }
+    .page > .page-title { display: none; }
+    .rail { display: none; }
+    .m-head {
+      display: grid;
+      gap: var(--gap-tight);
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      background: color-mix(in srgb, var(--bg) 92%, transparent);
+      backdrop-filter: blur(8px);
+      margin: 0 calc(-1 * var(--gap-block));
+      padding: var(--gap-item) var(--gap-block);
+      border-bottom: 1px solid color-mix(in srgb, var(--border) 40%, transparent);
+    }
+    .m-head .m-title {
+      margin: 0;
+      font-size: var(--text-title);
+      font-weight: 700;
+      letter-spacing: -0.01em;
+    }
+    .m-head .m-row { display: flex; align-items: center; gap: 6px; }
+    .m-head .dot {
+      display: grid;
+      place-items: center;
+      width: 24px;
+      height: 24px;
+      border-radius: 999px;
+      font-size: var(--text-micro);
+      font-weight: 800;
+      background: color-mix(in srgb, white 6%, var(--card));
+      color: var(--muted);
+    }
+    .m-head .dot.current { background: var(--accent); color: var(--accent-fg); }
+    .m-head .dot.done { background: var(--success); color: var(--success-fg); }
+    .m-head .m-date { margin-left: auto; }
+  }
+</style>
+</head>
+<body>
+<div class="mockup-frame" style="max-width:1240px;padding-bottom:0">
+  <div class="mockup-tag">Worksheet · Variant B</div>
+  <h1 class="mockup-title">Staged cards + progress rail</h1>
+  <p class="mockup-subtitle">Each stage is a surface; the rail names the path and tracks progress. Answers: H1, R2, symptom 3, symptom 5 (groups get a boundary).</p>
+  <nav class="mockup-nav">
+    <a href="index.html">Index</a>
+    <a href="worksheet-a.html">A · Numbered steps</a>
+    <a class="current" href="worksheet-b.html">B · Staged cards</a>
+    <a href="worksheet-c.html">C · Prompt / answer pairs</a>
+  </nav>
+</div>
+
+<div class="page">
+    <nav class="page-tabs">
+    <a class="current" href="#">New entry</a>
+    <a href="#">History</a>
+  </nav>
+  <header class="m-head">
+    <h1 class="m-title">DBT Distress Tolerance</h1>
+    <div class="m-row">
+      <span class="dot done">✓</span>
+      <span class="dot current">2</span>
+      <span class="dot">3</span>
+      <button class="chip m-date">Aug 13, 12:34</button>
+    </div>
+  </header>
+
+  <h1 class="page-title">DBT Distress Tolerance</h1>
+
+  <div class="split">
+    <nav class="rail">
+      <a class="done" href="#"><span class="dot">✓</span><span class="label-text">Recognize the emotion</span></a>
+      <a class="current" href="#"><span class="dot">2</span><span class="label-text">Watch the emotion</span></a>
+      <a href="#"><span class="dot">3</span><span class="label-text">Be present</span></a>
+      <div class="meta">
+        <span class="field-label">Date &amp; time</span>
+        <input type="datetime-local" value="2026-08-13T12:34" style="background:var(--card-strong)">
+        <button class="btn btn-primary" style="margin-top:8px">Save entry</button>
+      </div>
+    </nav>
+
+    <div class="stages">
+      <section class="stage" style="opacity:.75">
+        <div class="stage-head">
+          <span class="stage-kicker">Stage 1 · done</span>
+          <h2 class="stage-title">Recognize the emotion</h2>
+        </div>
+        <p class="stage-note">Try naming a more intense form of your emotion — not just sad, maybe distraught; not just mad, maybe appalled.</p>
+        <div class="field">
+          <span class="field-label">Emotion</span>
+          <p class="prompt">What emotion are you feeling?</p>
+          <input type="text" value="Dread — closer to panic than worry.">
+        </div>
+        <div class="field">
+          <span class="field-label">Affirmation</span>
+          <p class="prompt">I can allow myself to feel this. I'm not bad because of it.</p>
+          <textarea rows="2">I'm allowed to feel this. It will pass.</textarea>
+        </div>
+      </section>
+
+      <section class="stage">
+        <div class="stage-head">
+          <span class="stage-kicker">Stage 2</span>
+          <h2 class="stage-title">Watch the emotion</h2>
+        </div>
+        <p class="stage-note">Watch the emotion and see what it does. It's a wave — float with it instead of getting caught.</p>
+        <div class="field">
+          <span class="field-label">Call it what it is</span>
+          <p class="prompt">Name the emotion plainly.</p>
+          <input type="text">
+        </div>
+        <div class="field">
+          <span class="field-label">Where in the body</span>
+          <p class="prompt">Where do you notice it?</p>
+          <input type="text">
+        </div>
+        <div class="field">
+          <span class="field-label">Body sensation</span>
+          <p class="prompt">What does it feel like physically?</p>
+          <textarea rows="2"></textarea>
+        </div>
+      </section>
+
+      <section class="stage">
+        <div class="stage-head">
+          <span class="stage-kicker">Stage 3</span>
+          <h2 class="stage-title">Be present</h2>
+        </div>
+        <p class="stage-note">Turn attention back to now. Use your five senses, or your breath, as the anchor.</p>
+        <div class="field">
+          <span class="field-label">Right now</span>
+          <p class="prompt">What can you feel, hear, see, smell, or taste?</p>
+          <textarea rows="2"></textarea>
+        </div>
+        <p class="stage-note" style="background:color-mix(in srgb, var(--success) 8%, transparent)">When the emotion comes back, that's ok. Emotions come and go — watch it again, float with the wave.</p>
+      </section>
+
+      <div class="actions">
+        <button class="btn btn-primary">Save entry</button>
+      </div>
+    </div>
+  </div>
+
+</div>
+</body>
+</html>
