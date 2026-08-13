@@ -163,6 +163,21 @@
       font-weight: 700;
       letter-spacing: -0.01em;
     }
+    .m-head .m-titlerow { display: flex; align-items: center; gap: var(--gap-item); }
+    .m-burger {
+      display: inline-grid;
+      place-items: center;
+      width: 38px;
+      height: 38px;
+      flex: none;
+      border: 0;
+      border-radius: var(--radius-sm);
+      background: color-mix(in srgb, white 6%, var(--card));
+      color: var(--text);
+      cursor: pointer;
+    }
+    .m-burger svg { display: block; }
+
     .m-head .m-row { display: flex; align-items: center; gap: 6px; }
     .m-head .dot {
       display: grid;
@@ -200,7 +215,10 @@
     <a href="#">History</a>
   </nav>
   <header class="m-head">
-    <h1 class="m-title">DBT Distress Tolerance</h1>
+    <div class="m-titlerow">
+      <button class="m-burger" aria-label="Open navigation" aria-haspopup="dialog"><svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M2 4.5h14M2 9h14M2 13.5h14"/></svg></button>
+      <h1 class="m-title">DBT Distress Tolerance</h1>
+    </div>
     <div class="m-row">
       <span class="dot done">✓</span>
       <span class="dot current">2</span>
