@@ -63,7 +63,3 @@ export function diaryPreview(entry: DiaryEntry): string {
   return moodBits || desc || "—";
 }
 
-export function formatMetricDisplay(value: number | null | undefined, fractionDigits = 0): string {
-  if (value == null || Number.isNaN(Number(value))) return "—";
-  return Number(value).toLocaleString(undefined, { maximumFractionDigits: fractionDigits });
-}

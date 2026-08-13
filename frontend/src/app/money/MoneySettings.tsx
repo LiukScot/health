@@ -38,7 +38,7 @@ function PreferencesBlock({ showZeroAssets, onToggleShowZeroAssets }: Pick<Money
     <div className={ROW}>
       <div className="flex flex-col gap-[2px] min-w-0">
         <label htmlFor={id} className="text-sm font-bold text-text cursor-pointer">Show zero-value assets</label>
-        <span id={hintId} className="text-xs text-muted">Keep assets you have fully sold off visible in lists and charts.</span>
+        <span id={hintId} className="text-xs text-muted">Keep assets you have fully sold off visible in lists and charts. Same switch as the one on the dashboard.</span>
       </div>
       <div className="flex items-center gap-2 flex-shrink-0">
         <input
@@ -50,7 +50,7 @@ function PreferencesBlock({ showZeroAssets, onToggleShowZeroAssets }: Pick<Money
           checked={showZeroAssets}
           onChange={(e) => onToggleShowZeroAssets(e.target.checked)}
         />
-        <span className="text-control text-muted">{showZeroAssets ? "Shown" : "Hidden"}</span>
+        <span className="text-control text-muted">{showZeroAssets ? "On" : "Off"}</span>
       </div>
     </div>
   );

@@ -129,12 +129,7 @@ export function StageScale({
 const STEPPER_BTN =
   "grid place-items-center w-9 h-9 min-h-9 p-0 text-lg text-text bg-card-strong border border-border rounded-full shadow-none cursor-pointer transition-[color,border-color] duration-150 ease-[ease] hover:text-accent hover:border-accent hover:bg-card-strong";
 
-/*
- * A count, as a control you can see. The screen-helpers CoffeeStepper
- * carries its own label and a placeholder bar so it lines up with the old
- * BarMetric rows; inside a stage the field label is already there and the
- * bar has nothing to line up with.
- */
+/* A count, as a control you can see. */
 export function StageStepper({
   label,
   value,

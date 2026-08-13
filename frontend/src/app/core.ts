@@ -338,10 +338,10 @@ export type ThemeId = (typeof themeIds)[number];
 export const DEFAULT_THEME: ThemeId = "dark";
 // `bg` previews each theme as a swatch without mounting it; the value mirrors
 // the theme's --bg token in styles.css and is guarded by a test.
-export const THEMES: { id: ThemeId; label: string; bg: string }[] = [
-  { id: "oled", label: "OLED", bg: "#000000" },
-  { id: "dark", label: "Dark", bg: "#121214" },
-  { id: "grey", label: "Grey", bg: "#1f1f23" },
+export const THEMES: { id: ThemeId; label: string; bg: string; card: string; text: string; hint: string }[] = [
+  { id: "dark", label: "Dark", bg: "#121214", card: "#161619", text: "#f5f5f7", hint: "Default" },
+  { id: "grey", label: "Grey", bg: "#1f1f23", card: "#2a2a30", text: "#f5f5f7", hint: "Flat surfaces, softer contrast" },
+  { id: "oled", label: "OLED", bg: "#000000", card: "#0c0c0e", text: "#c9c9ce", hint: "True black, dimmed text" },
 ];
 
 export function toDateKey(value: Date) {

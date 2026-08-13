@@ -1,5 +1,7 @@
 import { useState } from "react";
-import { BarMetric, CoffeeStepper, PAGE_TITLE } from "./screen-helpers";
+import { PAGE_TITLE } from "./screen-helpers";
+import { STAGE, StageField, StageHead, StageScale, StageStepper } from "./staged";
+import { FIELD_LINE_INPUT } from "../components/ui/FieldLine";
 import { Button } from "../components/ui/Button";
 import { FieldLine } from "../components/ui/FieldLine";
 import { SectionHead } from "./shared";
@@ -59,7 +61,7 @@ export function DesignSystemSection() {
 
       <div className="grid gap-8 mt-8 items-start wide:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] wide:gap-12">
         <div className="block min-w-0 [&>section+section]:mt-3">
-          <EntriesHeading className="mt-0 mb-5">Foundations</EntriesHeading>
+          <EntriesHeading className="mb-5">Foundations</EntriesHeading>
 
           <section className="flex flex-col gap-3">
             <SectionHead title="Colors" aside="CSS custom properties" variant="ds" />
@@ -140,7 +142,7 @@ export function DesignSystemSection() {
         </div>
 
         <div className="block min-w-0 [&>section+section]:mt-3 wide:border-l wide:border-border wide:pl-12">
-          <EntriesHeading className="mt-0 mb-5">Components</EntriesHeading>
+          <EntriesHeading className="mb-5">Components</EntriesHeading>
 
           <section className="flex flex-col gap-3">
             <SectionHead title="Buttons" aside="Pill utility" variant="ds" />
@@ -179,11 +181,27 @@ export function DesignSystemSection() {
           </section>
 
           <section className="flex flex-col gap-3">
-            <SectionHead title="Metrics" aside="BarMetric · Stepper" variant="ds" />
-            <div className="flex flex-col gap-2">
-              <BarMetric label="Mood" value={moodDemo} fractionDigits={1} higherIsBetter onChange={setMoodDemo} />
-              <BarMetric label="Pain" value={painDemo} onChange={setPainDemo} />
-              <CoffeeStepper value={coffeeDemo} onChange={setCoffeeDemo} />
+            <SectionHead title="Metrics" aside="StageScale · StageStepper" variant="ds" />
+            <div className="flex flex-col gap-5">
+              <StageField label="Mood">
+                <StageScale label="Mood" value={moodDemo} higherIsBetter onChange={setMoodDemo} ends={["heavy", "okay", "great"]} />
+              </StageField>
+              <StageField label="Pain">
+                <StageScale label="Pain" value={painDemo} onChange={setPainDemo} ends={["mild", "moderate", "severe"]} />
+              </StageField>
+              <StageField label="Coffee">
+                <StageStepper label="coffee" value={coffeeDemo} onChange={setCoffeeDemo} />
+              </StageField>
+            </div>
+          </section>
+
+          <section className="flex flex-col gap-3">
+            <SectionHead title="Stage" aside="StageHead · StageField" variant="ds" />
+            <div className={STAGE}>
+              <StageHead step={1} title="How bad is it?" aside="optional" />
+              <StageField label="Situation" prompt="The prompt is a line, not a placeholder: it has to survive being answered.">
+                <input type="text" className={FIELD_LINE_INPUT} readOnly value="Started after the meeting" />
+              </StageField>
             </div>
           </section>
 
