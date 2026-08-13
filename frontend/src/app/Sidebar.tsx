@@ -119,6 +119,9 @@ export function Sidebar({ nav, onNav, realm, onRealmChange, collapsed, onToggle,
           <button
             key={item}
             className={`${NAV_ITEM} ${nav === item ? NAV_ITEM_ACTIVE : NAV_ITEM_IDLE}`}
+            // The active item was marked by tint alone, which a screen
+            // reader cannot see.
+            aria-current={nav === item ? "page" : undefined}
             onClick={() => onNav(item)}
             title={collapsed ? navLabels[item] : undefined}
           >

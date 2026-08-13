@@ -5,6 +5,7 @@ import { matchesMemorableDate, type useMemorableDays } from "../hooks/use-memora
 import { Button, buttonClass } from "../components/ui/Button";
 import { EntriesHeading } from "./entries";
 import { MemorableDayModal, type DraftState } from "./memorable-day-modal";
+import { PAGE_TITLE } from "./screen-helpers";
 import {
   MEMO_BACKDROP,
   MEMO_MODAL,
@@ -177,7 +178,7 @@ export function MemorableDaysSection({ memorable }: Props) {
     <section className="@container p-2 relative">
       <div>
         <div>
-          <h1 className="m-0 mb-10 [text-box:trim-both_cap_alphabetic] text-title font-bold tracking-tight text-text">Memorable days</h1>
+          <h1 className={`${PAGE_TITLE} mb-page`}>Memorable days</h1>
           <SectionHead title="Calendar" variant="dashboard" />
         </div>
       </div>

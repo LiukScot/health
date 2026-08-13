@@ -315,15 +315,28 @@ function App() {
         mobileOpen={mobileSidebarOpen}
       />
 
-      <main className={`max-w-[1500px] w-full overflow-y-auto [padding:clamp(20px,4vw,40px)] max-mobile:p-5 ${mobileSidebarOpen ? "max-mobile:overflow-hidden" : ""}`}>
-        <button
-          type="button"
-          className="mobile-menu-btn hidden max-mobile:flex max-mobile:items-center max-mobile:justify-center w-[40px] h-[40px] max-mobile:mb-3 max-mobile:ml-2 p-0 border-0 rounded-sm bg-card-soft text-muted cursor-pointer shadow-none hover:text-text hover:bg-card-strong"
-          onClick={() => setMobileSidebarOpen(true)}
-          aria-label="Open menu"
-        >
-          <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
-        </button>
+      {/* No overflow-y here. main has no height bound — the grid is
+          min-h-screen and grows — so it never scrolled; the document
+          does. The dead overflow still created a scroll container, which
+          is what kept the sticky head below from ever sticking. Locking
+          scroll behind the mobile drawer is the grid's h-[100dvh] +
+          overflow-hidden above, which does bound its height. */}
+      <main className="max-w-[1500px] w-full [padding:clamp(20px,4vw,40px)] max-mobile:p-5">
+        {/* Mobile head. Sticky, because the menu used to scroll away with
+            the page: reaching the nav from the bottom of a long entry
+            form meant scrolling back to the top. It bleeds past main's
+            padding so the blurred strip reaches both edges. */}
+        <header className="hidden max-mobile:flex max-mobile:items-center gap-3 sticky top-0 z-10 -mx-5 -mt-5 mb-5 px-5 py-3 bg-[color-mix(in_srgb,var(--bg)_92%,transparent)] backdrop-blur-md border-b border-[color-mix(in_srgb,var(--border)_40%,transparent)]">
+          <button
+            type="button"
+            className="mobile-menu-btn flex items-center justify-center w-[40px] h-[40px] flex-none p-0 border-0 rounded-sm bg-card-soft text-muted cursor-pointer shadow-none hover:text-text hover:bg-card-strong"
+            onClick={() => setMobileSidebarOpen(true)}
+            aria-label="Open menu"
+          >
+            <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+          </button>
+          <span className="[text-box:trim-both_cap_alphabetic] text-title font-bold tracking-tight text-text truncate">{navLabels[nav]}</span>
+        </header>
 
         <SectionErrorBoundary resetKey={nav}>
         <Suspense fallback={<p className="text-muted text-control">Loading…</p>}>

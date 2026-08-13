@@ -2,6 +2,7 @@ import { lazy, Suspense } from "react";
 import type { useAuth } from "../hooks/use-auth";
 import { navLabels, type InlineMessage, type NavItem } from "./core";
 import { SettingsScreen } from "./SettingsPanel";
+import { PAGE_TITLE } from "./screen-helpers";
 import type { MoneySettingsProps } from "./money/MoneySettings";
 
 const DesignSystemSection = lazy(() =>
@@ -42,7 +43,7 @@ export function SettingsSection({
 
   return (
     <section className="@container">
-      <h1 className="m-0 mb-10 [text-box:trim-both_cap_alphabetic] text-title font-bold tracking-tight text-text">{navLabels[nav]}</h1>
+      <h1 className={`${PAGE_TITLE} mb-page`}>{navLabels[nav]}</h1>
       <div className="max-w-[80ch]">
         <SettingsScreen nav={nav} money={money} {...rest} />
       </div>

@@ -1,6 +1,6 @@
 import { lazy, Suspense, useId } from "react";
 import { SectionHead } from "../shared";
-import { EmptyState } from "../screen-helpers";
+import { EmptyState, PAGE_TITLE } from "../screen-helpers";
 import { CARD_GRID, DASH_CARD, CARD_H3, CARD_VALUE } from "../cards";
 import { formatCurrency, formatPercent, formatTxDate, type AssetStats, type DashboardKpis } from "./core";
 
@@ -39,7 +39,7 @@ export function MoneyDashboardSection({
 
   return (
     <section className="@container">
-      <h1 className="m-0 mb-10 [text-box:trim-both_cap_alphabetic] text-title font-bold tracking-tight text-text">Dashboard</h1>
+      <h1 className={`${PAGE_TITLE} mb-page`}>Dashboard</h1>
 
       {isLoading ? <p className="text-muted text-control">Loading portfolio…</p> : null}
 
