@@ -9,8 +9,8 @@ import { csvToList, listToCsv, mergeOptions } from "./core";
 // idle/active color utilities don't collide on source order.
 const CHIP_SHAPE =
   "inline-flex items-center gap-2 px-3 py-1 min-h-8 rounded-full text-hint leading-none border-0 shadow-none transition-[color,background] duration-150 ease-[ease]";
-const CHIP_IDLE = "text-muted bg-[color-mix(in_srgb,white_5%,var(--card))]";
-const CHIP_IDLE_HOVER = "hover:text-text hover:bg-[color-mix(in_srgb,white_9%,var(--card))]";
+const CHIP_IDLE = "text-muted bg-[var(--control)]";
+const CHIP_IDLE_HOVER = "hover:text-text hover:bg-[var(--control-hover)]";
 // A filled pill, not a tinted one: at 10% accent the selected state was
 // indistinguishable from idle in the Settings realm, where --accent is --text.
 const CHIP_ACTIVE = "text-accent-fg bg-accent font-semibold";
@@ -340,7 +340,7 @@ export function MultiSelectField({ label, fieldKey, value, options, onChange, do
           <>
             <button
               type="button"
-              className={`${CHIP_SHAPE} text-muted-soft bg-[color-mix(in_srgb,white_5%,var(--card))] font-medium enabled:hover:text-text enabled:hover:bg-[color-mix(in_srgb,white_9%,var(--card))] disabled:opacity-40 disabled:cursor-not-allowed`}
+              className={`${CHIP_SHAPE} text-muted-soft bg-[var(--control)] font-medium enabled:hover:text-text enabled:hover:bg-[var(--control-hover)] disabled:opacity-40 disabled:cursor-not-allowed`}
               onClick={() => setAddingOption(true)}
               disabled={editOptionsMode}
             >
@@ -348,7 +348,7 @@ export function MultiSelectField({ label, fieldKey, value, options, onChange, do
             </button>
             <button
               type="button"
-              className={`border-0 rounded-full px-3 py-1 min-h-8 text-hint font-medium leading-none shadow-none cursor-pointer transition-[color,background] duration-150 ease-[ease] ${editOptionsMode ? "text-accent bg-[color-mix(in_srgb,var(--accent)_10%,transparent)]" : "text-muted-soft bg-[color-mix(in_srgb,white_5%,var(--card))] hover:text-text hover:bg-[color-mix(in_srgb,white_9%,var(--card))]"}`}
+              className={`border-0 rounded-full px-3 py-1 min-h-8 text-hint font-medium leading-none shadow-none cursor-pointer transition-[color,background] duration-150 ease-[ease] ${editOptionsMode ? "text-accent bg-[color-mix(in_srgb,var(--accent)_10%,transparent)]" : "text-muted-soft bg-[var(--control)] hover:text-text hover:bg-[var(--control-hover)]"}`}
               aria-pressed={editOptionsMode}
               onClick={() => setEditMode(!editOptionsMode)}
             >

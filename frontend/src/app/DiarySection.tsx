@@ -67,7 +67,7 @@ export function DiarySection({
   onViewChange: (next: EntryView) => void;
 }) {
   const [moodTab, setMoodTab] = useState<"positive" | "negative" | "general">("positive");
-  const [stage, setStage] = useState(0);
+  const [stage, setStage] = useState(-1);
 
   const moodLevels = diaryForm.watch(["moodLevel", "depressionLevel", "anxietyLevel"]);
   const [moodLevel, depressionLevel, anxietyLevel] = moodLevels;
@@ -75,10 +75,12 @@ export function DiarySection({
   const negativeMoods = diaryForm.watch("negativeMoods");
   const generalMoods = diaryForm.watch("generalMoods");
 
+  // Touched, not filled: a default the reader never chose is not progress.
+  const touched = diaryForm.formState.dirtyFields;
   const steps = [
-    { title: "How you feel", done: moodLevel != null || depressionLevel != null || anxietyLevel != null },
-    { title: "Emotions", done: !!(positiveMoods || negativeMoods || generalMoods) },
-    { title: "In your words", done: !!(diaryForm.watch("description") || diaryForm.watch("gratitude")) },
+    { title: "How you feel", done: !!(touched.moodLevel || touched.depressionLevel || touched.anxietyLevel) },
+    { title: "Emotions", done: !!(touched.positiveMoods || touched.negativeMoods || touched.generalMoods) },
+    { title: "In your words", done: !!(touched.description || touched.gratitude) },
   ];
 
   const moodTabs = [
@@ -201,12 +203,6 @@ export function DiarySection({
             </StageField>
           </section>
 
-          <div className="hidden max-mobile:flex justify-end gap-3">
-            {editingDiary ? <Button type="button" onClick={onCancelEdit}>Cancel edit</Button> : null}
-            <Button type="submit" variant={diaryMutationState.isSuccess ? "success" : "primary"}>
-              {diaryMutationState.isSuccess ? "✓ Saved" : editingDiary ? "Update entry" : "Save entry"}
-            </Button>
-          </div>
         </div>
       </form>
       ) : (

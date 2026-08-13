@@ -98,10 +98,11 @@ export function CbtSection({
   ];
   // The expanded entry still lists every field, in the same order.
   const cbtFields = cbtStages.flatMap((stageGroup) => stageGroup.fields);
-  const [stage, setStage] = useState(0);
+  const [stage, setStage] = useState(-1);
+  const touched = cbtForm.formState.dirtyFields;
   const steps = cbtStages.map((stageGroup) => ({
     title: stageGroup.title,
-    done: stageGroup.fields.some((f) => !!cbtForm.watch(f.key)),
+    done: stageGroup.fields.some((f) => !!touched[f.key]),
   }));
 
 
@@ -150,12 +151,6 @@ export function CbtSection({
             </section>
           ))}
 
-          <div className="hidden max-mobile:flex justify-end gap-3">
-            {editingCbt ? <Button type="button" onClick={onCancelEdit}>Cancel edit</Button> : null}
-            <Button type="submit" variant={cbtMutationState.isSuccess ? "success" : "primary"}>
-              {cbtMutationState.isSuccess ? "✓ Saved" : editingCbt ? "Update entry" : "Save entry"}
-            </Button>
-          </div>
         </div>
       </form>
       ) : (

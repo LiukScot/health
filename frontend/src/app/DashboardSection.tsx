@@ -91,7 +91,7 @@ export function DashboardSection({
     <section className={PAGE}>
       <h1 className={PAGE_TITLE}>Dashboard</h1>
 
-      <div className="flex flex-wrap gap-3 items-end mb-5">
+      <div className="flex flex-wrap gap-3 items-end">
         <label className="flex flex-col gap-2">
           <span className={FIELD_LINE_LABEL}>From</span>
           <DateInput value={dashboardFrom} onChange={(v) => onDateChange("from", v)} ariaLabel="From date" />

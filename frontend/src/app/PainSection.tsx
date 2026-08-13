@@ -81,7 +81,7 @@ export function PainSection({
   const [painTab, setPainTab] = useState<PainFieldKey>("area");
   // Which stage the rail highlights. Clicking a step scrolls to it; the
   // stages all stay rendered, so this only drives the highlight.
-  const [stage, setStage] = useState(0);
+  const [stage, setStage] = useState(-1);
 
   const [painLevel, fatigueLevel, coffeeCount] = painForm.watch(["painLevel", "fatigueLevel", "coffeeCount"]);
 
@@ -97,10 +97,16 @@ export function PainSection({
   const painOptionsForTab = (id: PainFieldKey) => painFieldOptions[id];
 
 
+  /*
+   * Touched, not filled. Medicines arrive preselected from Settings, so a
+   * value-based check marked stage 2 done before the reader had done
+   * anything — a tick that says "handled" about a default.
+   */
+  const touched = painForm.formState.dirtyFields;
   const steps = [
-    { title: "How bad", done: painLevel != null || fatigueLevel != null || coffeeCount != null },
-    { title: "Where & what", done: PAIN_TABS.some((t) => watchedValues[t.id]) },
-    { title: "Details", done: !!painForm.watch("note") },
+    { title: "How bad", done: !!(touched.painLevel || touched.fatigueLevel || touched.coffeeCount) },
+    { title: "Where & what", done: PAIN_TABS.some((t) => touched[t.id]) },
+    { title: "Details", done: !!touched.note },
   ];
 
   const tabLabel = PAIN_TABS.find((t) => t.id === painTab)?.label ?? "";
@@ -204,13 +210,6 @@ export function PainSection({
             </StageField>
           </section>
 
-          {/* Mobile only: the rail that holds Save is hidden there. */}
-          <div className="hidden max-mobile:flex justify-end gap-3">
-            {editingPain ? <Button type="button" onClick={onCancelEdit}>Cancel edit</Button> : null}
-            <Button type="submit" variant={painMutationState.isSuccess ? "success" : "primary"}>
-              {painMutationState.isSuccess ? "✓ Saved" : editingPain ? "Update entry" : "Save entry"}
-            </Button>
-          </div>
         </div>
       </form>
       ) : (

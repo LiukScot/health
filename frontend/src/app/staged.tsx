@@ -183,38 +183,45 @@ export function StageRail({
 }: {
   steps: RailStep[];
   current: number;
+  /** -1 until the reader picks one: highlighting step 1 on arrival claims a position nobody took. */
   onJump: (index: number) => void;
-  /** Date, quick chips and the save button. */
+  /** Date and the save button. */
   children: ReactNode;
 }) {
   return (
-    <nav className="sticky top-5 grid gap-1 content-start max-mobile:hidden" aria-label="Stages">
-      {steps.map((step, index) => {
-        const isCurrent = index === current;
-        const tone = isCurrent
-          ? "text-accent bg-[color-mix(in_srgb,var(--accent)_10%,transparent)]"
-          : step.done
-            ? "text-text"
-            : "text-muted";
-        const dotTone = isCurrent
-          ? "bg-accent text-accent-fg"
-          : step.done
-            ? "bg-success text-success-fg"
-            : "bg-[color-mix(in_srgb,white_6%,var(--card))] text-muted";
-        return (
-          <button
-            key={step.title}
-            type="button"
-            className={`${RAIL_STEP} ${tone}`}
-            aria-current={isCurrent ? "step" : undefined}
-            onClick={() => onJump(index)}
-          >
-            <span className={`${RAIL_DOT} ${dotTone}`} aria-hidden="true">{step.done ? "✓" : index + 1}</span>
-            <span>{step.title}</span>
-          </button>
-        );
-      })}
-      <div className="grid gap-2 mt-3 pt-3 border-t border-border">{children}</div>
+    <nav className="grid gap-1 content-start min-w-0 wide:sticky wide:top-5" aria-label="Stages">
+      {/* Named steps need the column beside the stages. Below `wide` there
+          is only one column, so the nav becomes a plain block above the
+          form and keeps only what it must carry: the date and Save. The
+          stage dots live in the mobile sticky head instead. */}
+      <div className="grid gap-1 max-wide:hidden">
+        {steps.map((step, index) => {
+          const isCurrent = index === current;
+          const tone = isCurrent
+            ? "text-accent bg-[color-mix(in_srgb,var(--accent)_10%,transparent)]"
+            : step.done
+              ? "text-text"
+              : "text-muted";
+          const dotTone = isCurrent
+            ? "bg-accent text-accent-fg"
+            : step.done
+              ? "bg-success text-success-fg"
+              : "bg-[var(--control)] text-muted";
+          return (
+            <button
+              key={step.title}
+              type="button"
+              className={`${RAIL_STEP} ${tone}`}
+              aria-current={isCurrent ? "step" : undefined}
+              onClick={() => onJump(index)}
+            >
+              <span className={`${RAIL_DOT} ${dotTone}`} aria-hidden="true">{step.done ? "✓" : index + 1}</span>
+              <span>{step.title}</span>
+            </button>
+          );
+        })}
+      </div>
+      <div className="grid gap-2 wide:mt-3 wide:pt-3 wide:border-t wide:border-border">{children}</div>
     </nav>
   );
 }

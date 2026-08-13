@@ -113,10 +113,11 @@ export function DbtSection({
     },
   ];
 
-  const [stage, setStage] = useState(0);
+  const [stage, setStage] = useState(-1);
+  const touched = dbtForm.formState.dirtyFields;
   const steps = dbtGroups.map((group) => ({
     title: group.title,
-    done: group.fields.some((f) => !!dbtForm.watch(f.key)),
+    done: group.fields.some((f) => !!touched[f.key]),
   }));
 
 
@@ -181,12 +182,6 @@ export function DbtSection({
             When the emotion comes back, that's ok. Emotions come and go — watch it again, float with the wave.
           </p>
 
-          <div className="hidden max-mobile:flex justify-end gap-3">
-            {editingDbt ? <Button type="button" onClick={onCancelEdit}>Cancel edit</Button> : null}
-            <Button type="submit" variant={dbtMutationState.isSuccess ? "success" : "primary"}>
-              {dbtMutationState.isSuccess ? "✓ Saved" : editingDbt ? "Update entry" : "Save entry"}
-            </Button>
-          </div>
         </div>
       </form>
       ) : (
