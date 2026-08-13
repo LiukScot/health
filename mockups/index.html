@@ -96,6 +96,21 @@
     text-transform: uppercase;
     margin: 20px 0 12px;
   }
+  .mk-card.superseded { opacity: 0.55; }
+  .mk-card.superseded .letter { color: var(--muted-soft); }
+  .mk-card.superseded .footer-link { color: var(--muted); }
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    align-self: start;
+    padding: 3px 10px;
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+  }
+  .badge.picked { background: color-mix(in srgb, var(--success) 16%, transparent); color: var(--success); }
+  .badge.out { background: color-mix(in srgb, var(--muted) 14%, transparent); color: var(--muted); }
   .alternatives-title {
     font-size: 11px;
     font-weight: 700;
@@ -112,12 +127,14 @@
     <div class="mockup-tag">World mockups</div>
     <h1>Design directions</h1>
     <p>Mockup per il refactor UI (#196), archetipo per archetipo, più il vecchio set del Pain redesign.</p>
+    <p style="margin-top:10px"><strong style="color:var(--success)">Scelto:</strong> Worksheet B per CBT/DBT, e Pain/Diary ridisegnati nello stesso linguaggio. Le quattro schermate di inserimento condividono una sola anatomia: rail di stage a sinistra su desktop, testata sticky su mobile, selettore <em>New entry / History</em> sopra il titolo, spacing a due livelli (40 tra i blocchi, scala piccola dentro).</p>
   </div>
 
-  <p class="chosen-section-title" style="color:var(--accent)">Worksheet archetype (CBT / DBT) — #196, in review</p>
+  <p class="chosen-section-title">✓ Worksheet archetype (CBT / DBT) — scelto</p>
   <div class="card-grid">
-    <a class="mk-card" href="worksheet-a.html">
+    <a class="mk-card superseded" href="worksheet-a.html">
       <span class="letter">Worksheet A</span>
+      <span class="badge out">Scartato</span>
       <h2>One column, numbered steps</h2>
       <p class="tagline">"La sequenza è il layout"</p>
       <p class="desc">Colonna unica a larghezza di lettura, step numerati, prompt sempre visibili sotto la label. Le stage DBT diventano heading veri (17px/800).</p>
@@ -125,39 +142,43 @@
         <span>Ordine ovvio senza leggere il sorgente</span>
         <span>Fix H1 + R2 con il minimo di struttura</span>
         <span>Più scroll su desktop</span>
+        <span>Perché no: nessun confine di gruppo, le stage restano prossimità</span>
       </div>
       <div class="footer-link">Esplora A →</div>
     </a>
-    <a class="mk-card" href="worksheet-b.html">
+    <a class="mk-card chosen" href="worksheet-b.html">
       <span class="letter">Worksheet B</span>
+      <span class="badge picked">✓ Scelto — CBT / DBT</span>
       <h2>Staged cards + rail</h2>
       <p class="tagline">"Ogni stage è una superficie"</p>
       <p class="desc">Stage su card con titolo grande e rail di progresso sticky. Il confine del gruppo lo dà la card, non la prossimità — risponde anche al sintomo 5 (Pain/Diary squished).</p>
       <div class="specs">
         <span>Progresso e posizione sempre visibili</span>
         <span>Gerarchia a 4 livelli dimostrata</span>
-        <span>Più cromo; rail superflua per CBT piatto</span>
+        <span>Diventa il linguaggio anche di Pain e Diary</span>
       </div>
       <div class="footer-link">Esplora B →</div>
     </a>
-    <a class="mk-card" href="worksheet-c.html">
+    <a class="mk-card superseded" href="worksheet-c.html">
       <span class="letter">Worksheet C</span>
+      <span class="badge out">Scartato</span>
       <h2>Prompt / answer pairs</h2>
       <p class="tagline">"Il worksheet come dialogo"</p>
       <p class="desc">I prompt sono domande del terapeuta, le risposte collassano in testo una volta date. La pagina si riempie delle tue parole, non di box vuoti.</p>
       <div class="specs">
         <span>R2 risolto alla radice</span>
         <span>Entry espansa riusa lo stesso layout (C5)</span>
-        <span>Più lontano dal resto dell'app</span>
+        <span>Perché no: troppo lontano dal resto dell'app</span>
       </div>
       <div class="footer-link">Esplora C →</div>
     </a>
   </div>
 
-  <p class="chosen-section-title" style="color:var(--accent)">Entry forms (Pain / Diary) — #196, in review</p>
+  <p class="chosen-section-title">✓ Entry forms (Pain / Diary) — scelto</p>
   <div class="card-grid">
-    <a class="mk-card" href="pain-staged.html">
+    <a class="mk-card chosen" href="pain-staged.html">
       <span class="letter">Pain · Staged</span>
+      <span class="badge picked">✓ Scelto — Pain</span>
       <h2>Pain nel linguaggio di Worksheet B</h2>
       <p class="tagline">"Il wizard, ma coerente"</p>
       <p class="desc">I tre step del wizard (How bad → Where &amp; what → Details) diventano tre stage su card, con rail sticky. Data e Save vivono nella rail: salvare dopo lo stage 1 è normale, non una scorciatoia.</p>
@@ -168,8 +189,9 @@
       </div>
       <div class="footer-link">Esplora →</div>
     </a>
-    <a class="mk-card" href="diary-staged.html">
+    <a class="mk-card chosen" href="diary-staged.html">
       <span class="letter">Diary · Staged</span>
+      <span class="badge picked">✓ Scelto — Diary</span>
       <h2>Diary nel linguaggio di Worksheet B</h2>
       <p class="tagline">"Stesso guscio, bande invertite"</p>
       <p class="desc">How you feel → Emotions → In your words. Mood legge verso l'alto: le bande colore si invertono (9 è il lato buono), la forma resta identica a Pain.</p>
@@ -182,11 +204,12 @@
     </a>
   </div>
 
-  <p class="alternatives-title">Pain redesign (shipped)</p>
-  <p class="chosen-section-title">✓ Chosen direction</p>
+  <p class="alternatives-title">Pain redesign (2025) — superato da Pain · Staged</p>
+  <p class="desc" style="max-width:720px;font-size:13px;color:var(--muted);line-height:1.5;margin:0 0 12px">Questo set precede la #196 e ha prodotto il Pain attuale in produzione (D). Resta come riferimento storico: il dense form di D non convive con l'anatomia staged, quindi viene sostituito, non affiancato.</p>
   <div class="card-grid" style="grid-template-columns: 1fr; margin-bottom:12px;">
-    <a class="mk-card chosen" href="pain-d.html">
+    <a class="mk-card superseded" href="pain-d.html">
       <span class="letter">Mockup D · Hybrid</span>
+      <span class="badge out">In produzione — da sostituire</span>
       <h2>Dense form + expandable log</h2>
       <p class="tagline">"Form di C, lista di B"</p>
       <p class="desc">Form dashboard-style di C (bar scale colorate, tab per i tag) per inserire veloce. Lista espandibile di B per consultare le entries passate. Due task, due UI.</p>
@@ -194,14 +217,16 @@
         <span>Inserimento veloce come C</span>
         <span>Consultazione pulita come B</span>
         <span>Nessuna sparkline (già c'è la Dashboard)</span>
+        <span>Perché no ora: due colonne squished, niente ordine di lettura</span>
+        <span>Perché no ora: due colonne squished, niente ordine di lettura</span>
       </div>
       <div class="footer-link">Esplora D →</div>
     </a>
   </div>
 
-  <p class="alternatives-title">Earlier alternatives (reference)</p>
+  <p class="alternatives-title">Alternative del 2025 (riferimento)</p>
   <div class="card-grid">
-    <a class="mk-card" href="pain-a.html">
+    <a class="mk-card superseded" href="pain-a.html">
       <span class="letter">Mockup A</span>
       <h2>Progressive disclosure</h2>
       <p class="tagline">"Mostra poco, espandi al bisogno"</p>
@@ -214,7 +239,7 @@
       <div class="footer-link">Esplora A →</div>
     </a>
 
-    <a class="mk-card" href="pain-b.html">
+    <a class="mk-card superseded" href="pain-b.html">
       <span class="letter">Mockup B</span>
       <h2>Guided wizard</h2>
       <p class="tagline">"Una cosa alla volta"</p>
@@ -222,12 +247,12 @@
       <div class="specs">
         <span>Ideale mobile</span>
         <span>Più focus ma più tap</span>
-        <span>Ottimo per nuovi utenti</span>
+        <span>Confluito in Pain · Staged: scale grandi e ordine, senza gli screen separati</span>
       </div>
       <div class="footer-link">Esplora B →</div>
     </a>
 
-    <a class="mk-card" href="pain-c.html">
+    <a class="mk-card superseded" href="pain-c.html">
       <span class="letter">Mockup C</span>
       <h2>Dense dashboard</h2>
       <p class="tagline">"Tutto in vista, nessuno scroll"</p>
