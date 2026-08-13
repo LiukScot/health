@@ -112,7 +112,7 @@ export function Select({ value, onValueChange, options, ariaLabel, disabled, pla
       <button
         ref={triggerRef}
         type="button"
-        className="appearance-none inline-flex items-center justify-between gap-2 w-full bg-[color-mix(in_srgb,white_3%,var(--bg))] border-0 rounded-sm px-3 py-2 text-text text-control font-medium font-body cursor-pointer text-left transition-[background,box-shadow] duration-150 ease-[ease] hover:bg-[color-mix(in_srgb,white_5%,var(--bg))] focus-visible:bg-[color-mix(in_srgb,white_5%,var(--bg))] focus-visible:shadow-[inset_0_0_0_1px_var(--accent)] focus-visible:outline-none disabled:cursor-not-allowed disabled:text-muted-soft data-[empty=true]:text-muted-soft [[data-theme=oled]_&]:bg-card-soft [[data-theme=oled]_&]:hover:bg-[color-mix(in_srgb,white_6%,var(--card-soft))] [[data-theme=oled]_&]:focus-visible:bg-[color-mix(in_srgb,white_6%,var(--card-soft))]"
+        className="appearance-none inline-flex items-center justify-between gap-2 w-full bg-[var(--control)] border-0 rounded-sm px-3 py-2 text-text text-control font-medium font-body cursor-pointer text-left transition-[background,box-shadow] duration-150 ease-[ease] hover:bg-[var(--control-hover)] focus-visible:bg-[var(--control-hover)] focus-visible:shadow-[inset_0_0_0_1px_var(--accent)] focus-visible:outline-none disabled:cursor-not-allowed disabled:text-muted-soft data-[empty=true]:text-muted-soft"
         aria-label={ariaLabel}
         aria-haspopup="listbox"
         aria-expanded={open}
@@ -143,7 +143,7 @@ export function Select({ value, onValueChange, options, ariaLabel, disabled, pla
             <li
               key={option.value}
               id={`${optionBaseId}-${index}`}
-              className="flex items-center gap-2 px-3 py-2 rounded-sm text-text text-control font-medium font-body cursor-pointer select-none data-[active=true]:bg-[color-mix(in_srgb,white_6%,var(--bg))] aria-selected:bg-accent aria-selected:text-accent-fg [[data-theme=oled]_&]:data-[active=true]:bg-[color-mix(in_srgb,white_6%,var(--card-soft))]"
+              className="flex items-center gap-2 px-3 py-2 rounded-sm text-text text-control font-medium font-body cursor-pointer select-none data-[active=true]:bg-[var(--control)] aria-selected:bg-accent aria-selected:text-accent-fg"
               role="option"
               aria-selected={option.value === value}
               data-active={index === activeIndex ? "true" : undefined}

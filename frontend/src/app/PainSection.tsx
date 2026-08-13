@@ -11,7 +11,7 @@ import {
   MultiSelectField,
 } from "./shared";
 import { EmptyState, PAGE, PAGE_TITLE } from "./screen-helpers";
-import { STAGE, STAGES, STAGE_SPLIT, StageField, StageHead, StageProgress, StageRail, StageScale, StageStepper } from "./staged";
+import { FLAT_ACTIONS, STAGE, STAGES, STAGE_SPLIT, StageField, StageHead, StageProgress, StageRail, StageScale, StageStepper } from "./staged";
 import { bandNine, painPreview, formatEntrySummaryDate } from "./screen-format";
 import { Button } from "../components/ui/Button";
 import { FieldLine, FIELD_LINE_INPUT } from "../components/ui/FieldLine";
@@ -151,12 +151,6 @@ export function PainSection({
               el.showPicker?.();
             }}
           />
-          <Button type="submit" variant={painMutationState.isSuccess ? "success" : "primary"}>
-            {painMutationState.isSuccess ? "✓ Saved" : editingPain ? "Update entry" : "Save entry"}
-          </Button>
-          {editingPain ? (
-            <Button type="button" onClick={onCancelEdit}>Cancel edit</Button>
-          ) : null}
         </StageRail>
 
         <div className={STAGES}>
@@ -213,6 +207,16 @@ export function PainSection({
             </StageField>
           </section>
 
+
+          {/* The end of the form, at the end of the form: Save is what
+              closes the thing you were filling in, not a piece of the
+              navigation beside it. */}
+          <div className={FLAT_ACTIONS}>
+            {editingPain ? <Button type="button" onClick={onCancelEdit}>Cancel edit</Button> : null}
+            <Button type="submit" variant={painMutationState.isSuccess ? "success" : "primary"}>
+              {painMutationState.isSuccess ? "✓ Saved" : editingPain ? "Update entry" : "Save entry"}
+            </Button>
+          </div>
         </div>
       </form>
       ) : (

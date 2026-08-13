@@ -6,7 +6,7 @@ import {
 } from "./core";
 import { AnimatedEditingLabel } from "./shared";
 import { EmptyState, PAGE, PAGE_TITLE } from "./screen-helpers";
-import { STAGE, STAGES, STAGE_SPLIT, StageField, StageHead, StageProgress, StageRail } from "./staged";
+import { FLAT_ACTIONS, STAGE, STAGES, STAGE_SPLIT, StageField, StageHead, StageProgress, StageRail } from "./staged";
 import { formatEntrySummaryDate } from "./screen-format";
 import { Button } from "../components/ui/Button";
 import { FieldLine, FIELD_LINE_INPUT } from "../components/ui/FieldLine";
@@ -132,10 +132,6 @@ export function CbtSection({
               el.showPicker?.();
             }}
           />
-          <Button type="submit" variant={cbtMutationState.isSuccess ? "success" : "primary"}>
-            {cbtMutationState.isSuccess ? "✓ Saved" : editingCbt ? "Update entry" : "Save entry"}
-          </Button>
-          {editingCbt ? <Button type="button" onClick={onCancelEdit}>Cancel edit</Button> : null}
         </StageRail>
 
         <div className={STAGES}>
@@ -154,6 +150,16 @@ export function CbtSection({
             </section>
           ))}
 
+
+          {/* The end of the form, at the end of the form: Save is what
+              closes the thing you were filling in, not a piece of the
+              navigation beside it. */}
+          <div className={FLAT_ACTIONS}>
+            {editingCbt ? <Button type="button" onClick={onCancelEdit}>Cancel edit</Button> : null}
+            <Button type="submit" variant={cbtMutationState.isSuccess ? "success" : "primary"}>
+              {cbtMutationState.isSuccess ? "✓ Saved" : editingCbt ? "Update entry" : "Save entry"}
+            </Button>
+          </div>
         </div>
       </form>
       ) : (
