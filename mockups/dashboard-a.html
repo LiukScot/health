@@ -39,7 +39,7 @@
 
   /* Tier 1: one number the page is about. Tier 2: supporting stats.
      Explicit columns per breakpoint — an orphan card cannot happen (H2). */
-  .kpi-row { display: grid; grid-template-columns: minmax(0, 1.6fr) repeat(3, minmax(0, 1fr)); gap: var(--gap-item); }
+  .kpi-row { display: grid; grid-template-columns: minmax(0, 1.6fr) repeat(4, minmax(0, 1fr)); gap: var(--gap-item); }
   .kpi-label {
     font-size: var(--text-nano);
     font-weight: 800;
@@ -48,6 +48,7 @@
     color: var(--muted);
   }
   .kpi-value { font-size: 18px; font-weight: 700; letter-spacing: -0.01em; }
+  .kpi-sub { font-size: var(--text-micro); color: var(--muted); }
   .hero .kpi-value { font-size: 34px; font-weight: 800; letter-spacing: -0.02em; }
   .delta {
     justify-self: start;
@@ -65,11 +66,6 @@
   .pos { color: var(--success); }
   .neg { color: var(--danger); }
 
-  /* A single surface with internal dividers: three numbers that belong
-     together read as one fact, not three orphanable cards. */
-  .triple { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); padding: 0; overflow: hidden; }
-  .triple > div { display: grid; gap: var(--gap-tight); padding: var(--gap-block); }
-  .triple > div + div { border-left: 1px solid color-mix(in srgb, var(--border) 35%, transparent); }
 
   .asset-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--gap-item); }
   .asset-head { display: flex; align-items: center; gap: var(--gap-tight); }
@@ -126,8 +122,6 @@
     .page { padding: var(--gap-block); gap: var(--gap-block); }
     .kpi-row { grid-template-columns: repeat(2, minmax(0, 1fr)); }
     .kpi-row .hero { grid-column: 1 / -1; }
-    .triple { grid-template-columns: minmax(0, 1fr); }
-    .triple > div + div { border-left: 0; border-top: 1px solid color-mix(in srgb, var(--border) 35%, transparent); }
     .asset-grid, .chart-row, .two-col { grid-template-columns: minmax(0, 1fr); }
   }
 </style>
@@ -136,7 +130,7 @@
 <div class="mockup-frame" style="max-width:1240px;padding-bottom:0">
   <div class="mockup-tag">Dashboard · Variant A</div>
   <h1 class="mockup-title">Hero + tiers</h1>
-  <p class="mockup-subtitle">One number the page is about, supporting stats a tier below, charts on the same card surface as everything else. Both realms in one file to prove the shared anatomy (C3). Explicit grid columns — an orphan card cannot happen (H2, #16). Skeletons replace each card 1:1 while loading (#17).</p>
+  <p class="mockup-subtitle">One number the page is about, supporting stats a tier below, charts on the same card surface as everything else. Both realms in one file to prove the shared anatomy (C3). Explicit grid columns — an orphan card cannot happen (H2, #16). Skeletons replace each card 1:1 while loading (#17). CHOSEN — with B's Money grouping: no Every month section (monthly net is a Portfolio card), charts as their own section.</p>
   <nav class="mockup-nav">
     <a href="index.html">Index</a>
     <a class="current" href="dashboard-a.html">A · Hero + tiers</a>
@@ -160,6 +154,11 @@
         <span class="delta up">▲ +€12.00 · +0.48% all time</span>
       </article>
       <article class="card">
+        <span class="kpi-label">Monthly net</span>
+        <span class="kpi-value neg">−€23.00</span>
+        <span class="kpi-sub">€2 in · €25 out</span>
+      </article>
+      <article class="card">
         <span class="kpi-label">Assets</span>
         <span class="kpi-value">2</span>
       </article>
@@ -176,22 +175,27 @@
 
   <section class="dash-section">
     <div class="section-row">
-      <span class="section-heading">Every month</span>
+      <span class="section-heading">Charts</span>
     </div>
-    <article class="card triple">
-      <div>
-        <span class="kpi-label">Income</span>
-        <span class="kpi-value">€2.00</span>
-      </div>
-      <div>
-        <span class="kpi-label">Expense</span>
-        <span class="kpi-value">€25.00</span>
-      </div>
-      <div>
-        <span class="kpi-label">Net</span>
-        <span class="kpi-value neg">−€23.00</span>
-      </div>
-    </article>
+    <div class="chart-row">
+      <article class="card">
+        <span class="chart-title">Allocation</span>
+        <div class="donut-wrap">
+          <div class="donut" role="img" aria-label="Allocation: btp 51.8%, revolut 48.2%"></div>
+          <div class="legend">
+            <div class="row"><span class="swatch" style="background:#34d399"></span> btp <span class="val">51.8%</span></div>
+            <div class="row"><span class="swatch" style="background:#e8e8ec"></span> revolut <span class="val">48.2%</span></div>
+          </div>
+        </div>
+      </article>
+      <article class="card">
+        <span class="chart-title">PnL per asset</span>
+        <div class="bars" role="img" aria-label="PnL per asset: revolut +€12.00, btp €0.00">
+          <div class="bar"><span class="pos" style="font-weight:700">+€12</span><div class="fill" style="height:96px"></div><span>revolut</span></div>
+          <div class="bar"><span style="font-weight:700">€0</span><div class="fill" style="height:3px;opacity:.4"></div><span>btp</span></div>
+        </div>
+      </article>
+    </div>
   </section>
 
   <section class="dash-section">
@@ -225,25 +229,6 @@
           <div><dt class="kpi-label">PnL</dt><dd class="kpi-value pos" style="margin:0">€12.00</dd></div>
           <div><dt class="kpi-label">PnL %</dt><dd class="kpi-value pos" style="margin:0">1.00%</dd></div>
         </dl>
-      </article>
-    </div>
-    <div class="chart-row">
-      <article class="card">
-        <span class="chart-title">Allocation</span>
-        <div class="donut-wrap">
-          <div class="donut" role="img" aria-label="Allocation: btp 51.8%, revolut 48.2%"></div>
-          <div class="legend">
-            <div class="row"><span class="swatch" style="background:#34d399"></span> btp <span class="val">51.8%</span></div>
-            <div class="row"><span class="swatch" style="background:#e8e8ec"></span> revolut <span class="val">48.2%</span></div>
-          </div>
-        </div>
-      </article>
-      <article class="card">
-        <span class="chart-title">PnL per asset</span>
-        <div class="bars" role="img" aria-label="PnL per asset: revolut +€12.00, btp €0.00">
-          <div class="bar"><span class="pos" style="font-weight:700">+€12</span><div class="fill" style="height:96px"></div><span>revolut</span></div>
-          <div class="bar"><span style="font-weight:700">€0</span><div class="fill" style="height:3px;opacity:.4"></div><span>btp</span></div>
-        </div>
       </article>
     </div>
   </section>
@@ -289,13 +274,17 @@
         <span class="kpi-value">5.67</span>
         <span class="delta up">▼ −3%</span>
       </article>
+      <article class="card">
+        <span class="kpi-label">Entries</span>
+        <span class="kpi-value">38</span>
+        <span class="kpi-sub">20 journal · 18 pain</span>
+      </article>
     </div>
   </section>
 
   <section class="dash-section">
     <div class="section-row">
       <span class="section-heading">Metrics over time</span>
-      <span class="aside">20 journal · 18 pain entries</span>
     </div>
     <article class="card">
       <div class="filters">

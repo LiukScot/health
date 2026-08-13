@@ -127,7 +127,7 @@
     <div class="mockup-tag">World mockups</div>
     <h1>Design directions</h1>
     <p>Mockup per il refactor UI (#196), archetipo per archetipo, più il vecchio set del Pain redesign.</p>
-    <p style="margin-top:10px"><strong style="color:var(--success)">Scelto:</strong> Worksheet B per CBT/DBT, e Pain/Diary ridisegnati nello stesso linguaggio. Le quattro schermate di inserimento condividono una sola anatomia: rail di stage a sinistra su desktop, testata sticky su mobile, selettore <em>New entry / History</em> sopra il titolo, spacing a due livelli (40 tra i blocchi, scala piccola dentro).</p>
+    <p style="margin-top:10px"><strong style="color:var(--success)">Scelto:</strong> Worksheet B per CBT/DBT, Pain/Diary nello stesso linguaggio, Dashboard A (con i gruppi di B su Money). Le quattro schermate di inserimento condividono una sola anatomia: rail di stage a sinistra su desktop, testata sticky su mobile, selettore <em>New entry / History</em> sopra il titolo, spacing a due livelli (40 tra i blocchi, scala piccola dentro).</p>
   </div>
 
   <p class="chosen-section-title">✓ Worksheet archetype (CBT / DBT) — scelto</p>
@@ -204,29 +204,31 @@
     </a>
   </div>
 
-  <p class="chosen-section-title" style="color:var(--accent)">Dashboard archetype (Health / Money) — #196, in review</p>
+  <p class="chosen-section-title">✓ Dashboard archetype (Health / Money) — scelto</p>
   <div class="card-grid">
-    <a class="mk-card" href="dashboard-a.html">
+    <a class="mk-card chosen" href="dashboard-a.html">
       <span class="letter">Dashboard A</span>
-      <h2>Hero + tiers</h2>
+      <span class="badge picked">✓ Scelto — Health / Money</span>
+      <h2>Hero + tiers, gruppi di B su Money</h2>
       <p class="tagline">"Un numero, poi il resto"</p>
       <p class="desc">Una metrica hero grande, stat di supporto un livello sotto, grafici su card con heading coerenti. Colonne esplicite per breakpoint: la card orfana non può esistere (H2, #16). Entrambi i realm nello stesso file (C3).</p>
       <div class="specs">
         <span>Gerarchia chiara: la pagina "parla" di un numero</span>
-        <span>Every month come card unica a 3 colonne</span>
-        <span>Più verticale; asset cards non scalano oltre ~10</span>
+        <span>Da B: niente sezione Every month, il net è una card di Portfolio</span>
+        <span>Da B: i chart sono una sezione a sé, non una coda di By asset</span>
       </div>
-      <div class="footer-link">Esplora A →</div>
+      <div class="footer-link">Esplora →</div>
     </a>
-    <a class="mk-card" href="dashboard-b.html">
+    <a class="mk-card superseded" href="dashboard-b.html">
       <span class="letter">Dashboard B</span>
+      <span class="badge out">Scartato — raggruppamento confluito in A</span>
       <h2>Strip + table</h2>
       <p class="tagline">"I numeri sono la didascalia"</p>
       <p class="desc">KPI in una strip unica con divisori, grafici in testa, asset in tabella con colonne allineate. Più denso di A, scala meglio con molti asset.</p>
       <div class="specs">
         <span>Nessun orfano possibile per costruzione</span>
         <span>Tabella: confronto numerico verticale</span>
-        <span>Meno gerarchia: nessun numero domina</span>
+        <span>Perché no: nessun numero domina, e la tabella serve oltre ~10 asset</span>
       </div>
       <div class="footer-link">Esplora B →</div>
     </a>
