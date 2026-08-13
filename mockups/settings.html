@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Settings · Card anatomy</title>
+<link rel="stylesheet" href="tokens.css">
+<style>
+  /* Settings realm: the accent is the text colour (styles.css). */
+  .page {
+    --accent: var(--text);
+    display: grid;
+    gap: var(--gap-page);
+    max-width: 860px;
+    margin: 0 auto;
+    padding: var(--gap-page);
+  }
+  h1.page-title {
+    margin: 0;
+    font-size: var(--text-title);
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    text-box: trim-both cap alphabetic;
+  }
+
+  .set-section { display: grid; gap: var(--gap-block); }
+  .section-row { display: flex; align-items: baseline; gap: var(--gap-item); }
+  .section-row .aside { margin-left: auto; font-size: var(--text-micro); color: var(--muted-soft); }
+  .section-sub { margin: 0; font-size: var(--text-hint); color: var(--muted); line-height: 1.5; max-width: 60ch; }
+
+  .card {
+    display: grid;
+    gap: var(--gap-item);
+    padding: var(--gap-block);
+    background: var(--card-soft);
+    border-radius: var(--radius-md);
+    min-width: 0;
+  }
+  .field { display: grid; gap: var(--gap-tight); }
+  .card input { background: var(--card-strong); }
+  .card-actions { display: flex; justify-content: flex-end; gap: var(--gap-tight); }
+
+  .profile { display: flex; align-items: center; gap: var(--gap-item); }
+  .avatar {
+    display: grid;
+    place-items: center;
+    width: 44px; height: 44px;
+    border-radius: 999px;
+    background: var(--card-strong);
+    font-weight: 800;
+    flex: none;
+  }
+  .profile .who { display: grid; gap: 2px; }
+  .profile .who strong { font-size: 15px; }
+  .profile .who span { font-size: var(--text-control); color: var(--muted); }
+  .profile .btn { margin-left: auto; }
+
+  /* Theme picker: labelled preview cards, not bare colour dots (R4). */
+  .themes { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--gap-item); }
+  .theme {
+    display: grid;
+    gap: var(--gap-tight);
+    padding: var(--gap-item);
+    background: var(--card-soft);
+    border: 1px solid transparent;
+    border-radius: var(--radius-md);
+    cursor: pointer;
+  }
+  .theme.active { border-color: var(--text); }
+  .theme .swatchbox {
+    height: 56px;
+    border-radius: var(--radius-sm);
+    border: 1px solid color-mix(in srgb, var(--border) 45%, transparent);
+    display: grid;
+    align-content: space-between;
+    padding: 8px;
+  }
+  .theme .bar { height: 7px; border-radius: 4px; width: 70%; }
+  .theme .bar.short { width: 40%; }
+  .theme .name { display: flex; align-items: center; gap: 6px; font-size: var(--text-control); font-weight: 600; }
+  .theme .name .tick { color: var(--success); font-weight: 800; }
+  .theme .hintline { font-size: var(--text-micro); color: var(--muted-soft); }
+
+  /* One control, one sentence, one state (R5). */
+  .pref { display: flex; align-items: flex-start; gap: var(--gap-item); }
+  .pref .text { display: grid; gap: 2px; }
+  .pref .text strong { font-size: 14px; }
+  .pref .text span { font-size: var(--text-hint); color: var(--muted); }
+  .switch {
+    margin-left: auto;
+    flex: none;
+    width: 40px; height: 24px;
+    border-radius: 999px;
+    border: 0;
+    background: var(--card-strong);
+    position: relative;
+    cursor: pointer;
+  }
+  .switch::after {
+    content: "";
+    position: absolute;
+    top: 3px; left: 3px;
+    width: 18px; height: 18px;
+    border-radius: 999px;
+    background: var(--muted);
+    transition: transform 0.15s ease, background 0.15s ease;
+  }
+  .switch[aria-checked="true"] { background: var(--success); }
+  .switch[aria-checked="true"]::after { transform: translateX(16px); background: var(--success-fg); }
+
+  .asset-row { display: flex; align-items: center; gap: var(--gap-item); }
+  .asset-row .swatch { width: 12px; height: 12px; border-radius: 4px; border: 1px solid var(--border); flex: none; }
+  .asset-row strong { font-size: 14px; }
+  .asset-row select { margin-left: auto; width: auto; min-width: 120px; padding: 6px 10px; font-size: var(--text-control); }
+
+  .danger-card {
+    border: 1px solid color-mix(in srgb, var(--danger) 35%, transparent);
+    background: color-mix(in srgb, var(--danger) 5%, var(--card-soft));
+  }
+  .btn-danger {
+    background: transparent;
+    border-color: color-mix(in srgb, var(--danger) 50%, transparent);
+    color: var(--danger);
+  }
+  .btn-danger:hover { border-color: var(--danger); }
+
+  .realm-divider {
+    display: flex; align-items: center; gap: var(--gap-item);
+    color: var(--muted-soft); font-size: var(--text-micro); font-weight: 800;
+    letter-spacing: 0.16em; text-transform: uppercase;
+  }
+  .realm-divider::before, .realm-divider::after { content: ""; flex: 1; border-top: 1px dashed var(--border); }
+
+  .m-head { display: none; }
+  @media (max-width: 900px) {
+    .page { padding: var(--gap-block); gap: var(--gap-block); }
+    .page > .page-title { display: none; }
+    .m-head {
+      display: flex;
+      align-items: center;
+      gap: var(--gap-item);
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      background: color-mix(in srgb, var(--bg) 92%, transparent);
+      backdrop-filter: blur(8px);
+      margin: 0 calc(-1 * var(--gap-block));
+      padding: var(--gap-item) var(--gap-block);
+      border-bottom: 1px solid color-mix(in srgb, var(--border) 40%, transparent);
+    }
+    .m-head .m-title { margin: 0; font-size: var(--text-title); font-weight: 700; letter-spacing: -0.01em; }
+    .m-burger {
+      display: inline-grid;
+      place-items: center;
+      width: 38px; height: 38px;
+      flex: none;
+      border: 0;
+      border-radius: var(--radius-sm);
+      background: color-mix(in srgb, white 6%, var(--card));
+      color: var(--text);
+      cursor: pointer;
+    }
+    .m-burger svg { display: block; }
+    .themes { grid-template-columns: minmax(0, 1fr); }
+    .profile { flex-wrap: wrap; }
+    .profile .btn { margin-left: 0; flex-basis: 100%; }
+  }
+</style>
+</head>
+<body>
+<div class="mockup-frame" style="max-width:860px;padding-bottom:0">
+  <div class="mockup-tag">Settings · All pages</div>
+  <h1 class="mockup-title">Settings in the shared card anatomy</h1>
+  <p class="mockup-subtitle">Same rhythm as everywhere else: sections 40 apart, cards as group boundaries, neutral realm accent. Fixes: Log out leaves the password form's column (R3), themes get names and previews instead of bare colour dots (R4), the zero-assets pref becomes one switch with one sentence (R5), with its dashboard twin named. Health/Backup/MCP reuse the identical card anatomy.</p>
+  <nav class="mockup-nav">
+    <a href="index.html">Index</a>
+    <a class="current" href="settings.html">Settings</a>
+  </nav>
+</div>
+
+<!-- ===== ACCOUNT ===== -->
+<div class="page">
+  <header class="m-head">
+    <button class="m-burger" aria-label="Open navigation" aria-haspopup="dialog"><svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M2 4.5h14M2 9h14M2 13.5h14"/></svg></button>
+    <h1 class="m-title">Account</h1>
+  </header>
+  <h1 class="page-title">Account</h1>
+
+  <section class="set-section">
+    <div class="section-row">
+      <span class="section-heading">Profile</span>
+    </div>
+    <article class="card">
+      <div class="profile">
+        <span class="avatar">T</span>
+        <span class="who">
+          <strong>test</strong>
+          <span>test@test.com</span>
+        </span>
+        <button class="btn">Log out</button>
+      </div>
+    </article>
+  </section>
+
+  <section class="set-section">
+    <div class="section-row">
+      <span class="section-heading">Password</span>
+    </div>
+    <article class="card">
+      <div class="field">
+        <label class="field-label" for="cur">Current password</label>
+        <input type="password" id="cur" name="current-password" autocomplete="current-password">
+      </div>
+      <div class="field">
+        <label class="field-label" for="new">New password</label>
+        <input type="password" id="new" name="new-password" autocomplete="new-password">
+      </div>
+      <div class="field">
+        <label class="field-label" for="conf">Confirm</label>
+        <input type="password" id="conf" name="confirm-password" autocomplete="new-password">
+      </div>
+      <div class="card-actions">
+        <button class="btn btn-primary">Change password</button>
+      </div>
+    </article>
+  </section>
+
+  <div class="realm-divider">Appearance · same anatomy</div>
+
+  <section class="set-section">
+    <div class="section-row">
+      <span class="section-heading">Theme</span>
+      <span class="aside">applies to every realm</span>
+    </div>
+    <div class="themes" role="radiogroup" aria-label="Theme">
+      <button class="theme" role="radio" aria-checked="false">
+        <span class="swatchbox" style="background:#121214">
+          <span class="bar" style="background:#161619"></span>
+          <span class="bar short" style="background:#f5f5f7"></span>
+        </span>
+        <span class="name">Dark</span>
+        <span class="hintline">Default</span>
+      </button>
+      <button class="theme active" role="radio" aria-checked="true">
+        <span class="swatchbox" style="background:#1f1f23">
+          <span class="bar" style="background:#2a2a30"></span>
+          <span class="bar short" style="background:#f5f5f7"></span>
+        </span>
+        <span class="name"><span class="tick">✓</span> Grey</span>
+        <span class="hintline">Flat surfaces, softer contrast</span>
+      </button>
+      <button class="theme" role="radio" aria-checked="false">
+        <span class="swatchbox" style="background:#000">
+          <span class="bar" style="background:#0c0c0e"></span>
+          <span class="bar short" style="background:#c9c9ce"></span>
+        </span>
+        <span class="name">OLED</span>
+        <span class="hintline">True black, dimmed text</span>
+      </button>
+    </div>
+  </section>
+
+  <div class="realm-divider">Money · same anatomy</div>
+
+  <section class="set-section">
+    <div class="section-row">
+      <span class="section-heading">Preferences</span>
+    </div>
+    <article class="card">
+      <div class="pref">
+        <span class="text">
+          <strong>Show zero-value assets</strong>
+          <span>Keep assets you have fully sold off visible in lists and charts. Same switch as on the dashboard.</span>
+        </span>
+        <button class="switch" role="switch" aria-checked="false" aria-label="Show zero-value assets"></button>
+      </div>
+    </article>
+  </section>
+
+  <section class="set-section">
+    <div class="section-row">
+      <span class="section-heading">Assets</span>
+      <span class="aside">risk decides the snapshot bucket</span>
+    </div>
+    <article class="card">
+      <div class="asset-row">
+        <span class="swatch" style="background:#34d399"></span>
+        <strong>btp</strong>
+        <select name="risk-btp" id="risk-btp" aria-label="Risk for btp"><option>low</option><option>medium</option><option>high</option><option>liquid</option></select>
+      </div>
+      <div class="asset-row">
+        <span class="swatch" style="background:#e8e8ec"></span>
+        <strong>revolut</strong>
+        <select name="risk-revolut" id="risk-revolut" aria-label="Risk for revolut"><option>low</option><option>medium</option><option>high</option><option>liquid</option></select>
+      </div>
+    </article>
+  </section>
+
+  <section class="set-section">
+    <div class="section-row">
+      <span class="section-heading" style="color:var(--danger)">Danger zone</span>
+    </div>
+    <article class="card danger-card">
+      <p class="section-sub" style="max-width:none">Permanently deletes every transaction, monthly movement, snapshot and asset style on this account. Your health data is not touched. This cannot be undone.</p>
+      <div class="card-actions">
+        <button class="btn btn-danger">Purge money data</button>
+      </div>
+    </article>
+  </section>
+</div>
+</body>
+</html>
