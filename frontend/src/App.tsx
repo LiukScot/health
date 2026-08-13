@@ -53,6 +53,7 @@ function App() {
   // Filled by the sticky head below; the staged screens portal their
   // progress dots into it (see StageHeadSlot).
   const [headSlot, setHeadSlot] = useState<HTMLDivElement | null>(null);
+  const mainRef = useRef<HTMLElement | null>(null);
   const goToNav = (item: NavItem) => { setNav(item); setEntryView("new"); };
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
@@ -112,13 +113,10 @@ function App() {
     return () => window.removeEventListener("keydown", onKeyDown);
   }, [mobileSidebarOpen]);
 
-  // Reset the page scroll position to the top whenever the user navigates
-  // to a different screen, so the new page doesn't start mid-scroll.
-  // The actual scroll container is the document element (<html>), not
-  // .app-main — that one has overflow-y: auto in CSS but no constrained
-  // height, so it never actually overflows.
+  // Reset the scroll position whenever the user navigates, so the new
+  // screen doesn't start mid-scroll.
   useEffect(() => {
-    window.scrollTo(0, 0);
+    mainRef.current?.scrollTo(0, 0);
   }, [nav]);
 
   useEffect(() => {
@@ -320,7 +318,7 @@ function App() {
 
   return (
     <>
-    <div className={`grid grid-cols-[220px_1fr] min-h-screen transition-[grid-template-columns] duration-[250ms] ease-[ease] max-mobile:grid-cols-1 ${sidebarCollapsed ? "mobile:grid-cols-[62px_1fr]" : ""} ${mobileSidebarOpen ? "max-mobile:h-[100dvh] max-mobile:overflow-hidden" : ""}`}>
+    <div className={`grid grid-cols-[220px_1fr] h-dvh overflow-hidden transition-[grid-template-columns] duration-[250ms] ease-[ease] max-mobile:grid-cols-1 ${sidebarCollapsed ? "mobile:grid-cols-[62px_1fr]" : ""}`}>
       <Sidebar
         nav={nav}
         onNav={(item) => { goToNav(item); setMobileSidebarOpen(false); }}
@@ -332,18 +330,26 @@ function App() {
         mobileOpen={mobileSidebarOpen}
       />
 
-      {/* No overflow-y here. main has no height bound — the grid is
-          min-h-screen and grows — so it never scrolled; the document
-          does. The dead overflow still created a scroll container, which
-          is what kept the sticky head below from ever sticking. Locking
-          scroll behind the mobile drawer is the grid's h-[100dvh] +
-          overflow-hidden above, which does bound its height. */}
-      <main className="max-w-[1500px] w-full [padding:clamp(20px,4vw,40px)] max-mobile:p-5">
+      {/* main is the scroll container, not the document: the reading area
+          moves and the nav column beside it does not. That needs a real
+          height bound — the grid above is the viewport — or main grows to
+          fit its content, never overflows, and takes the whole page with
+          it when it scrolls. Being the scroller, it is also what the
+          mobile drawer has to lock: an overlay does not stop the surface
+          under it from scrolling.
+
+          No top padding on mobile: the sticky head supplies its own, and
+          padding on the scrollport pushes a sticky top:0 down by that
+          much, leaving content sliding through the gap above it. */}
+      <main
+        ref={mainRef}
+        className={`max-w-[1500px] w-full overflow-y-auto overscroll-contain [padding:clamp(20px,4vw,40px)] max-mobile:px-5 max-mobile:pb-5 max-mobile:pt-0 ${mobileSidebarOpen ? "max-mobile:overflow-hidden" : ""}`}
+      >
         {/* Mobile head. Sticky, because the menu used to scroll away with
             the page: reaching the nav from the bottom of a long entry
             form meant scrolling back to the top. It bleeds past main's
             padding so the blurred strip reaches both edges. */}
-        <header className="hidden max-mobile:grid gap-2 sticky top-0 z-10 -mx-5 -mt-5 mb-5 px-5 py-3 bg-[color-mix(in_srgb,var(--bg)_92%,transparent)] backdrop-blur-md border-b border-[color-mix(in_srgb,var(--border)_40%,transparent)]">
+        <header className="hidden max-mobile:grid gap-2 sticky top-0 z-10 -mx-5 mb-5 px-5 py-3 bg-[color-mix(in_srgb,var(--bg)_92%,transparent)] backdrop-blur-md border-b border-[color-mix(in_srgb,var(--border)_40%,transparent)]">
           <div className="flex items-center gap-3">
             <button
               type="button"
