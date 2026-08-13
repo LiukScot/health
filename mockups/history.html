@@ -145,9 +145,8 @@
     .page { padding: var(--gap-block); gap: var(--gap-block); }
     .page > .page-title { display: none; }
     .m-head {
-      display: flex;
-      align-items: center;
-      gap: var(--gap-item);
+      display: grid;
+      gap: var(--gap-tight);
       position: sticky;
       top: 0;
       z-index: 10;
@@ -158,6 +157,10 @@
       border-bottom: 1px solid color-mix(in srgb, var(--border) 40%, transparent);
     }
     .m-head .m-title { margin: 0; font-size: var(--text-title); font-weight: 700; letter-spacing: -0.01em; }
+    .m-head .m-titlerow { display: flex; align-items: center; gap: var(--gap-item); }
+    .m-head .page-tabs { padding: 3px; justify-self: start; }
+    .m-head .page-tabs a { padding: 5px 10px; }
+    .page > .page-tabs { display: none; }
     .m-burger {
       display: inline-grid;
       place-items: center;
@@ -200,9 +203,15 @@
 
 <div class="page">
   <header class="m-head">
-    <button class="m-burger" aria-label="Open navigation" aria-haspopup="dialog"><svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M2 4.5h14M2 9h14M2 13.5h14"/></svg></button>
-    <h1 class="m-title">Pain</h1>
-    <span class="m-count">38 entries</span>
+    <div class="m-titlerow">
+      <button class="m-burger" aria-label="Open navigation" aria-haspopup="dialog"><svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M2 4.5h14M2 9h14M2 13.5h14"/></svg></button>
+      <h1 class="m-title">Pain</h1>
+      <span class="m-count">38 entries</span>
+    </div>
+    <nav class="page-tabs" aria-label="Entry or history">
+      <a href="pain-staged.html">New entry</a>
+      <a class="current" href="#">History</a>
+    </nav>
   </header>
 
   <nav class="page-tabs">

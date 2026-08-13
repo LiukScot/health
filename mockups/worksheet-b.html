@@ -179,11 +179,16 @@
     .m-burger svg { display: block; }
 
     .m-head .m-row { display: flex; align-items: center; gap: 6px; }
+    .m-head .page-tabs { padding: 3px; }
+    .m-head .page-tabs a { padding: 5px 10px; }
+    .m-head .m-progress { margin-left: auto; display: flex; align-items: center; gap: 6px; }
+    .m-head .m-date { min-height: 26px; padding: 2px 10px; font-size: var(--text-micro); }
+    .page > .page-tabs { display: none; }
     .m-head .dot {
       display: grid;
       place-items: center;
-      width: 24px;
-      height: 24px;
+      width: 22px;
+      height: 22px;
       border-radius: 999px;
       font-size: var(--text-micro);
       font-weight: 800;
@@ -220,10 +225,16 @@
       <h1 class="m-title">DBT Distress Tolerance</h1>
     </div>
     <div class="m-row">
-      <span class="dot done">✓</span>
-      <span class="dot current">2</span>
-      <span class="dot">3</span>
-      <button class="chip m-date">Aug 13, 12:34</button>
+      <nav class="page-tabs" aria-label="Entry or history">
+        <a class="current" href="#">New entry</a>
+        <a href="#">History</a>
+      </nav>
+      <div class="m-progress">
+        <span class="dot done">✓</span>
+        <span class="dot current">2</span>
+        <span class="dot">3</span>
+        <button class="chip m-date">Aug 13, 12:34</button>
+      </div>
     </div>
   </header>
 
