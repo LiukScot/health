@@ -118,12 +118,6 @@
   .insight .v { font-size: var(--text-control); line-height: 1.5; }
   .conf { justify-self: start; padding: 2px 8px; border-radius: 999px; font-size: var(--text-micro); font-weight: 700; background: color-mix(in srgb, var(--success) 14%, transparent); color: var(--success); }
 
-  .realm-divider {
-    display: flex; align-items: center; gap: var(--gap-item);
-    color: var(--muted-soft); font-size: var(--text-micro); font-weight: 800;
-    letter-spacing: 0.16em; text-transform: uppercase;
-  }
-  .realm-divider::before, .realm-divider::after { content: ""; flex: 1; border-top: 1px dashed var(--border); }
 
   @media (max-width: 900px) {
     .page { padding: var(--gap-block); gap: var(--gap-block); }
@@ -230,11 +224,10 @@
     </article>
   </section>
 
-  <div class="realm-divider">Health</div>
 </div>
 
 <!-- ======================= HEALTH ======================= -->
-<div class="page" style="padding-top:0">
+<div class="page">
   <h1 class="page-title">Dashboard</h1>
 
   <section class="dash-section">
