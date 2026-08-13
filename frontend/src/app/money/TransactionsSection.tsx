@@ -5,14 +5,12 @@ import { FieldLine, FIELD_LINE_LABEL } from "../../components/ui/FieldLine";
 import { Select } from "../../components/ui/select";
 import { AnimatedEditingLabel } from "../shared";
 import { EmptyState, PAGE, PAGE_TITLE } from "../screen-helpers";
+import { FLAT_ACTIONS, FLAT_FORM, FLAT_NARROW, FLAT_ROW } from "../staged";
 import {
   DELETE_CONFIRM,
   DETAIL_ACTIONS,
   DETAIL_ACTION_BTN,
   DetailGroup,
-  EntriesHeading,
-  FORM_COL,
-  FORM_SPLIT,
   ENTRY_CHEVRON,
   ENTRY_DATE,
   ENTRY_EXPANDED,
@@ -68,102 +66,97 @@ export function TransactionsSection({
   return (
     <section className={PAGE}>
       <h1 className={PAGE_TITLE}>Transactions</h1>
-      <div className="min-w-0 border-b border-border">
-        <EntriesHeading className="mt-0">New transaction</EntriesHeading>
-        <form onSubmit={txForm.handleSubmit(onSubmit)}>
-          <div className={FORM_SPLIT}>
-            {/* Left: what the transaction is. */}
-            <div className={FORM_COL}>
-            <FieldLine
-              label="Date"
-              type="date"
-              aria-label="Date"
-              {...txForm.register("txDate")}
-              onClick={(e) => {
-                const el = e.currentTarget as HTMLInputElement & { showPicker?: () => void };
-                el.showPicker?.();
-              }}
+      <form onSubmit={txForm.handleSubmit(onSubmit)} className={FLAT_FORM}>
+        <div className={FLAT_ROW}>
+          <FieldLine
+            label="Date"
+            type="date"
+            className={FLAT_NARROW}
+            aria-label="Date"
+            {...txForm.register("txDate")}
+            onClick={(e) => {
+              const el = e.currentTarget as HTMLInputElement & { showPicker?: () => void };
+              el.showPicker?.();
+            }}
+          />
+          {/* Native datalist: type a new asset or pick one already used.
+              No combobox library needed, and it stays keyboard-native. */}
+          <FieldLine
+            label="Asset"
+            type="text"
+            list={assetListId}
+            autoComplete="off"
+            placeholder={assetOptions.length > 0 ? "Type or pick one" : "e.g. revolut"}
+            aria-label="Asset"
+            {...txForm.register("asset")}
+          />
+          <datalist id={assetListId}>
+            {assetOptions.map((asset) => (
+              <option key={asset} value={asset} />
+            ))}
+          </datalist>
+        </div>
+
+        <div className={FLAT_ROW}>
+          {/* A <span>, not a <label>: the Select is a button + popover, and
+              wrapping those in a label makes every click toggle it twice. */}
+          <div className="grid gap-2 content-start">
+            <span className={FIELD_LINE_LABEL}>Type</span>
+            <Controller
+              control={txForm.control}
+              name="tipo"
+              render={({ field }) => (
+                <Select
+                  ariaLabel="Type"
+                  value={field.value}
+                  onValueChange={field.onChange}
+                  options={TIPO_SELECT_OPTIONS}
+                />
+              )}
             />
-
-            {/* Native datalist: type a new asset or pick one already used.
-                No combobox library needed, and it stays keyboard-native. */}
-            <FieldLine
-              label="Asset"
-              type="text"
-              list={assetListId}
-              autoComplete="off"
-              placeholder={assetOptions.length > 0 ? "Type or pick one" : "e.g. revolut"}
-              aria-label="Asset"
-              {...txForm.register("asset")}
-            />
-            <datalist id={assetListId}>
-              {assetOptions.map((asset) => (
-                <option key={asset} value={asset} />
-              ))}
-            </datalist>
-
-            {/* A <span>, not a <label>: the Select is a button + popover, and
-                wrapping those in a label makes every click toggle it twice. */}
-            <div className="grid gap-2 content-start">
-              <span className={FIELD_LINE_LABEL}>Tipo</span>
-              <Controller
-                control={txForm.control}
-                name="tipo"
-                render={({ field }) => (
-                  <Select
-                    ariaLabel="Tipo"
-                    value={field.value}
-                    onValueChange={field.onChange}
-                    options={TIPO_SELECT_OPTIONS}
-                  />
-                )}
-              />
-            </div>
-
-            </div>
-
-            {/* Right: how much, and why. */}
-            <div className={FORM_COL}>
-            {showBuyValue ? (
-              <FieldLine
-                label="Buy value"
-                type="number"
-                step="0.01"
-                placeholder="0"
-                aria-label="Buy value"
-                {...txForm.register("buyValue")}
-              />
-            ) : (
-              <FieldLine
-                label="PnL"
-                type="number"
-                step="0.01"
-                placeholder="0"
-                aria-label="PnL"
-                {...txForm.register("pnl")}
-              />
-            )}
-
-            <FieldLine
-              label="Note"
-              multiline
-              compact
-              rows={2}
-              placeholder="Anything worth remembering about this move."
-              aria-label="Note"
-              {...txForm.register("note")}
-            />
-
-            </div>
           </div>
 
-          <div className="flex justify-end pt-2">
-            <Button type="submit" variant={txMutationState.isSuccess ? "success" : "primary"} >
-              {txMutationState.isSuccess ? "✓ Saved" : editingTx ? "Update transaction" : "Save transaction"}
-            </Button>
-          </div>
-        </form>
-      </div>
+          {/* Buy value only exists for the tipo that books money in; the
+              others record a return on money already there. */}
+          {showBuyValue ? (
+            <FieldLine
+              label="Buy value"
+              type="number"
+              step="0.01"
+              placeholder="0"
+              className={FLAT_NARROW}
+              aria-label="Buy value"
+              {...txForm.register("buyValue")}
+            />
+          ) : (
+            <FieldLine
+              label="PnL"
+              type="number"
+              step="0.01"
+              placeholder="0"
+              className={FLAT_NARROW}
+              aria-label="PnL"
+              {...txForm.register("pnl")}
+            />
+          )}
+        </div>
+
+        <FieldLine
+          label="Note"
+          multiline
+          compact
+          rows={2}
+          placeholder="Anything worth remembering about this move."
+          aria-label="Note"
+          {...txForm.register("note")}
+        />
+
+        <div className={FLAT_ACTIONS}>
+          <Button type="submit" variant={txMutationState.isSuccess ? "success" : "primary"}>
+            {txMutationState.isSuccess ? "✓ Saved" : editingTx ? "Update transaction" : "Save transaction"}
+          </Button>
+        </div>
+      </form>
 
       <PastEntries
         title="History"

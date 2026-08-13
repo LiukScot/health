@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { groupByMonth } from "./screen-format";
 
 // Past-entries primitives shared by CBT/DBT/Diary/Pain. The summary layout
 // differs per screen (badges, mood, preview), so these expose styled wrappers
@@ -59,10 +60,60 @@ export function EntriesHeading({ children, className = "" }: { children: ReactNo
   );
 }
 
-// The entry log, stacked under the form it belongs to. Every row is rendered:
-// the list used to sit in a right-hand column capped to the form's height,
-// which clipped the overflow behind a fade and a "Show more" button that was
-// never wired to anything, so the clipped rows had no way back.
+/*
+ * New entry / History. The log is a sibling view of the form, not a tail
+ * below it: on a page whose form is a screenful, the list was only ever
+ * reachable by scrolling past everything. The state lives in App so the
+ * mobile sticky head can carry the same control.
+ */
+export type EntryView = "new" | "history";
+
+const VIEW_TAB = "px-3.5 py-1.5 rounded-full text-control font-semibold border-0 shadow-none cursor-pointer transition-[color,background] duration-150 ease-[ease]";
+const VIEW_TAB_ON = "bg-accent text-accent-fg";
+const VIEW_TAB_OFF = "bg-transparent text-muted hover:text-text";
+
+export function EntryViewTabs({
+  view,
+  onChange,
+  historyLabel = "History",
+  className = "",
+}: {
+  view: EntryView;
+  onChange: (next: EntryView) => void;
+  /** Movements calls its log "Recurring": it is active state, not a past log. */
+  historyLabel?: string;
+  /** Must set a display: the component declares none, so a caller's
+   *  `hidden` cannot lose a source-order fight with a base `inline-flex`. */
+  className: string;
+}) {
+  return (
+    <div className={`gap-1 p-1 justify-self-start rounded-full bg-card-strong ${className}`} role="tablist" aria-label="Entry or history">
+      <button
+        type="button"
+        role="tab"
+        aria-selected={view === "new"}
+        className={`${VIEW_TAB} ${view === "new" ? VIEW_TAB_ON : VIEW_TAB_OFF}`}
+        onClick={() => onChange("new")}
+      >
+        New entry
+      </button>
+      <button
+        type="button"
+        role="tab"
+        aria-selected={view === "history"}
+        className={`${VIEW_TAB} ${view === "history" ? VIEW_TAB_ON : VIEW_TAB_OFF}`}
+        onClick={() => onChange("history")}
+      >
+        {historyLabel}
+      </button>
+    </div>
+  );
+}
+
+// The entry log. Every row is rendered: the list used to sit in a
+// right-hand column capped to the form's height, which clipped the
+// overflow behind a fade and a "Show more" button that was never wired to
+// anything, so the clipped rows had no way back.
 export function PastEntries({
   title,
   isLoading,
@@ -71,7 +122,7 @@ export function PastEntries({
   emptyState,
   children,
 }: {
-  title: ReactNode;
+  title?: ReactNode;
   isLoading: boolean;
   loadingText: string;
   isEmpty: boolean;
@@ -81,8 +132,39 @@ export function PastEntries({
   return (
     <div className="min-w-0">
       {isLoading && <p className="text-muted text-control">{loadingText}</p>}
-      <EntriesHeading className="mt-0">{title}</EntriesHeading>
+      {title ? <EntriesHeading className="mt-0">{title}</EntriesHeading> : null}
       {isEmpty ? emptyState : children}
+    </div>
+  );
+}
+
+/*
+ * Rows cut into months, each run under its own heading with a count. The
+ * caller keeps rendering its own row: the summary differs per tracker
+ * (badges, mood, preview) and only the grouping is shared.
+ */
+export function EntryMonths<T>({
+  rows,
+  dateOf,
+  renderRow,
+}: {
+  rows: T[];
+  dateOf: (row: T) => string;
+  renderRow: (row: T) => ReactNode;
+}) {
+  return (
+    <div className="grid gap-page">
+      {groupByMonth(rows, dateOf).map((group, index) => (
+        <section key={`${group.key}-${index}`} className="grid gap-3">
+          <div className="flex items-baseline gap-3">
+            <span className="[text-box:trim-both_cap_alphabetic] text-xs font-bold tracking-[0.16em] uppercase text-muted">{group.label}</span>
+            <span className="ml-auto text-micro text-muted-soft tabular-nums">
+              {group.rows.length === 1 ? "1 entry" : `${group.rows.length} entries`}
+            </span>
+          </div>
+          <div className="min-w-0">{group.rows.map(renderRow)}</div>
+        </section>
+      ))}
     </div>
   );
 }
@@ -137,7 +219,19 @@ export function TagList({ items }: { items: string[] }) {
   );
 }
 
-export function DetailGroup({ label, children }: { label: ReactNode; children: ReactNode }) {
+/*
+ * A field of an expanded entry. Renders nothing when there is nothing to
+ * show: an entry with three of nine fields filled used to read as six em
+ * dashes, which buries the three that carry the answer. `empty` lets a
+ * caller declare emptiness the value alone cannot express — an all-zero
+ * count, a tag list that came back with no members.
+ */
+export function DetailGroup({ label, children, empty }: { label: ReactNode; children: ReactNode; empty?: boolean }) {
+  const blank = empty ?? (children == null || children === "" || children === "—");
+  if (blank) {
+    return null;
+  }
+
   return (
     <div className="grid gap-1">
       <span className="text-micro text-muted uppercase tracking-wider">{label}</span>

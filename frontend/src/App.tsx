@@ -8,6 +8,8 @@ import { LoginScreen } from "./app/LoginScreen";
 import { Sidebar } from "./app/Sidebar";
 import { DashboardSection } from "./app/DashboardSection";
 import { SectionErrorBoundary } from "./app/ErrorBoundary";
+import { EntryViewTabs, type EntryView } from "./app/entries";
+import { StageHeadSlot } from "./app/stage-head-slot";
 import {
   formatDocumentTitle, navItemsByRealm, navLabels, readStoredRealm, realmOf,
   REALM_STORAGE_KEY, type NavItem,
@@ -29,6 +31,10 @@ const MovementsSection = lazy(() => import("./app/money/MovementsSection").then(
 const SnapshotsSection = lazy(() => import("./app/money/SnapshotsSection").then((m) => ({ default: m.SnapshotsSection })));
 const MoneyDashboardSection = lazy(() => import("./app/money/MoneyDashboardSection").then((m) => ({ default: m.MoneyDashboardSection })));
 
+// Pages that split into a form and a log. Listed rather than derived: the
+// set is not a property of the nav item, it is a property of the screen.
+const ENTRY_VIEW_PAGES = new Set<NavItem>(["pain", "diary", "cbt", "dbt"]);
+
 function App() {
   const auth = useAuth();
   const loggedIn = !!auth.user;
@@ -37,6 +43,17 @@ function App() {
   // last realm is remembered so a reload lands you back where you were.
   const [nav, setNav] = useState<NavItem>(() => navItemsByRealm[readStoredRealm()][0]);
   const realm = realmOf(nav);
+  /*
+   * New entry vs History, for the pages that have both. It lives here
+   * rather than inside each screen because the mobile sticky head renders
+   * the same control, and two copies of one piece of state drift. Leaving
+   * a page resets it: arriving at Pain should offer the form.
+   */
+  const [entryView, setEntryView] = useState<EntryView>("new");
+  // Filled by the sticky head below; the staged screens portal their
+  // progress dots into it (see StageHeadSlot).
+  const [headSlot, setHeadSlot] = useState<HTMLDivElement | null>(null);
+  const goToNav = (item: NavItem) => { setNav(item); setEntryView("new"); };
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
   // Mirror of mobileSidebarOpen for the swipe handler closure to read,
@@ -306,9 +323,9 @@ function App() {
     <div className={`grid grid-cols-[220px_1fr] min-h-screen transition-[grid-template-columns] duration-[250ms] ease-[ease] max-mobile:grid-cols-1 ${sidebarCollapsed ? "mobile:grid-cols-[62px_1fr]" : ""} ${mobileSidebarOpen ? "max-mobile:h-[100dvh] max-mobile:overflow-hidden" : ""}`}>
       <Sidebar
         nav={nav}
-        onNav={(item) => { setNav(item); setMobileSidebarOpen(false); }}
+        onNav={(item) => { goToNav(item); setMobileSidebarOpen(false); }}
         realm={realm}
-        onRealmChange={(next) => setNav(navItemsByRealm[next][0])}
+        onRealmChange={(next) => goToNav(navItemsByRealm[next][0])}
         collapsed={sidebarCollapsed}
         onToggle={() => setSidebarCollapsed((c) => !c)}
         onCloseMobile={() => setMobileSidebarOpen(false)}
@@ -326,18 +343,29 @@ function App() {
             the page: reaching the nav from the bottom of a long entry
             form meant scrolling back to the top. It bleeds past main's
             padding so the blurred strip reaches both edges. */}
-        <header className="hidden max-mobile:flex max-mobile:items-center gap-3 sticky top-0 z-10 -mx-5 -mt-5 mb-5 px-5 py-3 bg-[color-mix(in_srgb,var(--bg)_92%,transparent)] backdrop-blur-md border-b border-[color-mix(in_srgb,var(--border)_40%,transparent)]">
-          <button
-            type="button"
-            className="mobile-menu-btn flex items-center justify-center w-[40px] h-[40px] flex-none p-0 border-0 rounded-sm bg-card-soft text-muted cursor-pointer shadow-none hover:text-text hover:bg-card-strong"
-            onClick={() => setMobileSidebarOpen(true)}
-            aria-label="Open menu"
-          >
-            <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
-          </button>
-          <span className="[text-box:trim-both_cap_alphabetic] text-title font-bold tracking-tight text-text truncate">{navLabels[nav]}</span>
+        <header className="hidden max-mobile:grid gap-2 sticky top-0 z-10 -mx-5 -mt-5 mb-5 px-5 py-3 bg-[color-mix(in_srgb,var(--bg)_92%,transparent)] backdrop-blur-md border-b border-[color-mix(in_srgb,var(--border)_40%,transparent)]">
+          <div className="flex items-center gap-3">
+            <button
+              type="button"
+              className="mobile-menu-btn flex items-center justify-center w-[40px] h-[40px] flex-none p-0 border-0 rounded-sm bg-card-soft text-muted cursor-pointer shadow-none hover:text-text hover:bg-card-strong"
+              onClick={() => setMobileSidebarOpen(true)}
+              aria-label="Open menu"
+            >
+              <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+            </button>
+            <span className="[text-box:trim-both_cap_alphabetic] text-title font-bold tracking-tight text-text truncate">{navLabels[nav]}</span>
+          </div>
+          {/* Second row, inside the sticky strip: switching view is
+              navigation, and navigation must not scroll away. */}
+          <div className="flex items-center gap-3">
+            {ENTRY_VIEW_PAGES.has(nav) ? (
+              <EntryViewTabs view={entryView} onChange={setEntryView} className="flex" />
+            ) : null}
+            <div ref={setHeadSlot} className="ml-auto empty:hidden" />
+          </div>
         </header>
 
+        <StageHeadSlot.Provider value={headSlot}>
         <SectionErrorBoundary resetKey={nav}>
         <Suspense fallback={<p className="text-muted text-control">Loading…</p>}>
         {nav === "dashboard" && (
@@ -359,6 +387,8 @@ function App() {
 
         {nav === "diary" && (
           <DiarySection
+            view={entryView}
+            onViewChange={setEntryView}
             diaryForm={diary.diaryForm} diaryMutationState={{ isSuccess: diary.diaryMutation.isSuccess }} isLoading={diary.isLoading}
             editingDiary={diary.editingDiary} moodFieldOptions={diary.moodFieldOptions}
             diaryEntries={diary.diaryEntries} confirmDeleteDiary={diary.confirmDeleteDiary}
@@ -369,6 +399,8 @@ function App() {
 
         {nav === "pain" && (
           <PainSection
+            view={entryView}
+            onViewChange={setEntryView}
             painForm={pain.painForm} painMutationState={{ isSuccess: pain.painMutation.isSuccess }} isLoading={pain.isLoading}
             editingPain={pain.editingPain} painFieldOptions={pain.painFieldOptions}
             watchedValues={pain.watchedValues} painEntries={pain.painEntries}
@@ -380,6 +412,8 @@ function App() {
 
         {nav === "cbt" && (
           <CbtSection
+            view={entryView}
+            onViewChange={setEntryView}
             cbtForm={cbt.cbtForm} cbtMutationState={{ isSuccess: cbt.cbtMutation.isSuccess }} isLoading={cbt.isLoading}
             editingCbt={cbt.editingCbt} cbtEntries={cbt.cbtEntries}
             confirmDeleteCbt={cbt.confirmDeleteCbt} onSubmit={(v) => cbt.cbtMutation.mutate(v)}
@@ -390,6 +424,8 @@ function App() {
 
         {nav === "dbt" && (
           <DbtSection
+            view={entryView}
+            onViewChange={setEntryView}
             dbtForm={dbt.dbtForm} dbtMutationState={{ isSuccess: dbt.dbtMutation.isSuccess }} isLoading={dbt.isLoading}
             editingDbt={dbt.editingDbt} dbtEntries={dbt.dbtEntries}
             confirmDeleteDbt={dbt.confirmDeleteDbt} onSubmit={(v) => dbt.dbtMutation.mutate(v)}
@@ -451,6 +487,7 @@ function App() {
 
         </Suspense>
         </SectionErrorBoundary>
+        </StageHeadSlot.Provider>
       </main>
     </div>
     {toaster}

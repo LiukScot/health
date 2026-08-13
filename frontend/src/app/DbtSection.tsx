@@ -1,22 +1,21 @@
+import { useState } from "react";
 import { type UseFormReturn } from "react-hook-form";
 import {
   type DbtEntry,
   type DbtFormValues,
 } from "./core";
-import { AnimatedEditingLabel, SectionHead } from "./shared";
+import { AnimatedEditingLabel } from "./shared";
 import { EmptyState, PAGE, PAGE_TITLE } from "./screen-helpers";
+import { STAGE, STAGES, STAGE_SPLIT, StageField, StageHead, StageProgress, StageRail } from "./staged";
 import { formatEntrySummaryDate } from "./screen-format";
 import { Button } from "../components/ui/Button";
-import { FieldLine } from "../components/ui/FieldLine";
+import { FieldLine, FIELD_LINE_INPUT } from "../components/ui/FieldLine";
 import {
   DELETE_CONFIRM,
   DATETIME_FIELD,
   DETAIL_ACTIONS,
   DETAIL_ACTION_BTN,
   DetailGroup,
-  EntriesHeading,
-  FORM_COL,
-  FORM_SPLIT,
   ENTRY_CHEVRON,
   ENTRY_DATE,
   ENTRY_EXPANDED,
@@ -25,6 +24,9 @@ import {
   ENTRY_SUMMARY,
   PainBadge,
   PastEntries,
+  EntryMonths,
+  EntryViewTabs,
+  type EntryView,
 } from "./entries";
 const THERAPY_CALLOUT =
   "m-0 px-3 py-2 bg-card-soft border-l-2 border-[color-mix(in_srgb,var(--accent)_50%,transparent)] rounded-sm text-muted text-hint leading-normal";
@@ -41,6 +43,8 @@ export function DbtSection({
   onStartEdit,
   onDeleteClick,
   onDeleteBlur,
+  view,
+  onViewChange,
 }: {
   dbtForm: UseFormReturn<DbtFormValues>;
   dbtMutationState: { isSuccess: boolean };
@@ -53,6 +57,8 @@ export function DbtSection({
   onStartEdit: (entry: DbtEntry) => void;
   onDeleteClick: (id: number) => void;
   onDeleteBlur: () => void;
+  view: EntryView;
+  onViewChange: (next: EntryView) => void;
 }) {
   type DbtGroup = {
     title: string;
@@ -107,6 +113,12 @@ export function DbtSection({
     },
   ];
 
+  const [stage, setStage] = useState(0);
+  const steps = dbtGroups.map((group) => ({
+    title: group.title,
+    done: group.fields.some((f) => !!dbtForm.watch(f.key)),
+  }));
+
 
   const dbtDetails: { label: string; key: keyof DbtEntry }[] = [
     { label: "Emotion", key: "emotionName" },
@@ -119,90 +131,66 @@ export function DbtSection({
 
   return (
     <section className={PAGE}>
+      <EntryViewTabs view={view} onChange={onViewChange} className="inline-flex max-mobile:hidden" />
       <h1 className={PAGE_TITLE}>DBT Distress Tolerance</h1>
-      <div className="min-w-0 border-b border-border">
-        <EntriesHeading className="mt-0">New entry</EntriesHeading>
-        <form onSubmit={dbtForm.handleSubmit(onSubmit)}>
-          <div className={FORM_SPLIT}>
-            {/* The groups are already ordered steps, so half go in each
-                column and it reads down one then the other. */}
-            <div className={FORM_COL}>
-            <FieldLine
-              label="Date & time"
-              type="datetime-local"
-              className={DATETIME_FIELD}
-              {...dbtForm.register("dateTime")}
-              aria-label="Date/time"
-              onClick={(e) => {
-                const el = e.currentTarget as HTMLInputElement & { showPicker?: () => void };
-                el.showPicker?.();
-              }}
-            />
-            {dbtGroups.slice(0, Math.ceil(dbtGroups.length / 2)).map((g) => (
-              <div key={g.title} className="flex flex-col gap-3">
-                <SectionHead title={g.title} variant="ds" />
-                {g.callouts?.map((c) => (
-                  <p key={c} className={THERAPY_CALLOUT}>{c}</p>
-                ))}
-                {g.fields.map((f) => (
-                  <FieldLine
-                    key={f.key}
-                    label={f.label}
-                    multiline={f.multiline}
-                    compact={f.multiline}
-                    rows={f.multiline ? 2 : undefined}
-                    type={f.multiline ? undefined : "text"}
-                    placeholder={f.hint}
-                    aria-label={f.label}
-                    {...dbtForm.register(f.key)}
-                  />
-                ))}
-              </div>
-            ))}
-            </div>
+      {view === "new" ? (
+      <form onSubmit={dbtForm.handleSubmit(onSubmit)} className={STAGE_SPLIT}>
+        <StageProgress steps={steps} current={stage} />
+        <StageRail
+          steps={steps}
+          current={stage}
+          onJump={setStage}
+        >
+          <FieldLine
+            label="Date & time"
+            type="datetime-local"
+            className={DATETIME_FIELD}
+            {...dbtForm.register("dateTime")}
+            aria-label="Date/time"
+            onClick={(e) => {
+              const el = e.currentTarget as HTMLInputElement & { showPicker?: () => void };
+              el.showPicker?.();
+            }}
+          />
+          <Button type="submit" variant={dbtMutationState.isSuccess ? "success" : "primary"}>
+            {dbtMutationState.isSuccess ? "✓ Saved" : editingDbt ? "Update entry" : "Save entry"}
+          </Button>
+          {editingDbt ? <Button type="button" onClick={onCancelEdit}>Cancel edit</Button> : null}
+        </StageRail>
 
-            <div className={FORM_COL}>
-            {dbtGroups.slice(Math.ceil(dbtGroups.length / 2)).map((g) => (
-              <div key={g.title} className="flex flex-col gap-3">
-                <SectionHead title={g.title} variant="ds" />
-                {g.callouts?.map((c) => (
-                  <p key={c} className={THERAPY_CALLOUT}>{c}</p>
-                ))}
-                {g.fields.map((f) => (
-                  <FieldLine
-                    key={f.key}
-                    label={f.label}
-                    multiline={f.multiline}
-                    compact={f.multiline}
-                    rows={f.multiline ? 2 : undefined}
-                    type={f.multiline ? undefined : "text"}
-                    placeholder={f.hint}
-                    aria-label={f.label}
-                    {...dbtForm.register(f.key)}
-                  />
-                ))}
-              </div>
-            ))}
-            <p className={`${THERAPY_CALLOUT} mt-3`}>
-              When the emotion comes back, that's ok. Emotions come and go — watch it again, float with the wave.
-            </p>
-            </div>
-          </div>
+        <div className={STAGES}>
+          {dbtGroups.map((group, index) => (
+            <section key={group.title} className={STAGE}>
+              <StageHead step={index + 1} title={group.title} aside={group.aside} />
+              {group.callouts?.map((c) => (
+                <p key={c} className={THERAPY_CALLOUT}>{c}</p>
+              ))}
+              {group.fields.map((f) => (
+                <StageField key={f.key} label={f.label} prompt={f.hint} htmlFor={`dbt-${f.key}`}>
+                  {f.multiline ? (
+                    <textarea id={`dbt-${f.key}`} rows={3} className={FIELD_LINE_INPUT} {...dbtForm.register(f.key)} />
+                  ) : (
+                    <input id={`dbt-${f.key}`} type="text" className={FIELD_LINE_INPUT} {...dbtForm.register(f.key)} />
+                  )}
+                </StageField>
+              ))}
+            </section>
+          ))}
 
-          <div className="flex justify-end items-center gap-3 pt-2">
-            {editingDbt ? (
-              <Button type="button" onClick={onCancelEdit}>
-                Cancel edit
-              </Button>
-            ) : null}
-            <Button type="submit" variant={dbtMutationState.isSuccess ? "success" : "primary"} >
+          <p className={THERAPY_CALLOUT}>
+            When the emotion comes back, that's ok. Emotions come and go — watch it again, float with the wave.
+          </p>
+
+          <div className="hidden max-mobile:flex justify-end gap-3">
+            {editingDbt ? <Button type="button" onClick={onCancelEdit}>Cancel edit</Button> : null}
+            <Button type="submit" variant={dbtMutationState.isSuccess ? "success" : "primary"}>
               {dbtMutationState.isSuccess ? "✓ Saved" : editingDbt ? "Update entry" : "Save entry"}
             </Button>
           </div>
-        </form>
-      </div>
+        </div>
+      </form>
+      ) : (
       <PastEntries
-        title="Past entries"
         isLoading={isLoading}
         loadingText="Loading DBT entries..."
         isEmpty={dbtEntries.length === 0}
@@ -213,7 +201,10 @@ export function DbtSection({
           />
         }
       >
-        {dbtEntries.map((entry) => (
+        <EntryMonths
+          rows={dbtEntries}
+          dateOf={(entry) => entry.entryDate}
+          renderRow={(entry) => (
           <details key={entry.id} className={ENTRY_ROW}>
             <summary className={ENTRY_SUMMARY}>
               <span className={ENTRY_DATE}>{formatEntrySummaryDate(entry.entryDate, entry.entryTime)}</span>
@@ -251,8 +242,10 @@ export function DbtSection({
               </div>
             </div>
           </details>
-        ))}
+        )}
+        />
       </PastEntries>
+      )}
     </section>
   );
 }

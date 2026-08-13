@@ -3,14 +3,14 @@ import { type UseFormReturn } from "react-hook-form";
 import { Button } from "../../components/ui/Button";
 import { FieldLine } from "../../components/ui/FieldLine";
 import { EmptyState, PAGE, PAGE_TITLE } from "../screen-helpers";
+import { FLAT_ACTIONS, FLAT_FORM, FLAT_NARROW, FLAT_ROW, StageField } from "../staged";
+import { SectionHead } from "../shared";
+import { FIELD_LINE_INPUT } from "../../components/ui/FieldLine";
 import {
   DELETE_CONFIRM,
   DETAIL_ACTIONS,
   DETAIL_ACTION_BTN,
   DetailGroup,
-  EntriesHeading,
-  FORM_COL,
-  FORM_SPLIT,
   ENTRY_CHEVRON,
   ENTRY_DATE,
   ENTRY_EXPANDED,
@@ -49,56 +49,56 @@ export function SnapshotsSection({
   return (
     <section className={PAGE}>
       <h1 className={PAGE_TITLE}>Snapshots</h1>
-      <div className="min-w-0 border-b border-border">
-        <EntriesHeading className="mt-0">New snapshot</EntriesHeading>
-        <p className="text-control text-muted m-0 mb-3 max-w-[60ch]">
-          The three risk totals are worked out from your transactions and the risk level set on
-          each asset. You only record the date and whatever is sitting liquid.
-        </p>
-        <form onSubmit={snapshotForm.handleSubmit(onSubmit)}>
-          <div className={FORM_SPLIT}>
-            {/* Left: when. */}
-            <div className={FORM_COL}>
-            <FieldLine
-              label="Date"
-              type="date"
-              aria-label="Date"
-              {...snapshotForm.register("snapshotDate")}
-              onClick={(e) => {
-                const el = e.currentTarget as HTMLInputElement & { showPicker?: () => void };
-                el.showPicker?.();
-              }}
-            />
-            </div>
-
-            {/* Right: how much is liquid. */}
-            <div className={FORM_COL}>
-            <FieldLine
-              label="Liquid"
+      <form onSubmit={snapshotForm.handleSubmit(onSubmit)} className={FLAT_FORM}>
+        <div className={FLAT_ROW}>
+          <FieldLine
+            label="Date"
+            type="date"
+            className={FLAT_NARROW}
+            aria-label="Date"
+            {...snapshotForm.register("snapshotDate")}
+            onClick={(e) => {
+              const el = e.currentTarget as HTMLInputElement & { showPicker?: () => void };
+              el.showPicker?.();
+            }}
+          />
+          <StageField
+            label="Liquid"
+            prompt="The three risk totals are worked out from your transactions and the risk level set on each asset. You only record the date and whatever is sitting liquid."
+            htmlFor="snapshot-liquid"
+          >
+            <input
+              id="snapshot-liquid"
               type="number"
               step="0.01"
               placeholder="0"
-              aria-label="Liquid"
+              className={`${FIELD_LINE_INPUT} ${FLAT_NARROW}`}
               {...snapshotForm.register("liquid")}
             />
-            </div>
-          </div>
+          </StageField>
+        </div>
 
-          <div className="flex justify-end items-center gap-3 pt-2">
-            {!canSave ? (
-              <span className="text-control text-muted">Loading transactions and asset styles…</span>
-            ) : null}
-            <Button
-              type="submit"
-              disabled={!canSave}
-              variant={snapshotMutationState.isSuccess ? "success" : "primary"}
-             
-            >
-              {snapshotMutationState.isSuccess ? "✓ Saved" : "Take snapshot"}
-            </Button>
-          </div>
-        </form>
-      </div>
+        <div className={FLAT_ACTIONS}>
+          {!canSave ? (
+            <span className="text-control text-muted self-center">Loading transactions and asset styles…</span>
+          ) : null}
+          <Button type="submit" disabled={!canSave} variant={snapshotMutationState.isSuccess ? "success" : "primary"}>
+            {snapshotMutationState.isSuccess ? "✓ Saved" : "Take snapshot"}
+          </Button>
+        </div>
+      </form>
+
+      {/* The risk chart used to render inside the entry list, above the
+          rows, as if it were an entry. It is a reading of the whole log,
+          so it gets its own titled section. */}
+      <section className="grid gap-3">
+        <SectionHead title="Risk over time" variant="dashboard" aside={snapshots.length === 1 ? "1 snapshot" : `${snapshots.length} snapshots`} />
+        <div className="grid gap-3 p-3 rounded-md bg-card-soft">
+          <Suspense fallback={<p className="text-muted text-control">Loading chart…</p>}>
+            <MonthlyRiskChart snapshots={snapshots} />
+          </Suspense>
+        </div>
+      </section>
 
       <PastEntries
         title="History"
@@ -112,9 +112,6 @@ export function SnapshotsSection({
           />
         }
       >
-        <Suspense fallback={<p className="text-muted text-control">Loading chart…</p>}>
-          <MonthlyRiskChart snapshots={snapshots} />
-        </Suspense>
         {snapshots.map((row) => {
           const total = row.lowRisk + row.mediumRisk + row.highRisk + row.liquid;
           return (

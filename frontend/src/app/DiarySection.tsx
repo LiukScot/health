@@ -8,21 +8,18 @@ import {
 import {
   AnimatedEditingLabel,
   MultiSelectField,
-  SectionHead,
 } from "./shared";
-import { BarMetric, EmptyState, PAGE, PAGE_TITLE } from "./screen-helpers";
+import { EmptyState, PAGE, PAGE_TITLE } from "./screen-helpers";
+import { STAGE, STAGES, STAGE_SPLIT, StageField, StageHead, StageProgress, StageRail, StageScale } from "./staged";
 import { bandNine, diaryPreview, formatEntrySummaryDate } from "./screen-format";
 import { Button } from "../components/ui/Button";
-import { FieldLine, FIELD_LINE_LABEL } from "../components/ui/FieldLine";
+import { FieldLine, FIELD_LINE_INPUT } from "../components/ui/FieldLine";
 import {
   DELETE_CONFIRM,
   DATETIME_FIELD,
   DETAIL_ACTIONS,
   DETAIL_ACTION_BTN,
   DetailGroup,
-  EntriesHeading,
-  FORM_COL,
-  FORM_SPLIT,
   ENTRY_CHEVRON,
   ENTRY_DATE,
   ENTRY_EXPANDED,
@@ -31,6 +28,9 @@ import {
   ENTRY_SUMMARY,
   PainBadge,
   PastEntries,
+  EntryMonths,
+  EntryViewTabs,
+  type EntryView,
   TagList,
   TagTabs,
 } from "./entries";
@@ -48,6 +48,8 @@ export function DiarySection({
   onStartEdit,
   onDeleteClick,
   onDeleteBlur,
+  view,
+  onViewChange,
 }: {
   diaryForm: UseFormReturn<DiaryFormValues>;
   diaryMutationState: { isSuccess: boolean };
@@ -61,13 +63,23 @@ export function DiarySection({
   onStartEdit: (entry: DiaryEntry) => void;
   onDeleteClick: (id: number) => void;
   onDeleteBlur: () => void;
+  view: EntryView;
+  onViewChange: (next: EntryView) => void;
 }) {
   const [moodTab, setMoodTab] = useState<"positive" | "negative" | "general">("positive");
+  const [stage, setStage] = useState(0);
+
   const moodLevels = diaryForm.watch(["moodLevel", "depressionLevel", "anxietyLevel"]);
   const [moodLevel, depressionLevel, anxietyLevel] = moodLevels;
   const positiveMoods = diaryForm.watch("positiveMoods");
   const negativeMoods = diaryForm.watch("negativeMoods");
   const generalMoods = diaryForm.watch("generalMoods");
+
+  const steps = [
+    { title: "How you feel", done: moodLevel != null || depressionLevel != null || anxietyLevel != null },
+    { title: "Emotions", done: !!(positiveMoods || negativeMoods || generalMoods) },
+    { title: "In your words", done: !!(diaryForm.watch("description") || diaryForm.watch("gratitude")) },
+  ];
 
   const moodTabs = [
     { id: "positive" as const, label: "Positive", count: csvToList(positiveMoods).length },
@@ -78,126 +90,127 @@ export function DiarySection({
 
   return (
     <section className={PAGE}>
+      <EntryViewTabs view={view} onChange={onViewChange} className="inline-flex max-mobile:hidden" />
       <h1 className={PAGE_TITLE}>Diary</h1>
-      <div className="min-w-0 border-b border-border">
-        <EntriesHeading className="mt-0">New entry</EntriesHeading>
-        <form onSubmit={diaryForm.handleSubmit(onSubmit)}>
-          <div className={FORM_SPLIT}>
-            <div className="sr-only" aria-hidden="true">
-              <input type="hidden" {...diaryForm.register("moodLevel", { valueAsNumber: true })} />
-              <input type="hidden" {...diaryForm.register("depressionLevel", { valueAsNumber: true })} />
-              <input type="hidden" {...diaryForm.register("anxietyLevel", { valueAsNumber: true })} />
-            </div>
-            {/* Wide column: what you fill on every entry. */}
-            <div className={FORM_COL}>
-            <div className="grid gap-2 content-start">
-              <span className={FIELD_LINE_LABEL}>Values</span>
-              <BarMetric
+      {view === "new" ? (
+      <form onSubmit={diaryForm.handleSubmit(onSubmit)} className={STAGE_SPLIT}>
+        <div className="sr-only" aria-hidden="true">
+          <input type="hidden" {...diaryForm.register("moodLevel", { valueAsNumber: true })} />
+          <input type="hidden" {...diaryForm.register("depressionLevel", { valueAsNumber: true })} />
+          <input type="hidden" {...diaryForm.register("anxietyLevel", { valueAsNumber: true })} />
+        </div>
+
+        <StageProgress steps={steps} current={stage} />
+        <StageRail
+          steps={steps}
+          current={stage}
+          onJump={setStage}
+        >
+          <FieldLine
+            label="Date & time"
+            type="datetime-local"
+            className={DATETIME_FIELD}
+            {...diaryForm.register("dateTime")}
+            aria-label="Date/time"
+            onClick={(e) => {
+              const el = e.currentTarget as HTMLInputElement & { showPicker?: () => void };
+              el.showPicker?.();
+            }}
+          />
+          <Button type="submit" variant={diaryMutationState.isSuccess ? "success" : "primary"}>
+            {diaryMutationState.isSuccess ? "✓ Saved" : editingDiary ? "Update entry" : "Save entry"}
+          </Button>
+          {editingDiary ? <Button type="button" onClick={onCancelEdit}>Cancel edit</Button> : null}
+        </StageRail>
+
+        <div className={STAGES}>
+          <section className={STAGE}>
+            <StageHead step={1} title="How you feel" />
+            <StageField label="Mood">
+              <StageScale
                 label="Mood"
                 value={moodLevel ?? null}
-                fractionDigits={1}
                 higherIsBetter
                 onChange={(next) => diaryForm.setValue("moodLevel", next, { shouldDirty: true })}
+                ends={["heavy", "okay", "great"]}
               />
-              <BarMetric
+            </StageField>
+            <StageField label="Depression">
+              <StageScale
                 label="Depression"
                 value={depressionLevel ?? null}
                 onChange={(next) => diaryForm.setValue("depressionLevel", next, { shouldDirty: true })}
+                ends={["none", "present", "crushing"]}
               />
-              <BarMetric
+            </StageField>
+            <StageField label="Anxiety">
+              <StageScale
                 label="Anxiety"
                 value={anxietyLevel ?? null}
                 onChange={(next) => diaryForm.setValue("anxietyLevel", next, { shouldDirty: true })}
+                ends={["calm", "tense", "panicked"]}
               />
-            </div>
-            <FieldLine
-              label="Description"
-              multiline
-              rows={2}
-              {...diaryForm.register("description")}
-              placeholder="What happened today? How did it feel?"
-              aria-label="Description"
-            />
-            <FieldLine
-              label="Gratitude"
-              multiline
-              rows={2}
-              {...diaryForm.register("gratitude")}
-              placeholder="One small thing you're glad about…"
-              aria-label="Gratitude"
-            />
-            </div>
+            </StageField>
+          </section>
 
-            {/* Narrow column: the date is usually already right, and the
-                emotion picker is where you go when something changed. */}
-            <div className={FORM_COL}>
-            <FieldLine
-              label="Date & time"
-              type="datetime-local"
-              className={DATETIME_FIELD}
-              {...diaryForm.register("dateTime")}
-              aria-label="Date/time"
-              onClick={(e) => {
-                const el = e.currentTarget as HTMLInputElement & { showPicker?: () => void };
-                el.showPicker?.();
-              }}
-            />
-            <div className="grid gap-3">
-              <SectionHead title="Emotions" variant="tags" />
-              <TagTabs tabs={moodTabs} active={moodTab} onSelect={setMoodTab} ariaLabel="Mood categories" />
-              <div className="grid gap-3">
-                {moodTab === "positive" ? (
-                  <MultiSelectField
-                    hideLabel
-                    label="Positive"
-                    fieldKey="positive_moods"
-                    value={positiveMoods}
-                    options={moodFieldOptions.positive_moods}
-                    onChange={(next) => diaryForm.setValue("positiveMoods", next, { shouldDirty: true })}
-                    domain="mood"
-                  />
-                ) : null}
-                {moodTab === "negative" ? (
-                  <MultiSelectField
-                    hideLabel
-                    label="Negative"
-                    fieldKey="negative_moods"
-                    value={negativeMoods}
-                    options={moodFieldOptions.negative_moods}
-                    onChange={(next) => diaryForm.setValue("negativeMoods", next, { shouldDirty: true })}
-                    domain="mood"
-                  />
-                ) : null}
-                {moodTab === "general" ? (
-                  <MultiSelectField
-                    hideLabel
-                    label="General"
-                    fieldKey="general_moods"
-                    value={generalMoods}
-                    options={moodFieldOptions.general_moods}
-                    onChange={(next) => diaryForm.setValue("generalMoods", next, { shouldDirty: true })}
-                    domain="mood"
-                  />
-                ) : null}
-              </div>
-            </div>
-            </div>
-          </div>
-
-          <div className="flex justify-end items-center gap-3 pt-2">
-            {editingDiary ? (
-              <Button type="button" onClick={onCancelEdit}>
-                Cancel edit
-              </Button>
+          <section className={STAGE}>
+            <StageHead step={2} title="Emotions" aside="optional" />
+            <TagTabs tabs={moodTabs} active={moodTab} onSelect={setMoodTab} ariaLabel="Mood categories" />
+            {moodTab === "positive" ? (
+              <MultiSelectField
+                hideLabel
+                label="Positive"
+                fieldKey="positive_moods"
+                value={positiveMoods}
+                options={moodFieldOptions.positive_moods}
+                onChange={(next) => diaryForm.setValue("positiveMoods", next, { shouldDirty: true })}
+                domain="mood"
+              />
             ) : null}
-            <Button type="submit" variant={diaryMutationState.isSuccess ? "success" : "primary"} >
+            {moodTab === "negative" ? (
+              <MultiSelectField
+                hideLabel
+                label="Negative"
+                fieldKey="negative_moods"
+                value={negativeMoods}
+                options={moodFieldOptions.negative_moods}
+                onChange={(next) => diaryForm.setValue("negativeMoods", next, { shouldDirty: true })}
+                domain="mood"
+              />
+            ) : null}
+            {moodTab === "general" ? (
+              <MultiSelectField
+                hideLabel
+                label="General"
+                fieldKey="general_moods"
+                value={generalMoods}
+                options={moodFieldOptions.general_moods}
+                onChange={(next) => diaryForm.setValue("generalMoods", next, { shouldDirty: true })}
+                domain="mood"
+              />
+            ) : null}
+          </section>
+
+          <section className={STAGE}>
+            <StageHead step={3} title="In your words" aside="optional" />
+            <StageField label="Description" prompt="What happened today? How did it feel?" htmlFor="diary-description">
+              <textarea id="diary-description" rows={4} className={FIELD_LINE_INPUT} {...diaryForm.register("description")} />
+            </StageField>
+            <StageField label="Gratitude" prompt="One small thing you're glad about." htmlFor="diary-gratitude">
+              <textarea id="diary-gratitude" rows={2} className={FIELD_LINE_INPUT} {...diaryForm.register("gratitude")} />
+            </StageField>
+          </section>
+
+          <div className="hidden max-mobile:flex justify-end gap-3">
+            {editingDiary ? <Button type="button" onClick={onCancelEdit}>Cancel edit</Button> : null}
+            <Button type="submit" variant={diaryMutationState.isSuccess ? "success" : "primary"}>
               {diaryMutationState.isSuccess ? "✓ Saved" : editingDiary ? "Update entry" : "Save entry"}
             </Button>
           </div>
-        </form>
-      </div>
+        </div>
+      </form>
+      ) : (
       <PastEntries
-        title="Past entries"
         isLoading={isLoading}
         loadingText="Loading diary entries..."
         isEmpty={diaryEntries.length === 0}
@@ -208,7 +221,10 @@ export function DiarySection({
           />
         }
       >
-        {diaryEntries.map((entry) => {
+        <EntryMonths
+          rows={diaryEntries}
+          dateOf={(entry) => entry.entryDate}
+          renderRow={(entry) => {
           const moodBand = bandNine(entry.moodLevel ?? undefined, true);
           return (
             <details key={entry.id} className={ENTRY_ROW}>
@@ -258,8 +274,10 @@ export function DiarySection({
               </div>
             </details>
           );
-        })}
+        }}
+        />
       </PastEntries>
+      )}
     </section>
   );
 }

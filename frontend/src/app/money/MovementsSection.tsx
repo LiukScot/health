@@ -5,14 +5,12 @@ import { FieldLine, FIELD_LINE_LABEL } from "../../components/ui/FieldLine";
 import { Select } from "../../components/ui/select";
 import { AnimatedEditingLabel } from "../shared";
 import { EmptyState, PAGE, PAGE_TITLE } from "../screen-helpers";
+import { FLAT_ACTIONS, FLAT_FORM, FLAT_NARROW, FLAT_ROW } from "../staged";
 import {
   DELETE_CONFIRM,
   DETAIL_ACTIONS,
   DETAIL_ACTION_BTN,
   DetailGroup,
-  EntriesHeading,
-  FORM_COL,
-  FORM_SPLIT,
   ENTRY_CHEVRON,
   ENTRY_EXPANDED,
   ENTRY_PREVIEW,
@@ -83,92 +81,77 @@ export function MovementsSection({
   return (
     <section className={PAGE}>
       <h1 className={PAGE_TITLE}>Movements</h1>
-      <div className="min-w-0 border-b border-border">
-        <EntriesHeading className="mt-0">New movement</EntriesHeading>
-        <form onSubmit={movementForm.handleSubmit(onSubmit)}>
-          <div className={FORM_SPLIT}>
-            {/* Left: what recurs and in which direction. */}
-            <div className={FORM_COL}>
-            <FieldLine
-              label="Name"
-              type="text"
-              placeholder="e.g. Rent, Salary"
-              aria-label="Name"
-              {...movementForm.register("name")}
+      <form onSubmit={movementForm.handleSubmit(onSubmit)} className={FLAT_FORM}>
+        <div className={FLAT_ROW}>
+          <FieldLine
+            label="Name"
+            type="text"
+            placeholder="e.g. Rent, Salary"
+            aria-label="Name"
+            {...movementForm.register("name")}
+          />
+          <FieldLine
+            label="Amount"
+            type="number"
+            step="0.01"
+            placeholder="0"
+            className={FLAT_NARROW}
+            aria-label="Amount"
+            {...movementForm.register("amount")}
+          />
+        </div>
+
+        <div className={FLAT_ROW}>
+          {/* A <span>, not a <label>: the Select is a button + popover, and
+              wrapping those in a label makes every click toggle it twice. */}
+          <div className="grid gap-2 content-start">
+            <span className={FIELD_LINE_LABEL}>Direction</span>
+            <Controller
+              control={movementForm.control}
+              name="direction"
+              render={({ field }) => (
+                <Select
+                  ariaLabel="Direction"
+                  value={field.value}
+                  onValueChange={field.onChange}
+                  options={DIRECTION_OPTIONS}
+                />
+              )}
             />
-
-            {/* A <span>, not a <label>: the Select is a button + popover, and
-                wrapping those in a label makes every click toggle it twice. */}
-            <div className="grid gap-2 content-start">
-              <span className={FIELD_LINE_LABEL}>Direction</span>
-              <Controller
-                control={movementForm.control}
-                name="direction"
-                render={({ field }) => (
-                  <Select
-                    ariaLabel="Direction"
-                    value={field.value}
-                    onValueChange={field.onChange}
-                    options={DIRECTION_OPTIONS}
-                  />
-                )}
-              />
-            </div>
-
-            <div className="grid gap-2 content-start">
-              <span className={FIELD_LINE_LABEL}>Cadence</span>
-              <Controller
-                control={movementForm.control}
-                name="cadence"
-                render={({ field }) => (
-                  <Select
-                    ariaLabel="Cadence"
-                    value={field.value}
-                    onValueChange={field.onChange}
-                    options={CADENCE_OPTIONS}
-                  />
-                )}
-              />
-            </div>
-
-            </div>
-
-            {/* Right: how much, and why. */}
-            <div className={FORM_COL}>
-            <FieldLine
-              label="Amount"
-              type="number"
-              step="0.01"
-              min="0"
-              placeholder="0"
-              aria-label="Amount"
-              {...movementForm.register("amount")}
-            />
-
-            <FieldLine
-              label="Note"
-              multiline
-              compact
-              rows={2}
-              placeholder="What is this recurring amount for?"
-              aria-label="Note"
-              {...movementForm.register("note")}
-            />
-
-            </div>
           </div>
-
-          <div className="flex justify-end pt-2">
-            <Button
-              type="submit"
-              variant={movementMutationState.isSuccess ? "success" : "primary"}
-             
-            >
-              {movementMutationState.isSuccess ? "✓ Saved" : editingMovement ? "Update movement" : "Save movement"}
-            </Button>
+          <div className="grid gap-2 content-start">
+            <span className={FIELD_LINE_LABEL}>Cadence</span>
+            <Controller
+              control={movementForm.control}
+              name="cadence"
+              render={({ field }) => (
+                <Select
+                  ariaLabel="Cadence"
+                  value={field.value}
+                  onValueChange={field.onChange}
+                  options={CADENCE_OPTIONS}
+                />
+              )}
+            />
           </div>
-        </form>
-      </div>
+        </div>
+
+        <FieldLine
+          label="Note"
+          multiline
+          compact
+          rows={2}
+          placeholder="What is this recurring amount for?"
+          aria-label="Note"
+          {...movementForm.register("note")}
+        />
+
+        <div className={FLAT_ACTIONS}>
+          <Button type="submit" variant={movementMutationState.isSuccess ? "success" : "primary"}>
+            {movementMutationState.isSuccess ? "✓ Saved" : editingMovement ? "Update movement" : "Save movement"}
+          </Button>
+        </div>
+      </form>
 
       <PastEntries
         title="Recurring"

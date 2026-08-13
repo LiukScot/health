@@ -48,6 +48,9 @@ export default function MonthlyRiskChart({ snapshots }: { snapshots: Snapshot[] 
     () => ({
       responsive: true,
       maintainAspectRatio: false,
+      // Without a cap a lone snapshot draws one bar as wide as the plot,
+      // which reads as a filled panel rather than as a measurement.
+      datasets: { bar: { maxBarThickness: 72 } },
       plugins: {
         legend: { position: "bottom" as const, labels: { color: colors.muted, boxWidth: 12 } },
       },

@@ -7,6 +7,33 @@ export function formatEntrySummaryDate(entryDate: string, entryTime: string): st
   return new Intl.DateTimeFormat(undefined, { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" }).format(d);
 }
 
+const MONTH_LABEL = new Intl.DateTimeFormat(undefined, { month: "long", year: "numeric" });
+
+/** "August 2026" — the heading the entry log groups rows under. */
+export function formatMonthLabel(entryDate: string): string {
+  const d = new Date(`${entryDate}T00:00:00`);
+  if (Number.isNaN(d.getTime())) return entryDate;
+  return MONTH_LABEL.format(d);
+}
+
+/**
+ * Rows in the order given, cut into runs that share a month. A run, not a
+ * map: the list is already sorted newest first, so a plain scan keeps that
+ * order and needs no re-sort. Entries with an unparseable date fall into
+ * their own run rather than being dropped.
+ */
+export function groupByMonth<T>(rows: T[], dateOf: (row: T) => string): { key: string; label: string; rows: T[] }[] {
+  const groups: { key: string; label: string; rows: T[] }[] = [];
+  for (const row of rows) {
+    const date = dateOf(row);
+    const key = date.slice(0, 7);
+    const last = groups[groups.length - 1];
+    if (last?.key === key) last.rows.push(row);
+    else groups.push({ key, label: formatMonthLabel(date), rows: [row] });
+  }
+  return groups;
+}
+
 export function bandNine(level: number | null | undefined, higherIsBetter = false): "low" | "mid" | "high" | "" {
   if (level == null || Number.isNaN(Number(level))) return "";
   const n = Math.round(Number(level));

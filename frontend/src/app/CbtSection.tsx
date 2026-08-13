@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { type UseFormReturn } from "react-hook-form";
 import {
   type CbtEntry,
@@ -5,18 +6,16 @@ import {
 } from "./core";
 import { AnimatedEditingLabel } from "./shared";
 import { EmptyState, PAGE, PAGE_TITLE } from "./screen-helpers";
+import { STAGE, STAGES, STAGE_SPLIT, StageField, StageHead, StageProgress, StageRail } from "./staged";
 import { formatEntrySummaryDate } from "./screen-format";
 import { Button } from "../components/ui/Button";
-import { FieldLine } from "../components/ui/FieldLine";
+import { FieldLine, FIELD_LINE_INPUT } from "../components/ui/FieldLine";
 import {
   DELETE_CONFIRM,
   DATETIME_FIELD,
   DETAIL_ACTIONS,
   DETAIL_ACTION_BTN,
   DetailGroup,
-  EntriesHeading,
-  FORM_COL,
-  FORM_SPLIT,
   ENTRY_CHEVRON,
   ENTRY_DATE,
   ENTRY_EXPANDED,
@@ -25,6 +24,9 @@ import {
   ENTRY_SUMMARY,
   PainBadge,
   PastEntries,
+  EntryMonths,
+  EntryViewTabs,
+  type EntryView,
 } from "./entries";
 
 export function CbtSection({
@@ -39,6 +41,8 @@ export function CbtSection({
   onStartEdit,
   onDeleteClick,
   onDeleteBlur,
+  view,
+  onViewChange,
 }: {
   cbtForm: UseFormReturn<CbtFormValues>;
   cbtMutationState: { isSuccess: boolean };
@@ -51,132 +55,111 @@ export function CbtSection({
   onStartEdit: (entry: CbtEntry) => void;
   onDeleteClick: (id: number) => void;
   onDeleteBlur: () => void;
+  view: EntryView;
+  onViewChange: (next: EntryView) => void;
 }) {
-  const cbtFields: { key: keyof CbtFormValues; label: string; hint?: string; multiline?: boolean }[] = [
-    { key: "situation", label: "Situation", hint: "What's the situation?" },
+  /*
+   * The ten prompts are a path: name what happened, examine the thought,
+   * look for another reading, decide what to do. They used to be cut in
+   * half by ceil(n/2) and poured into two columns, so the order existed
+   * only in this file. The groups below are that order, on screen.
+   */
+  const cbtStages: { title: string; fields: { key: keyof CbtFormValues; label: string; prompt: string; multiline?: boolean }[] }[] = [
     {
-      key: "thoughts",
-      label: "Thoughts",
-      hint: "What thoughts are running through your mind? How much do you believe each one?",
-      multiline: true,
+      title: "What happened",
+      fields: [
+        { key: "situation", label: "Situation", prompt: "What's the situation?" },
+        { key: "thoughts", label: "Thoughts", prompt: "What thoughts are running through your mind? How much do you believe each one?", multiline: true },
+      ],
     },
     {
-      key: "helpfulReasoning",
-      label: "Helpful reasoning",
-      hint: "Any helpful reasoning to counter this thought pattern?",
-      multiline: true,
+      title: "Examine the thought",
+      fields: [
+        { key: "helpfulReasoning", label: "Helpful reasoning", prompt: "Any helpful reasoning to counter this thought pattern?", multiline: true },
+        { key: "mainUnhelpfulThought", label: "Main unhelpful thought", prompt: "The single thought you want to work on." },
+        { key: "effectOfBelieving", label: "Effect of believing it", prompt: "What would change if you didn't believe it?", multiline: true },
+        { key: "evidenceForAgainst", label: "Evidence for / against", prompt: "What supports or rejects this thought?", multiline: true },
+      ],
     },
     {
-      key: "mainUnhelpfulThought",
-      label: "Main unhelpful thought",
-      hint: "The single thought you want to work on.",
+      title: "Another angle",
+      fields: [
+        { key: "alternativeExplanation", label: "Alternative explanation", prompt: "Could there be another way to read the situation?", multiline: true },
+        { key: "worstBestScenario", label: "Worst / best scenario", prompt: "What's the worst? Would you survive it? What's the best?", multiline: true },
+        { key: "friendAdvice", label: "Advice to a friend", prompt: "What would you tell a friend in this situation?", multiline: true },
+      ],
     },
     {
-      key: "effectOfBelieving",
-      label: "Effect of believing it",
-      hint: "What would change if you didn't believe it?",
-      multiline: true,
-    },
-    {
-      key: "evidenceForAgainst",
-      label: "Evidence for / against",
-      hint: "What supports or rejects this thought?",
-      multiline: true,
-    },
-    {
-      key: "alternativeExplanation",
-      label: "Alternative explanation",
-      hint: "Could there be another way to read the situation?",
-      multiline: true,
-    },
-    {
-      key: "worstBestScenario",
-      label: "Worst / best scenario",
-      hint: "What's the worst? Would you survive it? What's the best?",
-      multiline: true,
-    },
-    {
-      key: "friendAdvice",
-      label: "Advice to a friend",
-      hint: "What would you tell a friend in this situation?",
-      multiline: true,
-    },
-    {
-      key: "productiveResponse",
-      label: "Productive response",
-      hint: "Take a breath. What are your next steps?",
-      multiline: true,
+      title: "What now",
+      fields: [
+        { key: "productiveResponse", label: "Productive response", prompt: "Take a breath. What are your next steps?", multiline: true },
+      ],
     },
   ];
+  // The expanded entry still lists every field, in the same order.
+  const cbtFields = cbtStages.flatMap((stageGroup) => stageGroup.fields);
+  const [stage, setStage] = useState(0);
+  const steps = cbtStages.map((stageGroup) => ({
+    title: stageGroup.title,
+    done: stageGroup.fields.some((f) => !!cbtForm.watch(f.key)),
+  }));
 
 
   return (
     <section className={PAGE}>
+      <EntryViewTabs view={view} onChange={onViewChange} className="inline-flex max-mobile:hidden" />
       <h1 className={PAGE_TITLE}>CBT Thought Response</h1>
-      <div className="min-w-0 border-b border-border">
-        <EntriesHeading className="mt-0">New entry</EntriesHeading>
-        <form onSubmit={cbtForm.handleSubmit(onSubmit)}>
-          <div className={FORM_SPLIT}>
-            {/* Left: the date and the first half of the worksheet; the
-                order matters, so it reads down one column then the other. */}
-            <div className={FORM_COL}>
-            <FieldLine
-              label="Date & time"
-              type="datetime-local"
-              className={DATETIME_FIELD}
-              {...cbtForm.register("dateTime")}
-              aria-label="Date/time"
-              onClick={(e) => {
-                const el = e.currentTarget as HTMLInputElement & { showPicker?: () => void };
-                el.showPicker?.();
-              }}
-            />
-            {cbtFields.slice(0, Math.ceil(cbtFields.length / 2)).map((f) => (
-              <FieldLine
-                key={f.key}
-                label={f.label}
-                multiline={f.multiline}
-                compact={f.multiline}
-                rows={f.multiline ? 2 : undefined}
-                type={f.multiline ? undefined : "text"}
-                placeholder={f.hint}
-                aria-label={f.label}
-                {...cbtForm.register(f.key)}
-              />
-            ))}
-            </div>
+      {view === "new" ? (
+      <form onSubmit={cbtForm.handleSubmit(onSubmit)} className={STAGE_SPLIT}>
+        <StageProgress steps={steps} current={stage} />
+        <StageRail
+          steps={steps}
+          current={stage}
+          onJump={setStage}
+        >
+          <FieldLine
+            label="Date & time"
+            type="datetime-local"
+            className={DATETIME_FIELD}
+            {...cbtForm.register("dateTime")}
+            aria-label="Date/time"
+            onClick={(e) => {
+              const el = e.currentTarget as HTMLInputElement & { showPicker?: () => void };
+              el.showPicker?.();
+            }}
+          />
+          <Button type="submit" variant={cbtMutationState.isSuccess ? "success" : "primary"}>
+            {cbtMutationState.isSuccess ? "✓ Saved" : editingCbt ? "Update entry" : "Save entry"}
+          </Button>
+          {editingCbt ? <Button type="button" onClick={onCancelEdit}>Cancel edit</Button> : null}
+        </StageRail>
 
-            <div className={FORM_COL}>
-            {cbtFields.slice(Math.ceil(cbtFields.length / 2)).map((f) => (
-              <FieldLine
-                key={f.key}
-                label={f.label}
-                multiline={f.multiline}
-                compact={f.multiline}
-                rows={f.multiline ? 2 : undefined}
-                type={f.multiline ? undefined : "text"}
-                placeholder={f.hint}
-                aria-label={f.label}
-                {...cbtForm.register(f.key)}
-              />
-            ))}
-            </div>
-          </div>
+        <div className={STAGES}>
+          {cbtStages.map((stageGroup, index) => (
+            <section key={stageGroup.title} className={STAGE}>
+              <StageHead step={index + 1} title={stageGroup.title} />
+              {stageGroup.fields.map((f) => (
+                <StageField key={f.key} label={f.label} prompt={f.prompt} htmlFor={`cbt-${f.key}`}>
+                  {f.multiline ? (
+                    <textarea id={`cbt-${f.key}`} rows={3} className={FIELD_LINE_INPUT} {...cbtForm.register(f.key)} />
+                  ) : (
+                    <input id={`cbt-${f.key}`} type="text" className={FIELD_LINE_INPUT} {...cbtForm.register(f.key)} />
+                  )}
+                </StageField>
+              ))}
+            </section>
+          ))}
 
-          <div className="flex justify-end items-center gap-3 pt-2">
-            {editingCbt ? (
-              <Button type="button" onClick={onCancelEdit}>
-                Cancel edit
-              </Button>
-            ) : null}
-            <Button type="submit" variant={cbtMutationState.isSuccess ? "success" : "primary"} >
+          <div className="hidden max-mobile:flex justify-end gap-3">
+            {editingCbt ? <Button type="button" onClick={onCancelEdit}>Cancel edit</Button> : null}
+            <Button type="submit" variant={cbtMutationState.isSuccess ? "success" : "primary"}>
               {cbtMutationState.isSuccess ? "✓ Saved" : editingCbt ? "Update entry" : "Save entry"}
             </Button>
           </div>
-        </form>
-      </div>
+        </div>
+      </form>
+      ) : (
       <PastEntries
-        title="Past entries"
         isLoading={isLoading}
         loadingText="Loading CBT entries..."
         isEmpty={cbtEntries.length === 0}
@@ -187,7 +170,10 @@ export function CbtSection({
           />
         }
       >
-        {cbtEntries.map((entry) => (
+        <EntryMonths
+          rows={cbtEntries}
+          dateOf={(entry) => entry.entryDate}
+          renderRow={(entry) => (
           <details key={entry.id} className={ENTRY_ROW}>
             <summary className={ENTRY_SUMMARY}>
               <span className={ENTRY_DATE}>{formatEntrySummaryDate(entry.entryDate, entry.entryTime)}</span>
@@ -226,8 +212,10 @@ export function CbtSection({
               </div>
             </div>
           </details>
-        ))}
+        )}
+        />
       </PastEntries>
+      )}
     </section>
   );
 }

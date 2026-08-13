@@ -9,21 +9,18 @@ import {
 import {
   AnimatedEditingLabel,
   MultiSelectField,
-  SectionHead,
 } from "./shared";
-import { BarMetric, CoffeeStepper, EmptyState, PAGE, PAGE_TITLE } from "./screen-helpers";
+import { EmptyState, PAGE, PAGE_TITLE } from "./screen-helpers";
+import { STAGE, STAGES, STAGE_SPLIT, StageField, StageHead, StageProgress, StageRail, StageScale, StageStepper } from "./staged";
 import { bandNine, painPreview, formatEntrySummaryDate } from "./screen-format";
 import { Button } from "../components/ui/Button";
-import { FieldLine, FIELD_LINE_LABEL } from "../components/ui/FieldLine";
+import { FieldLine, FIELD_LINE_INPUT } from "../components/ui/FieldLine";
 import {
   DELETE_CONFIRM,
   DATETIME_FIELD,
   DETAIL_ACTIONS,
   DETAIL_ACTION_BTN,
   DetailGroup,
-  EntriesHeading,
-  FORM_COL,
-  FORM_SPLIT,
   ENTRY_CHEVRON,
   ENTRY_DATE,
   ENTRY_EXPANDED,
@@ -32,6 +29,9 @@ import {
   ENTRY_SUMMARY,
   PainBadge,
   PastEntries,
+  EntryMonths,
+  EntryViewTabs,
+  type EntryView,
   TagList,
   TagTabs,
 } from "./entries";
@@ -59,6 +59,8 @@ export function PainSection({
   onStartEdit,
   onDeleteClick,
   onDeleteBlur,
+  view,
+  onViewChange,
 }: {
   painForm: UseFormReturn<PainFormValues>;
   painMutationState: { isSuccess: boolean };
@@ -73,8 +75,14 @@ export function PainSection({
   onStartEdit: (entry: PainEntry) => void;
   onDeleteClick: (id: number) => void;
   onDeleteBlur: () => void;
+  view: EntryView;
+  onViewChange: (next: EntryView) => void;
 }) {
   const [painTab, setPainTab] = useState<PainFieldKey>("area");
+  // Which stage the rail highlights. Clicking a step scrolls to it; the
+  // stages all stay rendered, so this only drives the highlight.
+  const [stage, setStage] = useState(0);
+
   const [painLevel, fatigueLevel, coffeeCount] = painForm.watch(["painLevel", "fatigueLevel", "coffeeCount"]);
 
   const painTabCounts: Record<PainFieldKey, number> = {
@@ -89,6 +97,12 @@ export function PainSection({
   const painOptionsForTab = (id: PainFieldKey) => painFieldOptions[id];
 
 
+  const steps = [
+    { title: "How bad", done: painLevel != null || fatigueLevel != null || coffeeCount != null },
+    { title: "Where & what", done: PAIN_TABS.some((t) => watchedValues[t.id]) },
+    { title: "Details", done: !!painForm.watch("note") },
+  ];
+
   const tabLabel = PAIN_TABS.find((t) => t.id === painTab)?.label ?? "";
   const painDetails: { label: string; key: PainFieldKey }[] = [
     { label: "Area", key: "area" },
@@ -101,92 +115,106 @@ export function PainSection({
 
   return (
     <section className={PAGE}>
+      <EntryViewTabs view={view} onChange={onViewChange} className="inline-flex max-mobile:hidden" />
       <h1 className={PAGE_TITLE}>Pain</h1>
-      <div className="min-w-0 border-b border-border">
-        <EntriesHeading className="mt-0">New entry</EntriesHeading>
-        <form onSubmit={painForm.handleSubmit(onSubmit)}>
-          <div className={FORM_SPLIT}>
-            <div className="sr-only" aria-hidden="true">
-              <input type="hidden" {...painForm.register("painLevel", { valueAsNumber: true })} />
-              <input type="hidden" {...painForm.register("fatigueLevel", { valueAsNumber: true })} />
-              <input type="hidden" {...painForm.register("coffeeCount", { valueAsNumber: true })} />
-            </div>
-            {/* Wide column: the metrics and the tag strip, whose six tabs
-                need the room to stay on one line. */}
-            <div className={FORM_COL}>
-            <div className="grid gap-2 content-start">
-              <span className={FIELD_LINE_LABEL}>Values</span>
-              <BarMetric
+      {view === "new" ? (
+      <form onSubmit={painForm.handleSubmit(onSubmit)} className={STAGE_SPLIT}>
+        <div className="sr-only" aria-hidden="true">
+          <input type="hidden" {...painForm.register("painLevel", { valueAsNumber: true })} />
+          <input type="hidden" {...painForm.register("fatigueLevel", { valueAsNumber: true })} />
+          <input type="hidden" {...painForm.register("coffeeCount", { valueAsNumber: true })} />
+        </div>
+
+        <StageProgress steps={steps} current={stage} />
+        <StageRail
+          steps={steps}
+          current={stage}
+          onJump={setStage}
+        >
+          <FieldLine
+            label="Date & time"
+            type="datetime-local"
+            className={DATETIME_FIELD}
+            {...painForm.register("dateTime")}
+            aria-label="Date/time"
+            onClick={(e) => {
+              const el = e.currentTarget as HTMLInputElement & { showPicker?: () => void };
+              el.showPicker?.();
+            }}
+          />
+          <Button type="submit" variant={painMutationState.isSuccess ? "success" : "primary"}>
+            {painMutationState.isSuccess ? "✓ Saved" : editingPain ? "Update entry" : "Save entry"}
+          </Button>
+          {editingPain ? (
+            <Button type="button" onClick={onCancelEdit}>Cancel edit</Button>
+          ) : null}
+        </StageRail>
+
+        <div className={STAGES}>
+          <section className={STAGE}>
+            <StageHead step={1} title="How bad is it?" />
+            <StageField label="Pain level">
+              <StageScale
                 label="Pain level"
                 value={painLevel ?? null}
                 onChange={(next) => painForm.setValue("painLevel", next, { shouldDirty: true })}
+                ends={["mild", "moderate", "severe"]}
               />
-              <BarMetric
+            </StageField>
+            <StageField label="Fatigue">
+              <StageScale
                 label="Fatigue"
                 value={fatigueLevel ?? null}
                 onChange={(next) => painForm.setValue("fatigueLevel", next, { shouldDirty: true })}
+                ends={["fresh", "tired", "drained"]}
               />
-              <CoffeeStepper value={coffeeCount ?? null} onChange={(next) => painForm.setValue("coffeeCount", next, { shouldDirty: true })} />
-            </div>
-            <div className="grid gap-3 content-start min-w-0">
-              <SectionHead title="Factors" variant="tags" />
-              <TagTabs
-                tabs={PAIN_TABS.map((t) => ({ id: t.id, label: t.label, count: painTabCounts[t.id] }))}
-                active={painTab}
-                onSelect={setPainTab}
-                ariaLabel="Pain categories"
+            </StageField>
+            <StageField label="Coffee today">
+              <StageStepper label="coffee" value={coffeeCount ?? null} onChange={(next) => painForm.setValue("coffeeCount", next, { shouldDirty: true })} />
+            </StageField>
+          </section>
+
+          <section className={STAGE}>
+            <StageHead step={2} title="Where & what" aside="optional" />
+            <TagTabs
+              tabs={PAIN_TABS.map((t) => ({ id: t.id, label: t.label, count: painTabCounts[t.id] }))}
+              active={painTab}
+              onSelect={setPainTab}
+              ariaLabel="Pain categories"
+            />
+            <MultiSelectField
+              hideLabel
+              label={tabLabel}
+              fieldKey={painTab}
+              value={watchedValues[painTab]}
+              options={painOptionsForTab(painTab)}
+              onChange={(next) => painForm.setValue(painTab, next, { shouldDirty: true })}
+            />
+          </section>
+
+          <section className={STAGE}>
+            <StageHead step={3} title="Details" aside="optional" />
+            <StageField label="Note" prompt="Anything worth remembering about this flare." htmlFor="pain-note">
+              <textarea
+                id="pain-note"
+                rows={3}
+                className={FIELD_LINE_INPUT}
+                {...painForm.register("note")}
               />
-              <div className="grid gap-3">
-                <MultiSelectField
-                  hideLabel
-                  label={tabLabel}
-                  fieldKey={painTab}
-                  value={watchedValues[painTab]}
-                  options={painOptionsForTab(painTab)}
-                  onChange={(next) => painForm.setValue(painTab, next, { shouldDirty: true })}
-                />
-              </div>
-            </div>
-            </div>
+            </StageField>
+          </section>
 
-            {/* Narrow column: a date and free text both read fine narrow. */}
-            <div className={FORM_COL}>
-            <FieldLine
-              label="Date & time"
-              type="datetime-local"
-              className={DATETIME_FIELD}
-              {...painForm.register("dateTime")}
-              aria-label="Date/time"
-              onClick={(e) => {
-                const el = e.currentTarget as HTMLInputElement & { showPicker?: () => void };
-                el.showPicker?.();
-              }}
-            />
-            <FieldLine
-              label="Note"
-              multiline
-              rows={2}
-              {...painForm.register("note")}
-              placeholder="Anything worth remembering about this flare…"
-              aria-label="Note"
-            />
-            </div>
-          </div>
-
-          <div className="flex justify-end items-center gap-3 pt-2">
-            {editingPain ? (
-              <Button type="button" onClick={onCancelEdit}>
-                Cancel edit
-              </Button>
-            ) : null}
-            <Button type="submit" variant={painMutationState.isSuccess ? "success" : "primary"} >
+          {/* Mobile only: the rail that holds Save is hidden there. */}
+          <div className="hidden max-mobile:flex justify-end gap-3">
+            {editingPain ? <Button type="button" onClick={onCancelEdit}>Cancel edit</Button> : null}
+            <Button type="submit" variant={painMutationState.isSuccess ? "success" : "primary"}>
               {painMutationState.isSuccess ? "✓ Saved" : editingPain ? "Update entry" : "Save entry"}
             </Button>
           </div>
-        </form>
-      </div>
+        </div>
+      </form>
+      ) : (
       <PastEntries
-        title="Past entries"
         isLoading={isLoading}
         loadingText="Loading pain entries..."
         isEmpty={painEntries.length === 0}
@@ -197,7 +225,10 @@ export function PainSection({
           />
         }
       >
-        {painEntries.map((entry) => {
+        <EntryMonths
+          rows={painEntries}
+          dateOf={(entry) => entry.entryDate}
+          renderRow={(entry) => {
           const painBand = bandNine(entry.painLevel ?? undefined);
           return (
             <details key={entry.id} className={ENTRY_ROW}>
@@ -213,15 +244,18 @@ export function PainSection({
                 <span className={ENTRY_CHEVRON} aria-hidden="true">▶</span>
               </summary>
               <div className={ENTRY_EXPANDED}>
-                <DetailGroup label="Pain · Fatigue · Coffee">
+                <DetailGroup
+                  label="Pain · Fatigue · Coffee"
+                  empty={entry.painLevel == null && entry.fatigueLevel == null && entry.coffeeCount == null}
+                >
                   {entry.painLevel ?? "—"} · {entry.fatigueLevel ?? "—"} · {entry.coffeeCount ?? "—"}
                 </DetailGroup>
                 {painDetails.map((d) => (
-                  <DetailGroup key={d.key} label={d.label}>
+                  <DetailGroup key={d.key} label={d.label} empty={csvToList(entry[d.key]).length === 0}>
                     <TagList items={csvToList(entry[d.key])} />
                   </DetailGroup>
                 ))}
-                <DetailGroup label="Note">{entry.note || "—"}</DetailGroup>
+                <DetailGroup label="Note">{entry.note}</DetailGroup>
                 <div className={DETAIL_ACTIONS}>
                   <button
                     type="button"
@@ -248,8 +282,10 @@ export function PainSection({
               </div>
             </details>
           );
-        })}
+        }}
+        />
       </PastEntries>
+      )}
     </section>
   );
 }
