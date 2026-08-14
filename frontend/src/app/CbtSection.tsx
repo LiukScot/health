@@ -97,10 +97,17 @@ export function CbtSection({
   ];
   // The expanded entry still lists every field, in the same order.
   const cbtFields = cbtStages.flatMap((stageGroup) => stageGroup.fields);
-  const touched = cbtForm.formState.dirtyFields;
+  /*
+   * Every field, not any: the tick says the stage is done, and a stage
+   * with one of four prompts answered is not. Read from the values
+   * rather than from dirtyFields, so typing and then clearing takes the
+   * tick back — these worksheets start empty, so there is no default for
+   * a value check to mistake for an answer.
+   */
+  const cbtValues = cbtForm.watch();
   const steps = cbtStages.map((stageGroup) => ({
     title: stageGroup.title,
-    done: stageGroup.fields.some((f) => !!touched[f.key]),
+    done: stageGroup.fields.every((f) => !!String(cbtValues[f.key] ?? "").trim()),
   }));
 
 
@@ -112,7 +119,7 @@ export function CbtSection({
         <StageRail
           steps={steps}
           heading={
-            <div className="grid gap-5 content-start">
+            <div className="grid gap-page content-start">
               <EntryViewTabs view={view} onChange={onViewChange} labels={entryViewLabels["cbt"]!} className="inline-flex max-mobile:hidden" />
               <h1 className={PAGE_TITLE}>CBT Thought Response</h1>
             </div>
@@ -161,7 +168,7 @@ export function CbtSection({
       </form>
       ) : (
       <div className="grid gap-page content-start min-w-0">
-        <div className="grid gap-5 content-start">
+        <div className="grid gap-page content-start">
           <EntryViewTabs view={view} onChange={onViewChange} labels={entryViewLabels["cbt"]!} className="inline-flex max-mobile:hidden" />
           <h1 className={PAGE_TITLE}>CBT Thought Response</h1>
         </div>

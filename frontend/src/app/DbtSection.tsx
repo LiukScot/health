@@ -112,10 +112,11 @@ export function DbtSection({
     },
   ];
 
-  const touched = dbtForm.formState.dirtyFields;
+  // Every field, not any — see the note in CbtSection.
+  const dbtValues = dbtForm.watch();
   const steps = dbtGroups.map((group) => ({
     title: group.title,
-    done: group.fields.some((f) => !!touched[f.key]),
+    done: group.fields.every((f) => !!String(dbtValues[f.key] ?? "").trim()),
   }));
 
 
@@ -136,7 +137,7 @@ export function DbtSection({
         <StageRail
           steps={steps}
           heading={
-            <div className="grid gap-5 content-start">
+            <div className="grid gap-page content-start">
               <EntryViewTabs view={view} onChange={onViewChange} labels={entryViewLabels["dbt"]!} className="inline-flex max-mobile:hidden" />
               <h1 className={PAGE_TITLE}>DBT Distress Tolerance</h1>
             </div>
@@ -192,7 +193,7 @@ export function DbtSection({
       </form>
       ) : (
       <div className="grid gap-page content-start min-w-0">
-        <div className="grid gap-5 content-start">
+        <div className="grid gap-page content-start">
           <EntryViewTabs view={view} onChange={onViewChange} labels={entryViewLabels["dbt"]!} className="inline-flex max-mobile:hidden" />
           <h1 className={PAGE_TITLE}>DBT Distress Tolerance</h1>
         </div>

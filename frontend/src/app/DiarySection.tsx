@@ -103,7 +103,7 @@ export function DiarySection({
         <StageRail
           steps={steps}
           heading={
-            <div className="grid gap-5 content-start">
+            <div className="grid gap-page content-start">
               <EntryViewTabs view={view} onChange={onViewChange} labels={entryViewLabels["diary"]!} className="inline-flex max-mobile:hidden" />
               <h1 className={PAGE_TITLE}>Diary</h1>
             </div>
@@ -214,7 +214,7 @@ export function DiarySection({
       </form>
       ) : (
       <div className="grid gap-page content-start min-w-0">
-        <div className="grid gap-5 content-start">
+        <div className="grid gap-page content-start">
           <EntryViewTabs view={view} onChange={onViewChange} labels={entryViewLabels["diary"]!} className="inline-flex max-mobile:hidden" />
           <h1 className={PAGE_TITLE}>Diary</h1>
         </div>

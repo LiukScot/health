@@ -130,7 +130,7 @@ export function PainSection({
         <StageRail
           steps={steps}
           heading={
-            <div className="grid gap-5 content-start">
+            <div className="grid gap-page content-start">
               <EntryViewTabs view={view} onChange={onViewChange} labels={entryViewLabels["pain"]!} className="inline-flex max-mobile:hidden" />
               <h1 className={PAGE_TITLE}>Pain</h1>
             </div>
@@ -217,7 +217,7 @@ export function PainSection({
       </form>
       ) : (
       <div className="grid gap-page content-start min-w-0">
-        <div className="grid gap-5 content-start">
+        <div className="grid gap-page content-start">
           <EntryViewTabs view={view} onChange={onViewChange} labels={entryViewLabels["pain"]!} className="inline-flex max-mobile:hidden" />
           <h1 className={PAGE_TITLE}>Pain</h1>
         </div>
