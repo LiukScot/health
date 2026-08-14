@@ -1,0 +1,542 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pain · Mockup B</title>
+<link rel="stylesheet" href="tokens.css">
+<style>
+  /* Step indicator */
+  .steps {
+    display: flex;
+    gap: 0;
+    margin-bottom: 24px;
+    background: var(--card-strong);
+    border: 1px solid var(--border-soft);
+    border-radius: var(--radius-md);
+    padding: 4px;
+  }
+  .step {
+    flex: 1;
+    padding: 12px 14px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--muted);
+    text-align: center;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+  }
+  .step.active {
+    background: var(--bg);
+    color: var(--text);
+    border: 1px solid var(--border-soft);
+  }
+  .step.done { color: var(--success); }
+  .step .step-num {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: var(--card-soft);
+    color: var(--muted);
+    font-size: 11px;
+    font-weight: 700;
+  }
+  .step.active .step-num { background: var(--accent); color: #1a0608; }
+  .step.done .step-num { background: var(--success); color: #0a2018; }
+
+  /* Wizard panel */
+  .wizard {
+    background: var(--card-strong);
+    border: 1px solid var(--border-soft);
+    border-radius: var(--radius-md);
+    padding: 32px;
+    margin-bottom: 24px;
+    min-height: 440px;
+  }
+  .wizard-prompt {
+    font-size: 24px;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    margin: 0 0 6px;
+  }
+  .wizard-sub {
+    font-size: 14px;
+    color: var(--muted);
+    margin: 0 0 28px;
+  }
+  .big-field {
+    display: grid;
+    gap: 10px;
+    margin-bottom: 28px;
+  }
+  .big-field label {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--accent);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+  .big-scale {
+    display: grid;
+    gap: 6px;
+  }
+  .big-scale .row {
+    display: grid;
+    grid-template-columns: repeat(9, 1fr);
+    gap: 5px;
+  }
+  .big-scale button {
+    height: 48px;
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--muted);
+    background: var(--card-soft);
+    border: 1px solid var(--border-soft);
+    border-radius: 10px;
+    cursor: pointer;
+  }
+  .big-scale button:hover { border-color: var(--border); color: var(--text); }
+  .big-scale button.active { color: white; background: var(--accent); border-color: var(--accent); }
+  .big-scale button.active.low { background: var(--success); color: #0a2018; border-color: var(--success); }
+  .big-scale button.active.mid { background: var(--warning); color: #2a1a00; border-color: var(--warning); }
+  .big-scale button.active.high { background: var(--danger); border-color: var(--danger); }
+  .big-scale .labels {
+    display: flex;
+    justify-content: space-between;
+    font-size: 12px;
+    color: var(--muted-soft);
+    padding: 0 4px;
+  }
+  .big-stepper {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    justify-content: center;
+    padding: 12px 0;
+  }
+  .big-stepper button {
+    width: 52px;
+    height: 52px;
+    border-radius: 50%;
+    border: 1px solid var(--border);
+    background: var(--card-soft);
+    color: var(--text);
+    font-size: 22px;
+    cursor: pointer;
+  }
+  .big-stepper button:hover { border-color: var(--accent); color: var(--accent); }
+  .big-stepper .value {
+    font-size: 36px;
+    font-weight: 800;
+    min-width: 60px;
+    text-align: center;
+  }
+
+  /* Chip pickers for step 2/3 */
+  .chip-picker {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .chip-picker .chip { padding: 10px 16px; font-size: 14px; }
+  .chip-picker .add-new {
+    display: inline-flex;
+    padding: 10px 16px;
+    font-size: 14px;
+    color: var(--muted);
+    background: transparent;
+    border: 1px dashed var(--border-soft);
+    border-radius: 999px;
+    cursor: pointer;
+    font-family: inherit;
+  }
+  .chip-picker .add-new:hover { border-color: var(--accent); color: var(--accent); }
+
+  /* Wizard nav */
+  .wizard-nav {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 32px;
+    padding-top: 20px;
+    border-top: 1px solid var(--border-soft);
+  }
+
+  /* Entries list */
+  .entries-heading {
+    font-size: 13px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin: 32px 0 10px;
+  }
+  .entry-row {
+    background: var(--card-strong);
+    border: 1px solid var(--border-soft);
+    border-radius: var(--radius-md);
+    margin-bottom: 6px;
+    overflow: hidden;
+  }
+  .entry-row summary {
+    list-style: none;
+    display: grid;
+    grid-template-columns: auto auto 1fr auto auto;
+    align-items: center;
+    gap: 14px;
+    padding: 12px 16px;
+    cursor: pointer;
+  }
+  .entry-row summary::-webkit-details-marker { display: none; }
+  .entry-row summary .date {
+    font-size: 13px;
+    color: var(--muted);
+    min-width: 100px;
+  }
+  .entry-row summary .preview {
+    font-size: 13px;
+    color: var(--muted);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .entry-row summary .chevron {
+    color: var(--muted);
+    transition: transform 0.2s;
+    font-size: 12px;
+  }
+  .entry-row[open] summary .chevron { transform: rotate(90deg); }
+  .entry-expanded {
+    padding: 0 16px 16px;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 12px;
+    border-top: 1px solid var(--border-soft);
+    padding-top: 14px;
+  }
+  .detail-group {
+    display: grid;
+    gap: 4px;
+  }
+  .detail-group .label {
+    font-size: 11px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+  .detail-group .value {
+    font-size: 13px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+  }
+  .detail-group .tag-mini {
+    padding: 2px 8px;
+    font-size: 11px;
+    color: var(--muted);
+    background: var(--card-soft);
+    border-radius: 4px;
+  }
+</style>
+</head>
+<body>
+<div class="mockup-frame">
+  <div class="mockup-nav">
+    <a href="index.html">← All mockups</a>
+    <a href="pain-a.html">A · Progressive</a>
+    <a href="pain-b.html" class="current">B · Wizard</a>
+    <a href="pain-c.html">C · Dense</a>
+  </div>
+  <div class="mockup-tag">Mockup B</div>
+  <h1 class="mockup-title">Guided wizard</h1>
+  <p class="mockup-subtitle">Un passaggio alla volta. Zero overwhelm. Qui sotto i tre screen del wizard in sequenza: When · How → Where · What → Details.</p>
+
+  <!-- ===== SCREEN 1 · WHEN & HOW ===== -->
+  <h2 class="entries-heading">Screen 1 di 3</h2>
+  <div class="steps">
+    <div class="step active">
+      <span class="step-num">1</span>
+      <span>When · How</span>
+    </div>
+    <div class="step">
+      <span class="step-num">2</span>
+      <span>Where · What</span>
+    </div>
+    <div class="step">
+      <span class="step-num">3</span>
+      <span>Details</span>
+    </div>
+  </div>
+
+  <div class="wizard">
+    <p class="wizard-prompt">When did it flare, and how bad is it?</p>
+    <p class="wizard-sub">Date first, then the two scales. Everything else can wait.</p>
+
+    <div class="big-field">
+      <label>Date / time</label>
+      <input type="datetime-local" value="2026-04-17T14:30" style="max-width:260px">
+      <div class="chip-picker">
+        <button type="button" class="chip active">Now</button>
+        <button type="button" class="chip">1h ago</button>
+        <button type="button" class="chip">This morning</button>
+        <button type="button" class="chip">Yesterday</button>
+      </div>
+    </div>
+
+    <div class="big-field">
+      <label>Pain level</label>
+      <div class="big-scale">
+        <div class="row">
+          <button type="button" class="active low">1</button>
+          <button type="button" class="active low">2</button>
+          <button type="button" class="active low">3</button>
+          <button type="button" class="active mid">4</button>
+          <button type="button" class="active mid">5</button>
+          <button type="button" class="active mid">6</button>
+          <button type="button" class="active high">7</button>
+          <button type="button">8</button>
+          <button type="button">9</button>
+        </div>
+        <div class="labels"><span>mild</span><span>moderate</span><span>severe</span></div>
+      </div>
+    </div>
+
+    <div class="big-field">
+      <label>Fatigue</label>
+      <div class="big-scale">
+        <div class="row">
+          <button type="button" class="active low">1</button>
+          <button type="button" class="active low">2</button>
+          <button type="button" class="active low">3</button>
+          <button type="button" class="active mid">4</button>
+          <button type="button" class="active mid">5</button>
+          <button type="button">6</button>
+          <button type="button">7</button>
+          <button type="button">8</button>
+          <button type="button">9</button>
+        </div>
+        <div class="labels"><span>fresh</span><span>tired</span><span>drained</span></div>
+      </div>
+    </div>
+
+    <div class="big-field">
+      <label>Coffee today</label>
+      <div class="big-stepper">
+        <button type="button">−</button>
+        <span class="value">2</span>
+        <button type="button">+</button>
+      </div>
+    </div>
+
+    <div class="wizard-nav">
+      <button type="button" class="btn">Cancel</button>
+      <button type="button" class="btn-primary btn">Next →</button>
+    </div>
+  </div>
+
+  <!-- ===== SCREEN 2 · WHERE & WHAT ===== -->
+  <h2 class="entries-heading">Screen 2 di 3</h2>
+  <div class="steps">
+    <div class="step done">
+      <span class="step-num">✓</span>
+      <span>When · How</span>
+    </div>
+    <div class="step active">
+      <span class="step-num">2</span>
+      <span>Where · What</span>
+    </div>
+    <div class="step">
+      <span class="step-num">3</span>
+      <span>Details</span>
+    </div>
+  </div>
+
+  <div class="wizard">
+    <p class="wizard-prompt">Where does it hurt, and what's going on?</p>
+    <p class="wizard-sub">Pick the body areas and any symptoms you're feeling.</p>
+
+    <div class="big-field">
+      <label>Body area</label>
+      <div class="chip-picker">
+        <button type="button" class="chip">tmj</button>
+        <button type="button" class="chip">legs</button>
+        <button type="button" class="chip">shoulders</button>
+        <button type="button" class="chip">chest</button>
+        <button type="button" class="chip active">neck</button>
+        <button type="button" class="chip active">head</button>
+        <button type="button" class="chip">back</button>
+        <button type="button" class="chip">abdomen</button>
+        <button type="button" class="add-new">+ add area</button>
+      </div>
+    </div>
+
+    <div class="big-field">
+      <label>Symptoms</label>
+      <div class="chip-picker">
+        <button type="button" class="chip">running nose</button>
+        <button type="button" class="chip">coughing</button>
+        <button type="button" class="chip active">nausea</button>
+        <button type="button" class="chip">short breath</button>
+        <button type="button" class="chip">diarrhea</button>
+        <button type="button" class="chip">stiffness</button>
+        <button type="button" class="chip">palpitation</button>
+        <button type="button" class="chip">fever</button>
+        <button type="button" class="add-new">+ add symptom</button>
+      </div>
+    </div>
+
+    <div class="big-field">
+      <label>What were you doing?</label>
+      <div class="chip-picker">
+        <button type="button" class="chip">walking</button>
+        <button type="button" class="chip">sitting</button>
+        <button type="button" class="chip">exercise</button>
+        <button type="button" class="chip">driving</button>
+        <button type="button" class="chip">sleeping</button>
+        <button type="button" class="add-new">+ add activity</button>
+      </div>
+    </div>
+
+    <div class="wizard-nav">
+      <button type="button" class="btn">← Back</button>
+      <button type="button" class="btn-primary btn">Next →</button>
+    </div>
+  </div>
+
+  <!-- ===== SCREEN 3 · DETAILS ===== -->
+  <h2 class="entries-heading">Screen 3 di 3</h2>
+  <div class="steps">
+    <div class="step done">
+      <span class="step-num">✓</span>
+      <span>When · How</span>
+    </div>
+    <div class="step done">
+      <span class="step-num">✓</span>
+      <span>Where · What</span>
+    </div>
+    <div class="step active">
+      <span class="step-num">3</span>
+      <span>Details</span>
+    </div>
+  </div>
+
+  <div class="wizard">
+    <p class="wizard-prompt">Anything else worth keeping?</p>
+    <p class="wizard-sub">Medicines, habits, and a free note. All optional — Save works from here even if empty.</p>
+
+    <div class="big-field">
+      <label>Medicines taken</label>
+      <div class="chip-picker">
+        <button type="button" class="chip active">200mg celebrex</button>
+        <button type="button" class="chip active">4mg sirdalud</button>
+        <button type="button" class="chip">dwa</button>
+        <button type="button" class="chip">dwawd</button>
+        <button type="button" class="add-new">+ add medicine</button>
+      </div>
+    </div>
+
+    <div class="big-field">
+      <label>Habits</label>
+      <div class="chip-picker">
+        <button type="button" class="chip">skipped meal</button>
+        <button type="button" class="chip active">slept badly</button>
+        <button type="button" class="chip">screen late</button>
+        <button type="button" class="chip">alcohol</button>
+        <button type="button" class="add-new">+ add habit</button>
+      </div>
+    </div>
+
+    <div class="big-field">
+      <label for="pb-note">Note</label>
+      <textarea id="pb-note" name="note" rows="3" placeholder="Anything worth remembering about this flare…">Started after meeting</textarea>
+    </div>
+
+    <div class="wizard-nav">
+      <button type="button" class="btn">← Back</button>
+      <button type="button" class="btn-primary btn">Save entry</button>
+    </div>
+  </div>
+
+  <!-- ENTRIES LIST -->
+  <h2 class="entries-heading">Past entries</h2>
+
+  <details class="entry-row" open>
+    <summary>
+      <span class="date">Apr 17, 14:30</span>
+      <span class="pain-badge sm high">7</span>
+      <span class="preview">head, neck, nausea · Started after meeting</span>
+      <span></span>
+      <span class="chevron">▶</span>
+    </summary>
+    <div class="entry-expanded">
+      <div class="detail-group">
+        <span class="label">Area</span>
+        <span class="value"><span class="tag-mini">head</span><span class="tag-mini">neck</span></span>
+      </div>
+      <div class="detail-group">
+        <span class="label">Symptoms</span>
+        <span class="value"><span class="tag-mini">nausea</span></span>
+      </div>
+      <div class="detail-group">
+        <span class="label">Medicines</span>
+        <span class="value"><span class="tag-mini">celebrex</span><span class="tag-mini">sirdalud</span></span>
+      </div>
+      <div class="detail-group">
+        <span class="label">Fatigue · Coffee</span>
+        <span class="value">5 · 2</span>
+      </div>
+      <div class="detail-group" style="grid-column:1/-1">
+        <span class="label">Note</span>
+        <span class="value" style="color:var(--text)">Started after meeting</span>
+      </div>
+    </div>
+  </details>
+
+  <details class="entry-row">
+    <summary>
+      <span class="date">Apr 17, 09:00</span>
+      <span class="pain-badge sm mid">4</span>
+      <span class="preview">back</span>
+      <span></span>
+      <span class="chevron">▶</span>
+    </summary>
+    <div class="entry-expanded">
+      <div class="detail-group">
+        <span class="label">Area</span>
+        <span class="value"><span class="tag-mini">back</span></span>
+      </div>
+    </div>
+  </details>
+
+  <details class="entry-row">
+    <summary>
+      <span class="date">Apr 16, 20:15</span>
+      <span class="pain-badge sm mid">6</span>
+      <span class="preview">shoulders, head, stiffness · Long day</span>
+      <span></span>
+      <span class="chevron">▶</span>
+    </summary>
+    <div class="entry-expanded">
+      <div class="detail-group">
+        <span class="label">Area</span>
+        <span class="value"><span class="tag-mini">shoulders</span><span class="tag-mini">head</span></span>
+      </div>
+    </div>
+  </details>
+
+  <details class="entry-row">
+    <summary>
+      <span class="date">Apr 15, 22:00</span>
+      <span class="pain-badge sm mid">5</span>
+      <span class="preview">abdomen, cramps · After dinner</span>
+      <span></span>
+      <span class="chevron">▶</span>
+    </summary>
+  </details>
+</div>
+</body>
+</html>

@@ -97,7 +97,7 @@ export function Sidebar({ nav, onNav, realm, onRealmChange, collapsed, onToggle,
 
   return (
     <aside
-      className={`sidebar sticky top-0 h-screen flex flex-col bg-bg border-r border-border px-2 py-3 gap-2 z-10 max-mobile:fixed max-mobile:inset-0 max-mobile:w-full max-mobile:h-[100dvh] max-mobile:p-[14px_18px] max-mobile:z-[100] max-mobile:transition-transform max-mobile:duration-[250ms] max-mobile:ease-[ease] ${mobileOpen ? "max-mobile:[transform:translateX(0)]" : "max-mobile:[transform:translateX(-100%)]"}`}
+      className={`sidebar h-full min-h-0 overflow-y-auto flex flex-col bg-bg border-r border-border px-2 py-3 gap-2 z-10 max-mobile:fixed max-mobile:inset-0 max-mobile:w-full max-mobile:h-[100dvh] max-mobile:p-[14px_18px] max-mobile:z-[100] max-mobile:transition-transform max-mobile:duration-[250ms] max-mobile:ease-[ease] ${mobileOpen ? "max-mobile:[transform:translateX(0)]" : "max-mobile:[transform:translateX(-100%)]"}`}
       aria-label="Main navigation"
       {...(mobileOpen ? { role: "dialog", "aria-modal": true } : {})}
     >
@@ -119,6 +119,9 @@ export function Sidebar({ nav, onNav, realm, onRealmChange, collapsed, onToggle,
           <button
             key={item}
             className={`${NAV_ITEM} ${nav === item ? NAV_ITEM_ACTIVE : NAV_ITEM_IDLE}`}
+            // The active item was marked by tint alone, which a screen
+            // reader cannot see.
+            aria-current={nav === item ? "page" : undefined}
             onClick={() => onNav(item)}
             title={collapsed ? navLabels[item] : undefined}
           >

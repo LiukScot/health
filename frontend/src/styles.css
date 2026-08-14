@@ -22,6 +22,13 @@
   --text-control: 13px; /* compact date/select control text */
   --text-title: 22px; /* page h1 */
 
+  /* Page rhythm — the single distance between sibling blocks, between
+     columns, and around the page. Named so the choice reads as intent
+     (gap-page) rather than as a number (gap-10 vs gap-9), and so the
+     value has one home. The component-internal scale stays on
+     Tailwind's numeric spacing; it is a scale, not one number. */
+  --spacing-page: 40px;
+
   /* Radius — single-sourced here (formerly duplicated in :root). */
   --radius-sm: 10px;
   --radius-md: 12px;
@@ -62,6 +69,11 @@
      a stronger delete-confirm red, the softer warning text hue, dark
      foregrounds for text on the success/warning badge fills, and the modal
      scrim. Defined as literals (no :root forward) since they never re-theme. */
+  /* Chart grid lines. chart.js takes a resolved colour, not a CSS var,
+     so the charts read this off the root; it is a token so the grey and
+     oled themes can move it without editing JS. */
+  --color-chart-grid: rgba(255, 255, 255, 0.08);
+
   --color-danger-strong: #ff3333;
   --color-warning-soft: #ffd38a;
   --color-success-fg: #0a2018;
@@ -95,6 +107,14 @@
   /* Keyboard focus ring — single source for the accent halo on focus-visible
      (shadow-[0_0_0_2px_var(--ring)]). Unifies the former 28%/38% one-offs. */
   --ring: color-mix(in srgb, var(--accent) 38%, transparent);
+  /* The surface of a control — input, chip, select — a step lighter than
+     the card it sits on. Used as bg-[var(--control)] rather than through
+     a @theme --color-* forward: these are set per theme below, and a
+     forwarded token resolves once. Percentages don't work either — the
+     same mix over three different card values lands at three different
+     contrasts, and on grey it came out invisible. */
+  --control: #34343d;
+  --control-hover: #41414c;
 }
 
 /* Theme variants — base :root above is the default "dark" theme. */
@@ -103,6 +123,8 @@
   --card: #1f1f23;
   --card-strong: #26262b;
   --card-soft: #2a2a30;
+  --control: #3d3d47;
+  --control-hover: #4a4a56;
 }
 
 :root[data-theme="oled"] {
@@ -111,6 +133,8 @@
   --card-strong: #131316;
   --card-soft: #1a1a1d;
   --text: #c9c9ce;
+  --control: #2f2f37;
+  --control-hover: #3b3b45;
 }
 
 /* Per-realm accent. Themes own the surfaces, the realm owns the accent, so

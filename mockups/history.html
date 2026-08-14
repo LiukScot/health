@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>History · Full-page entry log</title>
+<link rel="stylesheet" href="tokens.css">
+<style>
+  .page {
+    display: grid;
+    gap: var(--gap-page);
+    max-width: 1240px;
+    margin: 0 auto;
+    padding: var(--gap-page);
+  }
+  h1.page-title {
+    margin: 0;
+    font-size: var(--text-title);
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    text-box: trim-both cap alphabetic;
+  }
+
+  .page-tabs {
+    display: inline-flex;
+    gap: 4px;
+    padding: 4px;
+    background: var(--card-strong);
+    border-radius: 999px;
+    justify-self: start;
+  }
+  .page-tabs a {
+    padding: 6px 14px;
+    border-radius: 999px;
+    font-size: var(--text-control);
+    font-weight: 600;
+    color: var(--muted);
+    text-decoration: none;
+  }
+  .page-tabs a.current { background: var(--accent); color: var(--accent-fg); }
+
+  .filters { display: flex; flex-wrap: wrap; gap: var(--gap-tight); align-items: center; }
+  .filters input[type="search"] {
+    flex: 0 1 260px;
+    min-width: 160px;
+    padding: 8px 12px;
+    font-size: var(--text-control);
+  }
+  .filters .chip.active { background: color-mix(in srgb, var(--accent) 15%, transparent); color: var(--accent); font-weight: 600; }
+  .filters .count { margin-left: auto; font-size: var(--text-micro); color: var(--muted-soft); }
+
+  .month { display: grid; gap: var(--gap-item); }
+  .month-row { display: flex; align-items: baseline; gap: var(--gap-item); }
+  .month-row .aside { margin-left: auto; font-size: var(--text-micro); color: var(--muted-soft); }
+
+  .entries { display: grid; }
+  details.entry {
+    border-bottom: 1px solid color-mix(in srgb, var(--border) 30%, transparent);
+  }
+  details.entry:last-child { border-bottom: 0; }
+  details.entry summary {
+    list-style: none;
+    display: grid;
+    grid-template-columns: 120px auto minmax(0, 1fr) auto;
+    align-items: center;
+    gap: var(--gap-item);
+    padding: var(--gap-item) 2px;
+    cursor: pointer;
+  }
+  details.entry summary::-webkit-details-marker { display: none; }
+  .e-date {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--muted);
+    letter-spacing: 0.02em;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+  }
+  details.entry summary:hover .e-date { color: var(--text); }
+  .e-preview {
+    font-size: var(--text-control);
+    color: var(--muted);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  details.entry summary:hover .e-preview { color: var(--text); }
+  .e-preview .sep { color: var(--muted-soft); padding: 0 4px; }
+  .chevron { color: var(--muted-soft); font-size: var(--text-nano); transition: transform 0.2s ease; }
+  details.entry[open] .chevron { transform: rotate(90deg); }
+
+  /* Expanded: a surface, same as a stage card. Only filled fields render
+     (C5) — no wall of em-dashes. */
+  .e-open {
+    display: grid;
+    gap: var(--gap-block);
+    padding: var(--gap-block);
+    margin: 0 0 var(--gap-item);
+    background: var(--card-soft);
+    border-radius: var(--radius-md);
+  }
+  .e-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: var(--gap-block); }
+  .e-field { display: grid; gap: var(--gap-tight); align-content: start; }
+  .e-k {
+    font-size: var(--text-nano);
+    font-weight: 800;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+  .e-v { font-size: var(--text-control); line-height: 1.5; }
+  .tag {
+    display: inline-flex;
+    padding: 3px 10px;
+    border-radius: 999px;
+    font-size: var(--text-micro);
+    color: var(--text);
+    background: color-mix(in srgb, white 7%, var(--card));
+    margin: 0 4px 4px 0;
+  }
+  .e-note { grid-column: 1 / -1; }
+  .e-foot { display: flex; align-items: center; gap: var(--gap-item); }
+  .e-foot .hint { font-size: var(--text-micro); color: var(--muted-soft); }
+  .e-foot .btns { margin-left: auto; display: flex; gap: var(--gap-tight); }
+  .btn-ghost {
+    padding: 6px 12px;
+    font-size: var(--text-control);
+    font-weight: 600;
+    color: var(--muted);
+    background: transparent;
+    border: 0;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    font-family: inherit;
+  }
+  .btn-ghost:hover { color: var(--text); background: color-mix(in srgb, var(--text) 8%, transparent); }
+  .btn-ghost.danger:hover { color: var(--danger); background: color-mix(in srgb, var(--danger) 12%, transparent); }
+
+  .more { display: flex; align-items: center; gap: var(--gap-item); justify-content: center; }
+  .more .hint { font-size: var(--text-micro); color: var(--muted-soft); }
+
+  /* Mobile: sticky head with title + count; rows re-wrap. */
+  .m-head { display: none; }
+  @media (max-width: 900px) {
+    .page { padding: var(--gap-block); gap: var(--gap-block); }
+    .page > .page-title { display: none; }
+    .m-head {
+      display: grid;
+      gap: var(--gap-tight);
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      background: color-mix(in srgb, var(--bg) 92%, transparent);
+      backdrop-filter: blur(8px);
+      margin: 0 calc(-1 * var(--gap-block));
+      padding: var(--gap-item) var(--gap-block);
+      border-bottom: 1px solid color-mix(in srgb, var(--border) 40%, transparent);
+    }
+    .m-head .m-title { margin: 0; font-size: var(--text-title); font-weight: 700; letter-spacing: -0.01em; }
+    .m-head .m-titlerow { display: flex; align-items: center; gap: var(--gap-item); }
+    .m-head .page-tabs { padding: 3px; justify-self: start; }
+    .m-head .page-tabs a { padding: 5px 10px; }
+    .page > .page-tabs { display: none; }
+    .m-burger {
+      display: inline-grid;
+      place-items: center;
+      width: 38px;
+      height: 38px;
+      flex: none;
+      border: 0;
+      border-radius: var(--radius-sm);
+      background: color-mix(in srgb, white 6%, var(--card));
+      color: var(--text);
+      cursor: pointer;
+    }
+    .m-burger svg { display: block; }
+
+    .m-head .m-count { margin-left: auto; font-size: var(--text-micro); color: var(--muted-soft); }
+    details.entry summary {
+      grid-template-columns: auto minmax(0, 1fr) auto;
+      grid-template-areas: "date date chev" "badge preview chev";
+      row-gap: 4px;
+    }
+    .e-date { grid-area: date; }
+    .e-badge { grid-area: badge; }
+    .e-preview { grid-area: preview; }
+    .chevron { grid-area: chev; }
+    .filters .count { flex-basis: 100%; margin-left: 0; }
+  }
+</style>
+</head>
+<body>
+<div class="mockup-frame" style="max-width:1240px;padding-bottom:0">
+  <div class="mockup-tag">History · Full page</div>
+  <h1 class="mockup-title">The entry log as its own page</h1>
+  <p class="mockup-subtitle">Destination of the New entry / History selector (#64, #65). Rows grouped by month; the expanded view is a stage-card surface that renders <strong>only filled fields</strong> (C5) — no wall of em-dashes. The badge carries the pain level, which varies, not the page name, which doesn't (C6). Pain shown; Diary/CBT/DBT/money pages reuse the identical anatomy.</p>
+  <nav class="mockup-nav">
+    <a href="index.html">Index</a>
+    <a href="pain-staged.html">Pain · staged</a>
+    <a class="current" href="history.html">History</a>
+  </nav>
+</div>
+
+<div class="page">
+  <header class="m-head">
+    <div class="m-titlerow">
+      <button type="button" class="m-burger" aria-label="Open navigation" aria-haspopup="dialog"><svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M2 4.5h14M2 9h14M2 13.5h14"/></svg></button>
+      <h1 class="m-title">Pain</h1>
+      <span class="m-count">38 entries</span>
+    </div>
+    <nav class="page-tabs" aria-label="Entry or history">
+      <a href="pain-staged.html">New entry</a>
+      <a class="current" href="#">History</a>
+    </nav>
+  </header>
+
+  <nav class="page-tabs" aria-label="Entry or history">
+    <a href="pain-staged.html">New entry</a>
+    <a class="current" href="#">History</a>
+  </nav>
+
+  <h1 class="page-title">Pain</h1>
+
+  <div class="filters">
+    <input type="search" name="q" id="q" placeholder="Search notes, areas, symptoms…" aria-label="Search entries">
+    <button type="button" class="chip active">All time</button>
+    <button type="button" class="chip">2026</button>
+    <button type="button" class="chip">2025</button>
+    <button type="button" class="chip">High pain only</button>
+    <span class="count">38 entries · showing 18</span>
+  </div>
+
+  <section class="month">
+    <div class="month-row">
+      <span class="section-heading">August 2026</span>
+      <span class="aside">1 entry</span>
+    </div>
+    <div class="entries">
+      <details class="entry">
+        <summary>
+          <span class="e-date">Aug 9 · 1:59 PM</span>
+          <span class="pain-badge sm mid e-badge">4</span>
+          <span class="e-preview">back<span class="sep">·</span>long drive, stiff since morning</span>
+          <span class="chevron">▶</span>
+        </summary>
+        <div class="e-open">
+          <div class="e-grid">
+            <div class="e-field"><span class="e-k">Pain · Fatigue · Coffee</span><span class="e-v">4 · 6 · 1</span></div>
+            <div class="e-field"><span class="e-k">Area</span><span class="e-v"><span class="tag">back</span></span></div>
+            <div class="e-field e-note"><span class="e-k">Note</span><span class="e-v">Long drive, stiff since morning.</span></div>
+          </div>
+          <div class="e-foot">
+            <span class="hint">Empty fields are hidden</span>
+            <div class="btns">
+              <button type="button" class="btn-ghost">Edit</button>
+              <button type="button" class="btn-ghost danger">Delete</button>
+            </div>
+          </div>
+        </div>
+      </details>
+    </div>
+  </section>
+
+  <section class="month">
+    <div class="month-row">
+      <span class="section-heading">April 2026</span>
+      <span class="aside">17 entries</span>
+    </div>
+    <div class="entries">
+      <details class="entry" open>
+        <summary>
+          <span class="e-date">Apr 19 · 5:51 PM</span>
+          <span class="pain-badge sm mid e-badge">4</span>
+          <span class="e-preview">head, neck<span class="sep">·</span>started after meeting</span>
+          <span class="chevron">▶</span>
+        </summary>
+        <div class="e-open">
+          <div class="e-grid">
+            <div class="e-field"><span class="e-k">Pain · Fatigue · Coffee</span><span class="e-v">4 · 2 · 2</span></div>
+            <div class="e-field"><span class="e-k">Area</span><span class="e-v"><span class="tag">head</span><span class="tag">neck</span></span></div>
+            <div class="e-field"><span class="e-k">Medicines</span><span class="e-v"><span class="tag">200mg celebrex</span><span class="tag">4mg sirdalud</span></span></div>
+            <div class="e-field e-note"><span class="e-k">Note</span><span class="e-v">Started after meeting.</span></div>
+          </div>
+          <div class="e-foot">
+            <span class="hint">Empty fields are hidden</span>
+            <div class="btns">
+              <button type="button" class="btn-ghost">Edit</button>
+              <button type="button" class="btn-ghost danger">Delete</button>
+            </div>
+          </div>
+        </div>
+      </details>
+      <details class="entry">
+        <summary>
+          <span class="e-date">Apr 19 · 5:50 PM</span>
+          <span class="pain-badge sm low e-badge">3</span>
+          <span class="e-preview">shoulders</span>
+          <span class="chevron">▶</span>
+        </summary>
+      </details>
+      <details class="entry">
+        <summary>
+          <span class="e-date">Apr 18 · 9:28 PM</span>
+          <span class="pain-badge sm high e-badge">7</span>
+          <span class="e-preview">tmj, head<span class="sep">·</span>flare after screen day, took nothing</span>
+          <span class="chevron">▶</span>
+        </summary>
+      </details>
+      <details class="entry">
+        <summary>
+          <span class="e-date">Apr 18 · 9:28 PM</span>
+          <span class="pain-badge sm low e-badge">2</span>
+          <span class="e-preview">legs</span>
+          <span class="chevron">▶</span>
+        </summary>
+      </details>
+      <details class="entry">
+        <summary>
+          <span class="e-date">Apr 17 · 2:30 PM</span>
+          <span class="pain-badge sm high e-badge">7</span>
+          <span class="e-preview">head, neck, nausea<span class="sep">·</span>started after meeting</span>
+          <span class="chevron">▶</span>
+        </summary>
+      </details>
+    </div>
+  </section>
+
+  <div class="more">
+    <button type="button" class="btn">Show older</button>
+    <span class="hint">18 of 38</span>
+  </div>
+</div>
+</body>
+</html>

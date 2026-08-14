@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { groupByMonth } from "./screen-format";
 
 // Past-entries primitives shared by CBT/DBT/Diary/Pain. The summary layout
 // differs per screen (badges, mood, preview), so these expose styled wrappers
@@ -21,48 +22,77 @@ export const DETAIL_ACTION_BTN =
   "px-2 py-1 text-xs font-medium text-muted bg-transparent border-0 rounded-[6px] shadow-none cursor-pointer font-[inherit] transition-[color,background] duration-150 ease-[ease] hover:text-text hover:bg-[color-mix(in_srgb,var(--text)_8%,transparent)]";
 export const DELETE_CONFIRM = "text-danger-strong bg-danger-strong/18 font-extrabold";
 
-// Forms whose fields are all much the same shape (CBT, DBT, the money forms)
-// flow into as many columns as fit. auto-fit reacts to the container, not the
-// viewport, so collapsing the sidebar reflows them with no breakpoint
-// involved; min(100%,…) keeps one column from overflowing a narrow container.
-export const FORM_GRID =
-  "grid gap-3 content-start min-w-0 grid-cols-[repeat(auto-fit,minmax(min(100%,28rem),1fr))]";
-// For rows that head or close a group and would read wrong beside a field.
-export const FORM_FULL = "[grid-column:1/-1]";
-
-// Forms built from blocks of genuinely different size get placed by hand:
-// letting an algorithm guess produced a different ragged result at every
-// width. The wide column takes the blocks that need room to read — a nine-step
-// metric, a six-tab strip — and the narrow one takes what stays legible small,
-// like a date or free text. No rule between them; the gap is the separation.
-// Container query, so collapsing the sidebar reflows it too.
-export const FORM_SPLIT =
-  "grid gap-10 min-w-0 @3xl:grid-cols-2 @3xl:items-start";
-// One number, 40px, for every gap on the page — columns, blocks, the page
-// margin, the headings. That only works because the labels and headings are
-// text-box trimmed, so a text box is exactly as tall as its letters and a
-// declared 40 is 40 on screen. Without the trim (Firefox, for now) vertical
-// gaps read a few px larger than horizontal ones; that is the whole reason
-// this used to be six different numbers compensating for leading.
-// The pt-0/mt-0 below cancel the padding blocks carry for the tight forms,
-// where the gap is 12px and that padding is the only separation.
-export const FORM_COL = "grid gap-10 content-start min-w-0 [&>*>:first-child]:pt-0 [&>*>:first-child]:mt-0";
-
 export const DATETIME_FIELD =
   "!w-auto max-w-full justify-self-start cursor-pointer tabular-nums [&::-webkit-calendar-picker-indicator]:cursor-pointer [&::-webkit-calendar-picker-indicator]:ml-2 [&::-webkit-calendar-picker-indicator]:invert [&::-webkit-calendar-picker-indicator]:opacity-60 hover:[&::-webkit-calendar-picker-indicator]:opacity-100";
 
+// No outer margin: every caller was passing mt-0 to undo one, which is the
+// tell that the constant owned spacing it had no business owning.
 export function EntriesHeading({ children, className = "" }: { children: ReactNode; className?: string }) {
   return (
-    <h2 className={`[text-box:trim-both_cap_alphabetic] text-control text-accent uppercase tracking-[0.16em] font-bold mb-10 ${className}`}>
+    <h2 className={`[text-box:trim-both_cap_alphabetic] text-control text-accent uppercase tracking-[0.16em] font-bold ${className}`}>
       {children}
     </h2>
   );
 }
 
-// The entry log, stacked under the form it belongs to. Every row is rendered:
-// the list used to sit in a right-hand column capped to the form's height,
-// which clipped the overflow behind a fade and a "Show more" button that was
-// never wired to anything, so the clipped rows had no way back.
+/*
+ * New entry / History. The log is a sibling view of the form, not a tail
+ * below it: on a page whose form is a screenful, the list was only ever
+ * reachable by scrolling past everything. The state lives in App so the
+ * mobile sticky head can carry the same control.
+ */
+export type EntryView = "new" | "history";
+
+const VIEW_TAB = "px-3.5 py-1.5 rounded-full text-control font-semibold border-0 shadow-none cursor-pointer transition-[color,background] duration-150 ease-[ease]";
+const VIEW_TAB_ON = "bg-accent text-accent-fg";
+const VIEW_TAB_OFF = "bg-transparent text-muted hover:text-text";
+
+export function EntryViewTabs({
+  view,
+  onChange,
+  labels,
+  className = "",
+}: {
+  view: EntryView;
+  onChange: (next: EntryView) => void;
+  /** From entryViewLabels: one source for the page and the mobile head. */
+  labels: { newEntry: string; history: string };
+  /** Must set a display: the component declares none, so a caller's
+   *  `hidden` cannot lose a source-order fight with a base `inline-flex`. */
+  className: string;
+}) {
+  return (
+    /*
+     * A toggle group, not a tablist: there is no tabpanel to point
+     * aria-controls at, and role="tab" carries a keyboard contract
+     * (roving tabindex, arrow keys) that a two-button switch does not
+     * need. Buttons with aria-pressed say the same thing honestly.
+     */
+    <div className={`gap-1 p-1 justify-self-start rounded-full bg-card-strong ${className}`} role="group" aria-label="Entry or history">
+      <button
+        type="button"
+        aria-pressed={view === "new"}
+        className={`${VIEW_TAB} ${view === "new" ? VIEW_TAB_ON : VIEW_TAB_OFF}`}
+        onClick={() => onChange("new")}
+      >
+        {labels.newEntry}
+      </button>
+      <button
+        type="button"
+        aria-pressed={view === "history"}
+        className={`${VIEW_TAB} ${view === "history" ? VIEW_TAB_ON : VIEW_TAB_OFF}`}
+        onClick={() => onChange("history")}
+      >
+        {labels.history}
+      </button>
+    </div>
+  );
+}
+
+// The entry log. Every row is rendered: the list used to sit in a
+// right-hand column capped to the form's height, which clipped the
+// overflow behind a fade and a "Show more" button that was never wired to
+// anything, so the clipped rows had no way back.
 export function PastEntries({
   title,
   isLoading,
@@ -71,18 +101,51 @@ export function PastEntries({
   emptyState,
   children,
 }: {
-  title: ReactNode;
+  title?: ReactNode;
   isLoading: boolean;
   loadingText: string;
   isEmpty: boolean;
   emptyState: ReactNode;
   children: ReactNode;
 }) {
+  // The gap is the container's: EntriesHeading carries no margin of its
+  // own, so without this the heading sits on top of the first row.
   return (
-    <div className="min-w-0">
+    <div className="grid gap-5 content-start min-w-0">
       {isLoading && <p className="text-muted text-control">{loadingText}</p>}
-      <EntriesHeading className="mt-0">{title}</EntriesHeading>
+      {title ? <EntriesHeading>{title}</EntriesHeading> : null}
       {isEmpty ? emptyState : children}
+    </div>
+  );
+}
+
+/*
+ * Rows cut into months, each run under its own heading with a count. The
+ * caller keeps rendering its own row: the summary differs per tracker
+ * (badges, mood, preview) and only the grouping is shared.
+ */
+export function EntryMonths<T>({
+  rows,
+  dateOf,
+  renderRow,
+}: {
+  rows: T[];
+  dateOf: (row: T) => string;
+  renderRow: (row: T) => ReactNode;
+}) {
+  return (
+    <div className="grid gap-page">
+      {groupByMonth(rows, dateOf).map((group, index) => (
+        <section key={`${group.key}-${index}`} className="grid gap-3">
+          <div className="flex items-baseline gap-3">
+            <span className="[text-box:trim-both_cap_alphabetic] text-xs font-bold tracking-[0.16em] uppercase text-muted">{group.label}</span>
+            <span className="ml-auto text-micro text-muted-soft tabular-nums">
+              {group.rows.length === 1 ? "1 entry" : `${group.rows.length} entries`}
+            </span>
+          </div>
+          <div className="min-w-0">{group.rows.map(renderRow)}</div>
+        </section>
+      ))}
     </div>
   );
 }
@@ -137,7 +200,19 @@ export function TagList({ items }: { items: string[] }) {
   );
 }
 
-export function DetailGroup({ label, children }: { label: ReactNode; children: ReactNode }) {
+/*
+ * A field of an expanded entry. Renders nothing when there is nothing to
+ * show: an entry with three of nine fields filled used to read as six em
+ * dashes, which buries the three that carry the answer. `empty` lets a
+ * caller declare emptiness the value alone cannot express — an all-zero
+ * count, a tag list that came back with no members.
+ */
+export function DetailGroup({ label, children, empty }: { label: ReactNode; children: ReactNode; empty?: boolean }) {
+  const blank = empty ?? (children == null || children === "" || children === "—");
+  if (blank) {
+    return null;
+  }
+
   return (
     <div className="grid gap-1">
       <span className="text-micro text-muted uppercase tracking-wider">{label}</span>

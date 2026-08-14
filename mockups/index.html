@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>World · Mockups</title>
+<link rel="stylesheet" href="tokens.css">
+<style>
+  .intro {
+    max-width: 720px;
+    margin-bottom: 40px;
+  }
+  .intro h1 {
+    font-size: 34px;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    margin: 0 0 10px;
+  }
+  .intro p {
+    font-size: 15px;
+    color: var(--muted);
+    line-height: 1.6;
+  }
+  .card-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 14px;
+  }
+  .mk-card {
+    display: grid;
+    gap: 10px;
+    padding: 22px;
+    background: var(--card-strong);
+    border: 1px solid var(--border-soft);
+    border-radius: var(--radius-md);
+    text-decoration: none;
+    color: var(--text);
+    transition: all 0.15s;
+  }
+  .mk-card:hover {
+    border-color: var(--accent);
+    transform: translateY(-2px);
+  }
+  .mk-card .letter {
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 0.12em;
+    color: var(--accent);
+    text-transform: uppercase;
+  }
+  .mk-card h2 {
+    font-size: 22px;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    margin: 0;
+  }
+  .mk-card .tagline {
+    font-size: 14px;
+    color: var(--muted);
+    font-style: italic;
+    margin: 0 0 6px;
+  }
+  .mk-card .desc {
+    font-size: 13px;
+    color: var(--muted);
+    line-height: 1.5;
+    margin: 0;
+  }
+  .mk-card .specs {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    margin-top: 8px;
+    font-size: 12px;
+    color: var(--muted-soft);
+  }
+  .mk-card .specs span::before { content: "· "; color: var(--accent); }
+  .mk-card .footer-link {
+    margin-top: 16px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--accent);
+  }
+  .mk-card.chosen {
+    border-color: var(--success);
+    background: color-mix(in srgb, var(--success) 6%, var(--card-strong));
+  }
+  .mk-card.chosen:hover { border-color: var(--success); }
+  .mk-card.chosen .letter { color: var(--success); }
+  .mk-card.chosen .footer-link { color: var(--success); }
+  .chosen-section-title {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    color: var(--success);
+    text-transform: uppercase;
+    margin: 20px 0 12px;
+  }
+  .mk-card.superseded { opacity: 0.55; }
+  .mk-card.superseded .letter { color: var(--muted-soft); }
+  .mk-card.superseded .footer-link { color: var(--muted); }
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    align-self: start;
+    padding: 3px 10px;
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+  }
+  .badge.picked { background: color-mix(in srgb, var(--success) 16%, transparent); color: var(--success); }
+  .badge.out { background: color-mix(in srgb, var(--muted) 14%, transparent); color: var(--muted); }
+  .alternatives-title {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    color: var(--muted);
+    text-transform: uppercase;
+    margin: 32px 0 12px;
+  }
+</style>
+</head>
+<body>
+<div class="mockup-frame">
+  <div class="intro">
+    <div class="mockup-tag">World mockups</div>
+    <h1>Design directions</h1>
+    <p>Mockup per il refactor UI (#196), archetipo per archetipo, più il vecchio set del Pain redesign.</p>
+    <p style="margin-top:10px"><strong style="color:var(--success)">Scelto:</strong> Worksheet B per CBT/DBT, Pain/Diary nello stesso linguaggio, Dashboard A (con i gruppi di B su Money). Le quattro schermate di inserimento condividono una sola anatomia: rail di stage a sinistra su desktop, testata sticky su mobile, selettore <em>New entry / History</em> sopra il titolo, spacing a due livelli (40 tra i blocchi, scala piccola dentro).</p>
+  </div>
+
+  <p class="chosen-section-title">✓ Worksheet archetype (CBT / DBT) — scelto</p>
+  <div class="card-grid">
+    <a class="mk-card superseded" href="worksheet-a.html">
+      <span class="letter">Worksheet A</span>
+      <span class="badge out">Scartato</span>
+      <h2>One column, numbered steps</h2>
+      <p class="tagline">"La sequenza è il layout"</p>
+      <p class="desc">Colonna unica a larghezza di lettura, step numerati, prompt sempre visibili sotto la label. Le stage DBT diventano heading veri (17px/800).</p>
+      <div class="specs">
+        <span>Ordine ovvio senza leggere il sorgente</span>
+        <span>Fix H1 + R2 con il minimo di struttura</span>
+        <span>Più scroll su desktop</span>
+        <span>Perché no: nessun confine di gruppo, le stage restano prossimità</span>
+      </div>
+      <div class="footer-link">Esplora A →</div>
+    </a>
+    <a class="mk-card chosen" href="worksheet-b.html">
+      <span class="letter">Worksheet B</span>
+      <span class="badge picked">✓ Scelto — CBT / DBT</span>
+      <h2>Staged cards + rail</h2>
+      <p class="tagline">"Ogni stage è una superficie"</p>
+      <p class="desc">Stage su card con titolo grande e rail di progresso sticky. Il confine del gruppo lo dà la card, non la prossimità — risponde anche al sintomo 5 (Pain/Diary squished).</p>
+      <div class="specs">
+        <span>Progresso e posizione sempre visibili</span>
+        <span>Gerarchia a 4 livelli dimostrata</span>
+        <span>Diventa il linguaggio anche di Pain e Diary</span>
+      </div>
+      <div class="footer-link">Esplora B →</div>
+    </a>
+    <a class="mk-card superseded" href="worksheet-c.html">
+      <span class="letter">Worksheet C</span>
+      <span class="badge out">Scartato</span>
+      <h2>Prompt / answer pairs</h2>
+      <p class="tagline">"Il worksheet come dialogo"</p>
+      <p class="desc">I prompt sono domande del terapeuta, le risposte collassano in testo una volta date. La pagina si riempie delle tue parole, non di box vuoti.</p>
+      <div class="specs">
+        <span>R2 risolto alla radice</span>
+        <span>Entry espansa riusa lo stesso layout (C5)</span>
+        <span>Perché no: troppo lontano dal resto dell'app</span>
+      </div>
+      <div class="footer-link">Esplora C →</div>
+    </a>
+  </div>
+
+  <p class="chosen-section-title">✓ Entry forms (Pain / Diary) — scelto</p>
+  <div class="card-grid">
+    <a class="mk-card chosen" href="pain-staged.html">
+      <span class="letter">Pain · Staged</span>
+      <span class="badge picked">✓ Scelto — Pain</span>
+      <h2>Pain nel linguaggio di Worksheet B</h2>
+      <p class="tagline">"Il wizard, ma coerente"</p>
+      <p class="desc">I tre step del wizard (How bad → Where &amp; what → Details) diventano tre stage su card, con rail sticky. Data e Save vivono nella rail: salvare dopo lo stage 1 è normale, non una scorciatoia.</p>
+      <div class="specs">
+        <span>Stessa anatomia di CBT/DBT</span>
+        <span>Scale grandi 1–9 (fix R6)</span>
+        <span>Stage 2–3 marcati optional</span>
+      </div>
+      <div class="footer-link">Esplora →</div>
+    </a>
+    <a class="mk-card chosen" href="diary-staged.html">
+      <span class="letter">Diary · Staged</span>
+      <span class="badge picked">✓ Scelto — Diary</span>
+      <h2>Diary nel linguaggio di Worksheet B</h2>
+      <p class="tagline">"Stesso guscio, bande invertite"</p>
+      <p class="desc">How you feel → Emotions → In your words. Mood legge verso l'alto: le bande colore si invertono (9 è il lato buono), la forma resta identica a Pain.</p>
+      <div class="specs">
+        <span>Stessa anatomia di Pain/CBT/DBT</span>
+        <span>Emozioni raggruppate pos/neg/general</span>
+        <span>Prompt persistenti (fix R2)</span>
+      </div>
+      <div class="footer-link">Esplora →</div>
+    </a>
+  </div>
+
+  <p class="chosen-section-title">✓ Dashboard archetype (Health / Money) — scelto</p>
+  <div class="card-grid">
+    <a class="mk-card chosen" href="dashboard-a.html">
+      <span class="letter">Dashboard A</span>
+      <span class="badge picked">✓ Scelto — Health / Money</span>
+      <h2>Hero + tiers, gruppi di B su Money</h2>
+      <p class="tagline">"Un numero, poi il resto"</p>
+      <p class="desc">Una metrica hero grande, stat di supporto un livello sotto, grafici su card con heading coerenti. Colonne esplicite per breakpoint: la card orfana non può esistere (H2, #16). Entrambi i realm nello stesso file (C3).</p>
+      <div class="specs">
+        <span>Gerarchia chiara: la pagina "parla" di un numero</span>
+        <span>Da B: niente sezione Every month, il net è una card di Portfolio</span>
+        <span>Da B: i chart sono una sezione a sé, non una coda di By asset</span>
+      </div>
+      <div class="footer-link">Esplora →</div>
+    </a>
+    <a class="mk-card superseded" href="dashboard-b.html">
+      <span class="letter">Dashboard B</span>
+      <span class="badge out">Scartato — raggruppamento confluito in A</span>
+      <h2>Strip + table</h2>
+      <p class="tagline">"I numeri sono la didascalia"</p>
+      <p class="desc">KPI in una strip unica con divisori, grafici in testa, asset in tabella con colonne allineate. Più denso di A, scala meglio con molti asset.</p>
+      <div class="specs">
+        <span>Nessun orfano possibile per costruzione</span>
+        <span>Tabella: confronto numerico verticale</span>
+        <span>Perché no: nessun numero domina, e la tabella serve oltre ~10 asset</span>
+      </div>
+      <div class="footer-link">Esplora B →</div>
+    </a>
+  </div>
+
+  <p class="chosen-section-title" style="color:var(--accent)">Money entry (Transactions / Movements / Snapshots) — #196, in review</p>
+  <div class="card-grid" style="grid-template-columns: 1fr; margin-bottom:12px;">
+    <a class="mk-card" href="money-entry.html">
+      <span class="letter">Money entry · All three</span>
+      <h2>Flat form su una card</h2>
+      <p class="tagline">"Tre-cinque campi non sono una sequenza"</p>
+      <p class="desc">Niente rail né stage: una card è tutto il form. I campi scorrono in ordine di lettura riga per riga, quindi il tab order è l'ordine visivo (R1); i campi corti si fermano alla loro larghezza naturale. Direction diventa segmented (2 opzioni non meritano un dropdown). Il risk chart esce dalla lista entry (C4) e diventa una sezione titolata di Snapshots, con barre a larghezza naturale (D2).</p>
+      <div class="specs">
+        <span>Stessi page tabs e testata sticky delle altre entry</span>
+        <span>Buy value col suo prompt persistente ("solo nuovo vincolo")</span>
+        <span>Label "Type"; la lingua dei valori resta la decisione #204</span>
+      </div>
+      <div class="footer-link">Esplora →</div>
+    </a>
+  </div>
+
+  <p class="chosen-section-title" style="color:var(--accent)">History (tutte le sezioni entry) — #196, in review</p>
+  <div class="card-grid" style="grid-template-columns: 1fr; margin-bottom:12px;">
+    <a class="mk-card" href="history.html">
+      <span class="letter">History · Full page</span>
+      <h2>Il log delle entry come pagina propria</h2>
+      <p class="tagline">"Destinazione del selettore New entry / History"</p>
+      <p class="desc">Righe raggruppate per mese, ricerca + filtri in testa, "Show older" esplicito (#64, #65). L'espansa è una superficie stage-card che mostra solo i campi compilati (C5) — niente muro di em-dash. Il badge porta il pain level, non il nome della pagina (C6). Pain mostrata; Diary/CBT/DBT/money riusano la stessa anatomia.</p>
+      <div class="specs">
+        <span>Espansa = soli campi pieni, "Empty fields are hidden"</span>
+        <span>Edit/Delete vivono nell'espansa, non nella riga</span>
+        <span>Mobile: testata sticky titolo + conteggio, righe a due livelli</span>
+      </div>
+      <div class="footer-link">Esplora →</div>
+    </a>
+  </div>
+
+  <p class="chosen-section-title" style="color:var(--accent)">Settings (tutte le pagine) — #196, in review</p>
+  <div class="card-grid" style="grid-template-columns: 1fr; margin-bottom:12px;">
+    <a class="mk-card" href="settings.html">
+      <span class="letter">Settings · Card anatomy</span>
+      <h2>Settings nell'anatomia condivisa</h2>
+      <p class="tagline">"Sezioni a 40, card come confini, accent neutro"</p>
+      <p class="desc">Account, Appearance e Money in un file. Log out esce dalla colonna del form password e vive nella card Profile (R3); i temi hanno nome, preview e descrizione invece di tre cerchi colorati (R4); la preferenza zero-assets diventa uno switch con una frase sola, che nomina il gemello sulla dashboard (R5).</p>
+      <div class="specs">
+        <span>Password: form dentro una card, azione dentro la card</span>
+        <span>Danger zone: card bordata danger, bottone ghost danger</span>
+        <span>Health/Backup/MCP riusano la stessa anatomia</span>
+      </div>
+      <div class="footer-link">Esplora →</div>
+    </a>
+  </div>
+
+  <p class="alternatives-title">Pain redesign (2025) — superato da Pain · Staged</p>
+  <p class="desc" style="max-width:720px;font-size:13px;color:var(--muted);line-height:1.5;margin:0 0 12px">Questo set precede la #196 e ha prodotto il Pain attuale in produzione (D). Resta come riferimento storico: il dense form di D non convive con l'anatomia staged, quindi viene sostituito, non affiancato.</p>
+  <div class="card-grid" style="grid-template-columns: 1fr; margin-bottom:12px;">
+    <a class="mk-card superseded" href="pain-d.html">
+      <span class="letter">Mockup D · Hybrid</span>
+      <span class="badge out">In produzione — da sostituire</span>
+      <h2>Dense form + expandable log</h2>
+      <p class="tagline">"Form di C, lista di B"</p>
+      <p class="desc">Form dashboard-style di C (bar scale colorate, tab per i tag) per inserire veloce. Lista espandibile di B per consultare le entries passate. Due task, due UI.</p>
+      <div class="specs">
+        <span>Inserimento veloce come C</span>
+        <span>Consultazione pulita come B</span>
+        <span>Nessuna sparkline (già c'è la Dashboard)</span>
+        <span>Perché no ora: due colonne squished, niente ordine di lettura</span>
+      </div>
+      <div class="footer-link">Esplora D →</div>
+    </a>
+  </div>
+
+  <p class="alternatives-title">Alternative del 2025 (riferimento)</p>
+  <div class="card-grid">
+    <a class="mk-card superseded" href="pain-a.html">
+      <span class="letter">Mockup A</span>
+      <h2>Progressive disclosure</h2>
+      <p class="tagline">"Mostra poco, espandi al bisogno"</p>
+      <p class="desc">Core metrics sempre visibili in alto. I 6 gruppi di tag diventano accordion: solo uno aperto di default. Entries come feed di card raggruppate per giorno.</p>
+      <div class="specs">
+        <span>Riduce cognitive load</span>
+        <span>Richiede click per espandere</span>
+        <span>Scale verticale sempre utile</span>
+      </div>
+      <div class="footer-link">Esplora A →</div>
+    </a>
+
+    <a class="mk-card superseded" href="pain-b.html">
+      <span class="letter">Mockup B</span>
+      <h2>Guided wizard</h2>
+      <p class="tagline">"Una cosa alla volta"</p>
+      <p class="desc">Form suddiviso in 3 step: Come ti senti, Dove e cosa, Dettagli. Scale visuali grandi (Pain/Fatigue), zero overwhelm. Entries come righe espandibili.</p>
+      <div class="specs">
+        <span>Ideale mobile</span>
+        <span>Più focus ma più tap</span>
+        <span>Confluito in Pain · Staged: scale grandi e ordine, senza gli screen separati</span>
+      </div>
+      <div class="footer-link">Esplora B →</div>
+    </a>
+
+    <a class="mk-card superseded" href="pain-c.html">
+      <span class="letter">Mockup C</span>
+      <h2>Dense dashboard</h2>
+      <p class="tagline">"Tutto in vista, nessuno scroll"</p>
+      <p class="desc">Due colonne: metriche con bar scale a sinistra, tag in tabs a destra. Entries raggruppate per giorno con sparkline di pain/fatigue. Per uso quotidiano.</p>
+      <div class="specs">
+        <span>Power user friendly</span>
+        <span>Intimidante al primo uso</span>
+        <span>Pattern visibili subito</span>
+      </div>
+      <div class="footer-link">Esplora C →</div>
+    </a>
+  </div>
+</div>
+</body>
+</html>

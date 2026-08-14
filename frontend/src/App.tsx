@@ -8,8 +8,10 @@ import { LoginScreen } from "./app/LoginScreen";
 import { Sidebar } from "./app/Sidebar";
 import { DashboardSection } from "./app/DashboardSection";
 import { SectionErrorBoundary } from "./app/ErrorBoundary";
+import { EntryViewTabs, type EntryView } from "./app/entries";
+import { StageHeadSlot } from "./app/stage-head-slot";
 import {
-  formatDocumentTitle, navItemsByRealm, navLabels, readStoredRealm, realmOf,
+  entryViewLabels, formatDocumentTitle, hasEntryViews, navItemsByRealm, navLabels, readStoredRealm, realmOf,
   REALM_STORAGE_KEY, type NavItem,
 } from "./app/core";
 
@@ -37,6 +39,18 @@ function App() {
   // last realm is remembered so a reload lands you back where you were.
   const [nav, setNav] = useState<NavItem>(() => navItemsByRealm[readStoredRealm()][0]);
   const realm = realmOf(nav);
+  /*
+   * New entry vs History, for the pages that have both. It lives here
+   * rather than inside each screen because the mobile sticky head renders
+   * the same control, and two copies of one piece of state drift. Leaving
+   * a page resets it: arriving at Pain should offer the form.
+   */
+  const [entryView, setEntryView] = useState<EntryView>("new");
+  // Filled by the sticky head below; the staged screens portal their
+  // progress dots into it (see StageHeadSlot).
+  const [headSlot, setHeadSlot] = useState<HTMLDivElement | null>(null);
+  const mainRef = useRef<HTMLElement | null>(null);
+  const goToNav = (item: NavItem) => { setNav(item); setEntryView("new"); };
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
   // Mirror of mobileSidebarOpen for the swipe handler closure to read,
@@ -95,14 +109,11 @@ function App() {
     return () => window.removeEventListener("keydown", onKeyDown);
   }, [mobileSidebarOpen]);
 
-  // Reset the page scroll position to the top whenever the user navigates
-  // to a different screen, so the new page doesn't start mid-scroll.
-  // The actual scroll container is the document element (<html>), not
-  // .app-main — that one has overflow-y: auto in CSS but no constrained
-  // height, so it never actually overflows.
+  // Reset the scroll position whenever the user navigates, so the new
+  // screen doesn't start mid-scroll.
   useEffect(() => {
-    window.scrollTo(0, 0);
-  }, [nav]);
+    mainRef.current?.scrollTo(0, 0);
+  }, [nav, entryView]);
 
   useEffect(() => {
     document.title = loggedIn
@@ -303,28 +314,60 @@ function App() {
 
   return (
     <>
-    <div className={`grid grid-cols-[220px_1fr] min-h-screen transition-[grid-template-columns] duration-[250ms] ease-[ease] max-mobile:grid-cols-1 ${sidebarCollapsed ? "mobile:grid-cols-[62px_1fr]" : ""} ${mobileSidebarOpen ? "max-mobile:h-[100dvh] max-mobile:overflow-hidden" : ""}`}>
+    <div className={`grid grid-cols-[220px_1fr] h-dvh overflow-hidden transition-[grid-template-columns] duration-[250ms] ease-[ease] max-mobile:grid-cols-1 ${sidebarCollapsed ? "mobile:grid-cols-[62px_1fr]" : ""}`}>
       <Sidebar
         nav={nav}
-        onNav={(item) => { setNav(item); setMobileSidebarOpen(false); }}
+        onNav={(item) => { goToNav(item); setMobileSidebarOpen(false); }}
         realm={realm}
-        onRealmChange={(next) => setNav(navItemsByRealm[next][0])}
+        onRealmChange={(next) => goToNav(navItemsByRealm[next][0])}
         collapsed={sidebarCollapsed}
         onToggle={() => setSidebarCollapsed((c) => !c)}
         onCloseMobile={() => setMobileSidebarOpen(false)}
         mobileOpen={mobileSidebarOpen}
       />
 
-      <main className={`max-w-[1500px] w-full overflow-y-auto [padding:clamp(20px,4vw,40px)] max-mobile:p-5 ${mobileSidebarOpen ? "max-mobile:overflow-hidden" : ""}`}>
-        <button
-          type="button"
-          className="mobile-menu-btn hidden max-mobile:flex max-mobile:items-center max-mobile:justify-center w-[40px] h-[40px] max-mobile:mb-3 max-mobile:ml-2 p-0 border-0 rounded-sm bg-card-soft text-muted cursor-pointer shadow-none hover:text-text hover:bg-card-strong"
-          onClick={() => setMobileSidebarOpen(true)}
-          aria-label="Open menu"
-        >
-          <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
-        </button>
+      {/* main is the scroll container, not the document: the reading area
+          moves and the nav column beside it does not. That needs a real
+          height bound — the grid above is the viewport — or main grows to
+          fit its content, never overflows, and takes the whole page with
+          it when it scrolls. Being the scroller, it is also what the
+          mobile drawer has to lock: an overlay does not stop the surface
+          under it from scrolling.
 
+          No top padding on mobile: the sticky head supplies its own, and
+          padding on the scrollport pushes a sticky top:0 down by that
+          much, leaving content sliding through the gap above it. */}
+      <main
+        ref={mainRef}
+        className={`max-w-[1500px] w-full overflow-y-auto overscroll-contain [padding:clamp(20px,4vw,40px)] max-mobile:px-5 max-mobile:pb-5 max-mobile:pt-0 ${mobileSidebarOpen ? "max-mobile:overflow-hidden" : ""}`}
+      >
+        {/* Mobile head. Sticky, because the menu used to scroll away with
+            the page: reaching the nav from the bottom of a long entry
+            form meant scrolling back to the top. It bleeds past main's
+            padding so the blurred strip reaches both edges. */}
+        <header className="hidden max-mobile:grid gap-2 sticky top-0 z-10 -mx-5 mb-5 px-5 py-3 bg-[color-mix(in_srgb,var(--bg)_92%,transparent)] backdrop-blur-md border-b border-[color-mix(in_srgb,var(--border)_40%,transparent)]">
+          <div className="flex items-center gap-3">
+            <button
+              type="button"
+              className="mobile-menu-btn flex items-center justify-center w-[40px] h-[40px] flex-none p-0 border-0 rounded-sm bg-card-soft text-muted cursor-pointer shadow-none hover:text-text hover:bg-card-strong"
+              onClick={() => setMobileSidebarOpen(true)}
+              aria-label="Open menu"
+            >
+              <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+            </button>
+            <span className="[text-box:trim-both_cap_alphabetic] text-title font-bold tracking-tight text-text truncate">{navLabels[nav]}</span>
+          </div>
+          {/* Second row, inside the sticky strip: switching view is
+              navigation, and navigation must not scroll away. */}
+          <div className="flex items-center gap-3">
+            {hasEntryViews(nav) ? (
+              <EntryViewTabs view={entryView} onChange={setEntryView} labels={entryViewLabels[nav]} className="flex" />
+            ) : null}
+            <div ref={setHeadSlot} className="ml-auto empty:hidden" />
+          </div>
+        </header>
+
+        <StageHeadSlot.Provider value={headSlot}>
         <SectionErrorBoundary resetKey={nav}>
         <Suspense fallback={<p className="text-muted text-control">Loading…</p>}>
         {nav === "dashboard" && (
@@ -346,6 +389,8 @@ function App() {
 
         {nav === "diary" && (
           <DiarySection
+            view={entryView}
+            onViewChange={setEntryView}
             diaryForm={diary.diaryForm} diaryMutationState={{ isSuccess: diary.diaryMutation.isSuccess }} isLoading={diary.isLoading}
             editingDiary={diary.editingDiary} moodFieldOptions={diary.moodFieldOptions}
             diaryEntries={diary.diaryEntries} confirmDeleteDiary={diary.confirmDeleteDiary}
@@ -356,6 +401,8 @@ function App() {
 
         {nav === "pain" && (
           <PainSection
+            view={entryView}
+            onViewChange={setEntryView}
             painForm={pain.painForm} painMutationState={{ isSuccess: pain.painMutation.isSuccess }} isLoading={pain.isLoading}
             editingPain={pain.editingPain} painFieldOptions={pain.painFieldOptions}
             watchedValues={pain.watchedValues} painEntries={pain.painEntries}
@@ -367,6 +414,8 @@ function App() {
 
         {nav === "cbt" && (
           <CbtSection
+            view={entryView}
+            onViewChange={setEntryView}
             cbtForm={cbt.cbtForm} cbtMutationState={{ isSuccess: cbt.cbtMutation.isSuccess }} isLoading={cbt.isLoading}
             editingCbt={cbt.editingCbt} cbtEntries={cbt.cbtEntries}
             confirmDeleteCbt={cbt.confirmDeleteCbt} onSubmit={(v) => cbt.cbtMutation.mutate(v)}
@@ -377,6 +426,8 @@ function App() {
 
         {nav === "dbt" && (
           <DbtSection
+            view={entryView}
+            onViewChange={setEntryView}
             dbtForm={dbt.dbtForm} dbtMutationState={{ isSuccess: dbt.dbtMutation.isSuccess }} isLoading={dbt.isLoading}
             editingDbt={dbt.editingDbt} dbtEntries={dbt.dbtEntries}
             confirmDeleteDbt={dbt.confirmDeleteDbt} onSubmit={(v) => dbt.dbtMutation.mutate(v)}
@@ -387,6 +438,8 @@ function App() {
 
         {nav === "money-transactions" && (
           <TransactionsSection
+            view={entryView}
+            onViewChange={setEntryView}
             txForm={moneyTx.txForm} txMutationState={{ isSuccess: moneyTx.txMutation.isSuccess }}
             isLoading={moneyTx.isLoading} editingTx={moneyTx.editingTx}
             transactions={moneyTx.transactions} assetOptions={moneyTx.assetOptions}
@@ -399,6 +452,8 @@ function App() {
 
         {nav === "money-movements" && (
           <MovementsSection
+            view={entryView}
+            onViewChange={setEntryView}
             movementForm={moneyMovements.movementForm}
             movementMutationState={{ isSuccess: moneyMovements.movementMutation.isSuccess }}
             isLoading={moneyMovements.isLoading} editingMovement={moneyMovements.editingMovement}
@@ -411,6 +466,8 @@ function App() {
 
         {nav === "money-snapshots" && (
           <SnapshotsSection
+            view={entryView}
+            onViewChange={setEntryView}
             snapshotForm={moneySnapshots.snapshotForm}
             snapshotMutationState={{ isSuccess: moneySnapshots.snapshotMutation.isSuccess }}
             isLoading={moneySnapshots.isLoading} canSave={moneySnapshots.canSave}
@@ -438,6 +495,7 @@ function App() {
 
         </Suspense>
         </SectionErrorBoundary>
+        </StageHeadSlot.Provider>
       </main>
     </div>
     {toaster}

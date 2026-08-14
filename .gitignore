@@ -46,7 +46,10 @@ Thumbs.db
 .legacy_extract/
 rollback/legacy-runtime.tar.gz
 
-mockups/
+# Old note mockups sitting in public/: Vite copies public/ into the build,
+# so tracking these would ship dead HTML to production. The design mockups
+# live in /mockups at the repo root and are tracked.
+frontend/public/mockups/
 
 # Local planning/spec artifacts
 docs/superpowers/

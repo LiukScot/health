@@ -59,40 +59,43 @@ function ThemeBlock() {
   const { theme, setTheme } = useTheme();
   return (
     <div className="grid gap-3">
-      <SectionHead title="Theme" />
-      <div className="flex flex-wrap gap-5" role="group" aria-label="Theme">
+      <SectionHead title="Theme" aside="applies to every realm" />
+      {/* Named cards, not bare colour circles: the swatches were the only
+          thing telling the three apart, and colour alone is not a label
+          you can read, search or hear. */}
+      {/* Native radios, visually hidden inside the cards: one tab stop and
+          arrow-key selection come with the input, where a div with
+          role="radio" would owe both by hand. */}
+      <div className="grid gap-3 grid-cols-2 wide:grid-cols-3">
         {THEMES.map((t) => {
           const selected = t.id === theme;
-          const dotShadow = selected
-            ? "shadow-[0_0_0_2px_var(--accent)]"
-            : "shadow-[var(--shadow-sm)] group-hover/sw:shadow-[0_0_0_2px_var(--ring)]";
           return (
-            <button
+            <label
               key={t.id}
-              type="button"
-              className="group/sw flex p-0 min-h-0 bg-transparent border-0 rounded-none shadow-none cursor-pointer"
-              aria-pressed={selected}
-              aria-label={t.label}
-              title={t.label}
-              onClick={() => setTheme(t.id)}
+              className={`grid gap-2 content-start p-3 text-left bg-card-soft rounded-md cursor-pointer border has-[:focus-visible]:shadow-[0_0_0_2px_var(--ring)] ${selected ? "border-text" : "border-transparent hover:border-border"}`}
             >
-              <span className={`w-[44px] h-[44px] rounded-full border border-border grid place-items-center transition-[box-shadow] duration-150 ease-[ease] ${dotShadow}`} style={{ background: t.bg }}>
-                {selected ? (
-                  <svg
-                    className="text-text w-[18px] h-[18px]"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2.5"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    aria-hidden="true"
-                  >
-                    <polyline points="20 6 9 17 4 12" />
-                  </svg>
-                ) : null}
+              <input
+                type="radio"
+                name="theme"
+                value={t.id}
+                checked={selected}
+                onChange={() => setTheme(t.id)}
+                className="sr-only"
+              />
+              <span
+                className="grid content-between h-14 p-2 rounded-sm border border-[color-mix(in_srgb,var(--border)_45%,transparent)]"
+                style={{ background: t.bg }}
+                aria-hidden="true"
+              >
+                <span className="h-[7px] w-[70%] rounded-[4px]" style={{ background: t.card }} />
+                <span className="h-[7px] w-[40%] rounded-[4px]" style={{ background: t.text }} />
               </span>
-            </button>
+              <span className="flex items-center gap-1.5 text-control font-semibold text-text">
+                {selected ? <span className="text-success font-extrabold" aria-hidden="true">✓</span> : null}
+                {t.label}
+              </span>
+              <span className="text-micro text-muted-soft">{t.hint}</span>
+            </label>
           );
         })}
       </div>
@@ -124,11 +127,6 @@ function AccountBlock({ auth }: Pick<SettingsSectionProps, "auth">) {
           }
         />
       </form>
-      <div className="flex justify-end pt-2">
-        <Button type="button" onClick={() => auth.logoutMutation.mutate()} disabled={auth.logoutMutation.isPending}>
-          Log out
-        </Button>
-      </div>
     </div>
   );
 }
@@ -243,6 +241,16 @@ function AccountIdentity({ auth }: Pick<SettingsSectionProps, "auth">) {
         <div className="text-sm font-semibold font-body text-text overflow-hidden text-ellipsis whitespace-nowrap">{name || email.split("@")[0]}</div>
         <div className="text-xs text-muted tabular-nums">{email}</div>
       </div>
+      {/* Log out sits with the identity it ends. Right-aligned under the
+          password form it read as that form's second step. */}
+      <Button
+        type="button"
+        className="ml-auto flex-none"
+        onClick={() => auth.logoutMutation.mutate()}
+        disabled={auth.logoutMutation.isPending}
+      >
+        Log out
+      </Button>
     </div>
   );
 }

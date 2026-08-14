@@ -6,7 +6,7 @@ import type { InputHTMLAttributes, ReactNode, TextareaHTMLAttributes } from "rea
 export const FIELD_LINE_LABEL =
   "[text-box:trim-both_cap_alphabetic] pt-3 pb-2 text-xs font-bold tracking-[0.16em] uppercase text-muted";
 export const FIELD_LINE_INPUT =
-  "w-full bg-[color-mix(in_srgb,white_3%,var(--bg))] border-0 rounded-sm px-3 py-2 text-text text-control font-medium font-body shadow-none outline-none transition-[background,box-shadow] duration-150 ease-[ease] hover:bg-[color-mix(in_srgb,white_5%,var(--bg))] focus:bg-[color-mix(in_srgb,white_5%,var(--bg))] focus:shadow-[inset_0_0_0_1px_var(--accent)] placeholder:text-muted-soft [[data-theme=oled]_&]:bg-card-soft [[data-theme=oled]_&]:hover:bg-[color-mix(in_srgb,white_6%,var(--card-soft))] [[data-theme=oled]_&]:focus:bg-[color-mix(in_srgb,white_6%,var(--card-soft))]";
+  "w-full bg-[var(--control)] border-0 rounded-sm px-3 py-2 text-text text-control font-medium font-body shadow-none outline-none transition-[background,box-shadow] duration-150 ease-[ease] hover:bg-[var(--control-hover)] focus:bg-[var(--control-hover)] focus:shadow-[inset_0_0_0_1px_var(--accent)] placeholder:text-muted-soft";
 
 type FieldLineProps = InputHTMLAttributes<HTMLInputElement> &
   TextareaHTMLAttributes<HTMLTextAreaElement> & {
@@ -18,8 +18,10 @@ type FieldLineProps = InputHTMLAttributes<HTMLInputElement> &
 
 export function FieldLine({ label, multiline = false, compact = false, className = "", ...rest }: FieldLineProps) {
   const minH = compact ? "min-h-[54px]" : "min-h-[64px]";
+  // The wrapping label associates implicitly; htmlFor is added when the
+  // caller gives the control an id, so the pair is explicit as well.
   return (
-    <label className="grid gap-2 content-start">
+    <label className="grid gap-2 content-start" htmlFor={rest.id}>
       <span className={FIELD_LINE_LABEL}>{label}</span>
       {multiline ? (
         // rest is the input∩textarea intersection; narrow to the rendered element.

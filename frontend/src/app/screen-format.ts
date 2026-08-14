@@ -7,6 +7,46 @@ export function formatEntrySummaryDate(entryDate: string, entryTime: string): st
   return new Intl.DateTimeFormat(undefined, { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" }).format(d);
 }
 
+const MONTH_LABEL = new Intl.DateTimeFormat(undefined, { month: "long", year: "numeric" });
+
+/*
+ * "August 2026" — the heading the entry log groups rows under.
+ *
+ * The components are checked against the date they produce, because the
+ * Date constructor rolls overflow forward: 2026-02-31 parses fine and
+ * comes back as March, so a NaN check alone would relabel it.
+ */
+export function formatMonthLabel(entryDate: string): string {
+  const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(entryDate);
+  if (!match) return entryDate;
+  const [, year, month, day] = match.map(Number);
+  const d = new Date(year, month - 1, day);
+  const roundTrips = d.getFullYear() === year && d.getMonth() === month - 1 && d.getDate() === day;
+  return roundTrips ? MONTH_LABEL.format(d) : entryDate;
+}
+
+/**
+ * Rows in the order given, cut into runs that share a month. A run, not a
+ * map: the list is already sorted newest first, so a plain scan keeps that
+ * order and needs no re-sort. Entries with an unparseable date fall into
+ * their own run rather than being dropped.
+ */
+export function groupByMonth<T>(rows: T[], dateOf: (row: T) => string): { key: string; label: string; rows: T[] }[] {
+  const groups: { key: string; label: string; rows: T[] }[] = [];
+  for (const [index, row] of rows.entries()) {
+    const date = dateOf(row);
+    const label = formatMonthLabel(date);
+    // An unparseable date has no month to share, so it gets a run of its
+    // own rather than joining whatever else starts with the same seven
+    // characters.
+    const key = label === date ? `invalid:${index}` : date.slice(0, 7);
+    const last = groups[groups.length - 1];
+    if (last?.key === key) last.rows.push(row);
+    else groups.push({ key, label, rows: [row] });
+  }
+  return groups;
+}
+
 export function bandNine(level: number | null | undefined, higherIsBetter = false): "low" | "mid" | "high" | "" {
   if (level == null || Number.isNaN(Number(level))) return "";
   const n = Math.round(Number(level));
@@ -36,7 +76,3 @@ export function diaryPreview(entry: DiaryEntry): string {
   return moodBits || desc || "—";
 }
 
-export function formatMetricDisplay(value: number | null | undefined, fractionDigits = 0): string {
-  if (value == null || Number.isNaN(Number(value))) return "—";
-  return Number(value).toLocaleString(undefined, { maximumFractionDigits: fractionDigits });
-}

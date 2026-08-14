@@ -5,6 +5,7 @@ import { matchesMemorableDate, type useMemorableDays } from "../hooks/use-memora
 import { Button, buttonClass } from "../components/ui/Button";
 import { EntriesHeading } from "./entries";
 import { MemorableDayModal, type DraftState } from "./memorable-day-modal";
+import { PAGE_TITLE } from "./screen-helpers";
 import {
   MEMO_BACKDROP,
   MEMO_MODAL,
@@ -177,7 +178,7 @@ export function MemorableDaysSection({ memorable }: Props) {
     <section className="@container p-2 relative">
       <div>
         <div>
-          <h1 className="m-0 mb-10 [text-box:trim-both_cap_alphabetic] text-title font-bold tracking-tight text-text">Memorable days</h1>
+          <h1 className={`${PAGE_TITLE} mb-page`}>Memorable days</h1>
           <SectionHead title="Calendar" variant="dashboard" />
         </div>
       </div>
@@ -256,7 +257,7 @@ export function MemorableDaysSection({ memorable }: Props) {
         </section>
 
         <section ref={rightColRef} className="min-w-0 flex flex-col min-h-0 overflow-hidden h-[var(--split-col-height,auto)] max-h-[var(--split-col-height,none)] max-xwide:h-auto max-xwide:max-h-none max-xwide:pt-5 max-[980px]:pt-0">
-          <EntriesHeading className="mt-0 mb-5">All memorable days</EntriesHeading>
+          <EntriesHeading className="mb-5">All memorable days</EntriesHeading>
           {memorable.isLoading ? (
             <p className="text-muted text-control">Loading memorable days...</p>
           ) : memorable.memorableDays.length === 0 ? (

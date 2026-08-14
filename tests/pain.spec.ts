@@ -1,5 +1,5 @@
 import { expect, test } from "@playwright/test";
-import { loginUi, navigateTo, purgeUserData } from "./helpers";
+import { loginUi, navigateTo, openEntryView, purgeUserData } from "./helpers";
 
 test.beforeEach(async ({ request, page }) => {
   await purgeUserData(request);
@@ -13,8 +13,9 @@ test.afterEach(async ({ request }) => {
 });
 
 test("shows a pain empty state when there are no entries", async ({ page }) => {
+  await openEntryView(page, "history");
   await expect(page.getByText("No pain entries yet")).toBeVisible();
-  await expect(page.getByText("Track your first session with the form above. Your pain history will show up here once you save it.")).toBeVisible();
+  await expect(page.getByText("Open New entry to record a flare", { exact: false })).toBeVisible();
 });
 
 // Pain CRUD UI flow E2E removed — same rationale as diary.spec.ts.

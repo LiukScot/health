@@ -1,0 +1,247 @@
+/*
+ * Shared tokens for the mockups under /mockups.
+ *
+ * Values are transcribed from frontend/src/styles.css (the app's single
+ * source of truth) — dark theme, Health accent. If styles.css changes,
+ * re-copy; do not invent values here. A mockup on the wrong scale lies
+ * about exactly what #196 is trying to fix.
+ */
+:root {
+  /* Colors — styles.css :root (dark) */
+  --bg: #121214;
+  --card: #161619;
+  --card-strong: #1a1a1d;
+  --card-soft: #1e1e22;
+  --text: #f5f5f7;
+  --muted: #a1a1ad;
+  --muted-soft: #6d6d78;
+  --border: #48484f;
+  --accent: #ff5e8a;
+  --accent-fg: var(--bg);
+  --danger: #ff5a7f;
+  --danger-strong: #ff3333;
+  --success: #6fe1b0;
+  --success-fg: #0a2018;
+  --warning: #f5a623;
+  --warning-soft: #ffd38a;
+  --warning-fg: #2a1a00;
+  --shadow: 0 16px 40px rgba(0, 0, 0, 0.45);
+  --shadow-sm: 0 2px 6px rgba(0, 0, 0, 0.25);
+  --ring: color-mix(in srgb, var(--accent) 38%, transparent);
+
+  /* Realm accents, for mockups that show Money/Settings screens */
+  --accent-money: #34d399;
+  --risk-low: #34d399;
+  --risk-medium: #fbbf24;
+  --risk-high: #fb7185;
+  --risk-liquid: #60a5fa;
+
+  /* Typography — styles.css @theme */
+  --text-nano: 10px;
+  --text-micro: 11px;
+  --text-hint: 12.5px;
+  --text-control: 13px;
+  --text-title: 22px;
+  --radius-sm: 10px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --font-body: "Manrope", system-ui, -apple-system, "BlinkMacSystemFont", "Segoe UI", sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, "SFMono-Regular", "Menlo", monospace;
+
+  /* Spacing — the two tiers from #196. Page rhythm is one number; the
+     component tier mirrors the app's gap-2/3/5 utilities. */
+  --gap-page: 40px;  /* page margin, columns, sibling blocks, under headings */
+  --gap-block: 20px; /* inside a block: chart card padding rows, filter rows */
+  --gap-item: 12px;  /* between fields/cards in a group (gap-3) */
+  --gap-tight: 8px;  /* label→input, chip rows (gap-2) */
+
+  /* DEPRECATED — no counterpart in styles.css, kept only so the legacy
+     pain-* mockups still render. Do not use in new mockups. */
+  --space-1: 10px;
+  --space-2: 20px;
+  --space-3: 30px;
+  --border-soft: color-mix(in srgb, var(--border) 55%, transparent);
+  --accent-2: #ff8fb1;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  font-family: var(--font-body);
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.45;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Headings joining the page rhythm need the leading stripped, or a
+   declared 40px renders ~45 (see #196). */
+.trim { text-box: trim-both cap alphabetic; }
+
+/* Mockup framing */
+.mockup-frame {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: var(--gap-page) var(--gap-block);
+}
+
+.mockup-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  font-size: var(--text-micro);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 14%, transparent);
+  border-radius: 999px;
+  margin-bottom: 10px;
+}
+
+.mockup-title {
+  font-size: 28px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  margin: 0 0 4px;
+}
+
+.mockup-subtitle {
+  font-size: 14px;
+  color: var(--muted);
+  margin: 0 0 var(--gap-block);
+}
+
+.mockup-nav {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  font-size: var(--text-control);
+  padding: 8px 0 16px;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: var(--gap-block);
+}
+.mockup-nav a {
+  color: var(--muted);
+  text-decoration: none;
+  padding: 6px 10px;
+  border-radius: 8px;
+  border: 1px solid transparent;
+}
+.mockup-nav a:hover { color: var(--text); border-color: var(--border); }
+.mockup-nav a.current { color: var(--text); background: var(--card-strong); border-color: var(--border); }
+
+/* Shared primitives, mirroring the app's constants */
+
+/* EntriesHeading: text-control accent caps, 0.16em tracking */
+.section-heading {
+  display: block;
+  font-size: var(--text-control);
+  font-weight: 700;
+  color: var(--accent);
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  text-box: trim-both cap alphabetic;
+}
+
+/* FieldLine label: micro caps muted */
+.field-label {
+  display: block;
+  font-size: var(--text-micro);
+  font-weight: 700;
+  color: var(--muted);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  text-box: trim-both cap alphabetic;
+}
+
+/* CHIP_SHAPE + CHIP_IDLE / CHIP_ACTIVE */
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 12px;
+  min-height: 32px;
+  font-size: var(--text-hint);
+  line-height: 1;
+  color: var(--muted);
+  background: color-mix(in srgb, white 5%, var(--card));
+  border: 0;
+  border-radius: 999px;
+  cursor: pointer;
+  font-family: inherit;
+  transition: color 0.15s ease, background 0.15s ease;
+}
+.chip:hover { color: var(--text); background: color-mix(in srgb, white 9%, var(--card)); }
+.chip.active {
+  color: var(--accent-fg);
+  background: var(--accent);
+  font-weight: 600;
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 10px 16px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text);
+  background: var(--card-strong);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  font-family: inherit;
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+.btn:hover { border-color: var(--accent); }
+.btn:disabled { opacity: 0.4; cursor: not-allowed; }
+.btn-primary {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--accent-fg);
+}
+.btn-primary:hover { filter: brightness(1.1); }
+
+.pain-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 30px;
+  height: 30px;
+  padding: 0 8px;
+  border-radius: 8px;
+  font-weight: 800;
+  font-size: 14px;
+  color: var(--text);
+}
+.pain-badge.low  { background: var(--success); color: var(--success-fg); }
+.pain-badge.mid  { background: var(--warning); color: var(--warning-fg); }
+.pain-badge.high { background: var(--danger); }
+.pain-badge.sm { min-width: 24px; height: 24px; font-size: 12px; padding: 0 6px; }
+
+input[type="text"],
+input[type="number"],
+input[type="datetime-local"],
+textarea,
+select {
+  width: 100%;
+  padding: 10px 12px;
+  font-family: inherit;
+  font-size: 14px;
+  color: var(--text);
+  background: var(--card-strong);
+  border: 1px solid color-mix(in srgb, var(--border) 55%, transparent);
+  border-radius: var(--radius-sm);
+  outline: none;
+  transition: border-color 0.15s ease;
+}
+input:focus-visible, textarea:focus-visible, select:focus-visible {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px var(--ring);
+}
+::placeholder { color: var(--muted-soft); }

@@ -1,5 +1,5 @@
 import { expect, test } from "@playwright/test";
-import { loginUi, navigateTo, purgeUserData } from "./helpers";
+import { loginUi, navigateTo, openEntryView, purgeUserData } from "./helpers";
 
 test.beforeEach(async ({ request, page }) => {
   await purgeUserData(request);
@@ -13,8 +13,9 @@ test.afterEach(async ({ request }) => {
 });
 
 test("shows a diary empty state when there are no entries", async ({ page }) => {
+  await openEntryView(page, "history");
   await expect(page.getByText("No diary entries yet")).toBeVisible();
-  await expect(page.getByText("Use the form above to log your first mood entry. Once you save it, it will appear here.")).toBeVisible();
+  await expect(page.getByText("Open New entry to log how today felt", { exact: false })).toBeVisible();
 });
 
 // Diary CRUD UI flow E2E removed — was brittle to UI changes (tab-switched

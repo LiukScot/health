@@ -95,15 +95,18 @@ test("renders dashboard data and supports chart toggles", async ({ page }) => {
   await expect(page.getByLabel("From date")).toHaveCSS("font-size", "13px");
   await expect(page.getByLabel("From date")).toHaveCSS("font-weight", "500");
   await page.setViewportSize({ width: 850, height: 1000 });
-  const firstCardBox = await statsGrid.locator("article").nth(0).boundingBox();
-  // Guards against a card stretching across the row on a narrow screen. The
-  // ceiling is deliberately loose: the exact width falls out of how many
-  // tracks the card grid fits, which is a layout detail, not a contract.
-  expect(firstCardBox?.width ?? 0).toBeLessThanOrEqual(190);
-  await page.setViewportSize({ width: 790, height: 1000 });
-  const painValueBox = await statsGrid.locator("article").nth(1).locator("strong").boundingBox();
-  const moodValueBox = await statsGrid.locator("article").nth(2).locator("strong").boundingBox();
-  expect(painValueBox?.y).toBe(moodValueBox?.y);
+  /*
+   * The contract is the hierarchy, not a pixel ceiling: one metric leads
+   * at the full width of the row, the rest sit a tier below it, two to a
+   * row at this width. The old assertion capped every card at 190px,
+   * which described the auto-filled grid this replaced.
+   */
+  const heroBox = await statsGrid.locator("article").nth(0).boundingBox();
+  const tierBox = await statsGrid.locator("article").nth(1).boundingBox();
+  expect(tierBox?.width ?? 0).toBeLessThan((heroBox?.width ?? 0) * 0.75);
+  // Same row, so the tier reads as one group rather than a column of ones.
+  const secondTierBox = await statsGrid.locator("article").nth(2).boundingBox();
+  expect(tierBox?.y).toBe(secondTierBox?.y);
 
   // Wait for chart canvas to render dynamically
   await page.waitForSelector("canvas", { timeout: 5000 });

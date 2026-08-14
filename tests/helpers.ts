@@ -147,6 +147,17 @@ export async function navigateTo(page: Page, section: string) {
   await page.getByRole("button", { name: section }).click();
 }
 
+/*
+ * The saved log is a sibling view of the form, not a tail below it, so a
+ * test that has just saved something has to switch views before it can
+ * see it. The page tabs and the mobile sticky head render the same
+ * control, so target the visible one.
+ */
+export async function openEntryView(page: Page, view: "new" | "history") {
+  const group = page.getByRole("group", { name: "Entry or history" });
+  await group.first().getByRole("button").nth(view === "new" ? 0 : 1).click();
+}
+
 export async function saveBirthday(
   request: APIRequestContext,
   birthday: string | null,

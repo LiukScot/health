@@ -5,7 +5,7 @@ import { formatCurrency, type Snapshot } from "./core";
 
 ChartJS.register(BarElement, CategoryScale, LinearScale, Tooltip, Legend);
 
-type RiskColors = { low: string; medium: string; high: string; liquid: string; muted: string };
+type RiskColors = { low: string; medium: string; high: string; liquid: string; muted: string; grid: string };
 
 function readRiskColors(): RiskColors {
   const style = getComputedStyle(document.documentElement);
@@ -16,6 +16,7 @@ function readRiskColors(): RiskColors {
     high: token("--risk-high", "#fb7185"),
     liquid: token("--risk-liquid", "#60a5fa"),
     muted: token("--muted", "#a1a1ad"),
+    grid: token("--color-chart-grid", "rgba(255,255,255,0.08)"),
   };
 }
 
@@ -47,6 +48,9 @@ export default function MonthlyRiskChart({ snapshots }: { snapshots: Snapshot[] 
     () => ({
       responsive: true,
       maintainAspectRatio: false,
+      // Without a cap a lone snapshot draws one bar as wide as the plot,
+      // which reads as a filled panel rather than as a measurement.
+      datasets: { bar: { maxBarThickness: 72 } },
       plugins: {
         legend: { position: "bottom" as const, labels: { color: colors.muted, boxWidth: 12 } },
       },
@@ -54,17 +58,16 @@ export default function MonthlyRiskChart({ snapshots }: { snapshots: Snapshot[] 
         x: {
           stacked: true,
           ticks: { color: colors.muted },
-          // rgba(255,255,255,0.08) has no design token; matches the wellbeing chart.
-          grid: { color: "rgba(255,255,255,0.08)" },
+          grid: { color: colors.grid },
         },
         y: {
           stacked: true,
           ticks: { color: colors.muted, callback: (value: string | number) => formatCurrency(Number(value)) },
-          grid: { color: "rgba(255,255,255,0.08)" },
+          grid: { color: colors.grid },
         },
       },
     }),
-    [colors.muted],
+    [colors.muted, colors.grid],
   );
 
   return (

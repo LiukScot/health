@@ -10,10 +10,11 @@ import {
 } from "chart.js";
 import { Bar, Pie } from "react-chartjs-2";
 import { formatCurrency, type AssetStats } from "./core";
+import { ChartCard } from "../dashboard-cards";
 
 ChartJS.register(ArcElement, BarElement, CategoryScale, LinearScale, Tooltip, Legend);
 
-type ChartColors = { positive: string; negative: string; muted: string };
+type ChartColors = { positive: string; negative: string; muted: string; grid: string };
 
 function readChartColors(): ChartColors {
   const style = getComputedStyle(document.documentElement);
@@ -22,6 +23,7 @@ function readChartColors(): ChartColors {
     positive: token("--risk-low", "#34d399"),
     negative: token("--risk-high", "#fb7185"),
     muted: token("--muted", "#a1a1ad"),
+    grid: token("--color-chart-grid", "rgba(255,255,255,0.08)"),
   };
 }
 
@@ -79,30 +81,28 @@ export default function AssetCharts({ visibleAssets }: { visibleAssets: AssetSta
       maintainAspectRatio: false,
       plugins: { legend: { display: false } },
       scales: {
-        x: { ticks: { color: colors.muted }, grid: { color: "rgba(255,255,255,0.08)" } },
+        x: { ticks: { color: colors.muted }, grid: { color: colors.grid } },
         y: {
           ticks: { color: colors.muted, callback: (value: string | number) => formatCurrency(Number(value)) },
-          grid: { color: "rgba(255,255,255,0.08)" },
+          grid: { color: colors.grid },
         },
       },
     }),
-    [colors.muted],
+    [colors.muted, colors.grid],
   );
 
   return (
-    <div className="grid gap-5 grid-cols-[repeat(auto-fit,minmax(min(100%,20rem),1fr))]">
-      <div className="grid gap-2 min-w-0">
-        <span className="text-nano font-bold tracking-[0.16em] uppercase text-muted">Allocation</span>
-        <div className="h-[260px] min-w-0">
+    <>
+      <ChartCard title="Allocation">
+        <div className="h-[240px] min-w-0">
           <Pie data={allocation} options={allocationOptions} />
         </div>
-      </div>
-      <div className="grid gap-2 min-w-0">
-        <span className="text-nano font-bold tracking-[0.16em] uppercase text-muted">PnL per asset</span>
-        <div className="h-[260px] min-w-0">
+      </ChartCard>
+      <ChartCard title="PnL per asset">
+        <div className="h-[240px] min-w-0">
           <Bar data={pnl} options={pnlOptions} />
         </div>
-      </div>
-    </div>
+      </ChartCard>
+    </>
   );
 }

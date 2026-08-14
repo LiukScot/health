@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dashboard B · Strip + table</title>
+<link rel="stylesheet" href="tokens.css">
+<style>
+  .page {
+    display: grid;
+    gap: var(--gap-page);
+    max-width: 1240px;
+    margin: 0 auto;
+    padding: var(--gap-page);
+  }
+  h1.page-title {
+    margin: 0;
+    font-size: var(--text-title);
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    text-box: trim-both cap alphabetic;
+  }
+  .realm-money { --accent: var(--accent-money); }
+
+  .dash-section { display: grid; gap: var(--gap-block); }
+  .section-row { display: flex; align-items: baseline; gap: var(--gap-item); }
+  .section-row .aside { margin-left: auto; font-size: var(--text-micro); color: var(--muted-soft); }
+
+  .card {
+    display: grid;
+    gap: var(--gap-item);
+    padding: var(--gap-block);
+    background: var(--card-soft);
+    border-radius: var(--radius-md);
+    min-width: 0;
+  }
+
+  /* One strip, one surface: stats can wrap but never orphan (H2, #16).
+     The page leads with the charts; numbers are the caption, not the show. */
+  .strip {
+    display: flex;
+    flex-wrap: wrap;
+    padding: 0;
+    background: var(--card-soft);
+    border-radius: var(--radius-md);
+  }
+  .strip > div {
+    display: grid;
+    gap: var(--gap-tight);
+    padding: var(--gap-block);
+    flex: 1 1 150px;
+    min-width: 0;
+  }
+  .strip > div + div { border-left: 1px solid color-mix(in srgb, var(--border) 35%, transparent); }
+  .kpi-label {
+    font-size: var(--text-nano);
+    font-weight: 800;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+  .kpi-value { font-size: 18px; font-weight: 700; letter-spacing: -0.01em; white-space: nowrap; }
+  .kpi-sub { font-size: var(--text-micro); color: var(--muted); }
+  .pos { color: var(--success); }
+  .neg { color: var(--danger); }
+
+  .chart-row { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--gap-item); align-items: start; }
+  .chart-title {
+    font-size: var(--text-micro);
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+  .donut-wrap { display: flex; align-items: center; gap: var(--gap-block); }
+  .donut {
+    width: 150px; height: 150px; border-radius: 50%; flex: none;
+    background: conic-gradient(#34d399 0 51.8%, #e8e8ec 51.8% 100%);
+    -webkit-mask: radial-gradient(circle 46px, transparent 98%, black 100%);
+            mask: radial-gradient(circle 46px, transparent 98%, black 100%);
+  }
+  .legend { display: grid; gap: var(--gap-tight); font-size: var(--text-control); color: var(--muted); }
+  .legend .row { display: flex; align-items: center; gap: 8px; }
+  .legend .swatch { width: 10px; height: 10px; border-radius: 3px; }
+  .legend .val { margin-left: auto; color: var(--text); font-variant-numeric: tabular-nums; }
+  .bars { display: grid; grid-template-columns: repeat(2, 64px); gap: var(--gap-block); align-items: end; height: 150px; padding: 0 var(--gap-tight); }
+  .bars .bar { display: grid; gap: 6px; align-content: end; text-align: center; font-size: var(--text-micro); color: var(--muted); }
+  .bars .fill { border-radius: 6px 6px 2px 2px; background: var(--success); }
+
+  /* The by-asset table: denser than cards, scales past 10 assets, and
+     numbers align for comparison — which is what a portfolio list is for. */
+  .table-card { padding: 0; overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; font-size: var(--text-control); }
+  th, td { text-align: right; padding: 12px var(--gap-block); white-space: nowrap; }
+  th:first-child, td:first-child { text-align: left; }
+  thead th {
+    font-size: var(--text-nano);
+    font-weight: 800;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--muted);
+    border-bottom: 1px solid color-mix(in srgb, var(--border) 35%, transparent);
+  }
+  tbody td { border-bottom: 1px solid color-mix(in srgb, var(--border) 20%, transparent); font-variant-numeric: tabular-nums; }
+  tbody tr:last-child td { border-bottom: 0; }
+  .asset-cell { display: flex; align-items: center; gap: 8px; font-weight: 600; }
+  .asset-cell .swatch { width: 10px; height: 10px; border-radius: 3px; border: 1px solid var(--border); }
+  .risk-tag { font-size: var(--text-nano); letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); }
+
+  .toggle { display: inline-flex; align-items: center; gap: 8px; font-size: var(--text-control); color: var(--muted); cursor: pointer; }
+  .toggle input { width: 15px; height: 15px; accent-color: var(--accent); }
+  .filters { display: flex; flex-wrap: wrap; gap: var(--gap-tight); align-items: center; }
+  .filters .chip.active { background: color-mix(in srgb, var(--accent) 15%, transparent); color: var(--accent); font-weight: 600; }
+
+  .linechart { width: 100%; height: 240px; }
+  .insight { display: grid; gap: 4px; }
+  .insight .k { font-size: var(--text-nano); font-weight: 800; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); }
+  .insight .v { font-size: var(--text-control); line-height: 1.5; }
+  .conf { justify-self: start; padding: 2px 8px; border-radius: 999px; font-size: var(--text-micro); font-weight: 700; background: color-mix(in srgb, var(--success) 14%, transparent); color: var(--success); }
+
+
+  @media (max-width: 900px) {
+    .page { padding: var(--gap-block); gap: var(--gap-block); }
+    .strip > div { flex-basis: 40%; }
+    .strip > div + div { border-left: 0; }
+    .strip { gap: 1px; background: color-mix(in srgb, var(--border) 20%, var(--card-soft)); overflow: hidden; }
+    .strip > div { background: var(--card-soft); }
+    .chart-row { grid-template-columns: minmax(0, 1fr); }
+  }
+</style>
+</head>
+<body>
+<div class="mockup-frame" style="max-width:1240px;padding-bottom:0">
+  <div class="mockup-tag">Dashboard · Variant B</div>
+  <h1 class="mockup-title">Strip + table</h1>
+  <p class="mockup-subtitle">Numbers as one strip (a caption, not six cards), charts lead the page, assets as a table with aligned columns. Denser than A; scales better past 10 assets. Same shared anatomy across both realms (C3), no orphans possible (H2).</p>
+  <nav class="mockup-nav">
+    <a href="index.html">Index</a>
+    <a href="dashboard-a.html">A · Hero + tiers</a>
+    <a class="current" href="dashboard-b.html">B · Strip + table</a>
+  </nav>
+</div>
+
+<!-- ======================= MONEY ======================= -->
+<div class="page realm-money">
+  <h1 class="page-title">Dashboard</h1>
+
+  <section class="dash-section">
+    <div class="section-row">
+      <span class="section-heading">Portfolio</span>
+      <span class="aside">updated Aug 13, 2026</span>
+    </div>
+    <div class="strip">
+      <div>
+        <span class="kpi-label">Current value</span>
+        <span class="kpi-value">€2,512.00</span>
+        <span class="kpi-sub pos">+€12.00 · +0.48%</span>
+      </div>
+      <div>
+        <span class="kpi-label">Monthly net</span>
+        <span class="kpi-value neg">−€23.00</span>
+        <span class="kpi-sub">€2 in · €25 out</span>
+      </div>
+      <div>
+        <span class="kpi-label">Assets</span>
+        <span class="kpi-value">2</span>
+      </div>
+      <div>
+        <span class="kpi-label">Transactions</span>
+        <span class="kpi-value">3</span>
+        <span class="kpi-sub">last Aug 9, 2026</span>
+      </div>
+    </div>
+  </section>
+
+  <section class="dash-section">
+    <div class="section-row">
+      <span class="section-heading">Charts</span>
+    </div>
+    <div class="chart-row">
+      <article class="card">
+        <span class="chart-title">Allocation</span>
+        <div class="donut-wrap">
+          <div class="donut" role="img" aria-label="Allocation: btp 51.8%, revolut 48.2%"></div>
+          <div class="legend">
+            <div class="row"><span class="swatch" style="background:#34d399"></span> btp <span class="val">51.8%</span></div>
+            <div class="row"><span class="swatch" style="background:#e8e8ec"></span> revolut <span class="val">48.2%</span></div>
+          </div>
+        </div>
+      </article>
+      <article class="card">
+        <span class="chart-title">PnL per asset</span>
+        <div class="bars" role="img" aria-label="PnL per asset: revolut +€12.00, btp €0.00">
+          <div class="bar"><span class="pos" style="font-weight:700">+€12</span><div class="fill" style="height:96px"></div><span>revolut</span></div>
+          <div class="bar"><span style="font-weight:700">€0</span><div class="fill" style="height:3px;opacity:.4"></div><span>btp</span></div>
+        </div>
+      </article>
+    </div>
+  </section>
+
+  <section class="dash-section">
+    <div class="section-row">
+      <span class="section-heading">By asset</span>
+      <label class="toggle aside"><input type="checkbox" name="show-zero" id="show-zero"> Show zero-value assets</label>
+    </div>
+    <article class="card table-card">
+      <table>
+        <thead>
+          <tr><th>Asset</th><th>Risk</th><th>Current</th><th>Allocation</th><th>PnL</th><th>PnL %</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><span class="asset-cell"><span class="swatch" style="background:#34d399"></span>btp</span></td>
+            <td><span class="risk-tag">low</span></td>
+            <td>€1,300.00</td><td>51.8%</td><td class="pos">€0.00</td><td class="pos">0.00%</td>
+          </tr>
+          <tr>
+            <td><span class="asset-cell"><span class="swatch" style="background:#e8e8ec"></span>revolut</span></td>
+            <td><span class="risk-tag">low</span></td>
+            <td>€1,212.00</td><td>48.2%</td><td class="pos">€12.00</td><td class="pos">1.00%</td>
+          </tr>
+        </tbody>
+      </table>
+    </article>
+  </section>
+
+</div>
+
+<!-- ======================= HEALTH ======================= -->
+<div class="page">
+  <h1 class="page-title">Dashboard</h1>
+
+  <section class="dash-section">
+    <div class="section-row">
+      <span class="section-heading">Averages</span>
+      <span class="aside">Apr 17 – Aug 13, 2026</span>
+    </div>
+    <div class="filters">
+      <button type="button" class="chip">1 week</button>
+      <button type="button" class="chip">1 month</button>
+      <button type="button" class="chip">3 months</button>
+      <button type="button" class="chip">1 year</button>
+      <button type="button" class="chip active">Since start</button>
+      <button type="button" class="chip">Custom…</button>
+    </div>
+    <div class="strip">
+      <div>
+        <span class="kpi-label">Mood</span>
+        <span class="kpi-value">6.00</span>
+        <span class="kpi-sub pos">▲ +8% vs previous</span>
+      </div>
+      <div>
+        <span class="kpi-label">Pain</span>
+        <span class="kpi-value">4.00</span>
+        <span class="kpi-sub neg">▼ +5%</span>
+      </div>
+      <div>
+        <span class="kpi-label">Anxiety</span>
+        <span class="kpi-value">4.00</span>
+        <span class="kpi-sub">— 0%</span>
+      </div>
+      <div>
+        <span class="kpi-label">Fatigue</span>
+        <span class="kpi-value">5.67</span>
+        <span class="kpi-sub pos">▼ −3%</span>
+      </div>
+      <div>
+        <span class="kpi-label">Entries</span>
+        <span class="kpi-value">38</span>
+        <span class="kpi-sub">20 journal · 18 pain</span>
+      </div>
+    </div>
+  </section>
+
+  <section class="dash-section">
+    <div class="section-row">
+      <span class="section-heading">Metrics over time</span>
+    </div>
+    <article class="card">
+      <div class="filters">
+        <button type="button" class="chip active">Pain</button>
+        <button type="button" class="chip active">Fatigue</button>
+        <button type="button" class="chip">Mood</button>
+        <button type="button" class="chip">Depression</button>
+        <button type="button" class="chip">Anxiety</button>
+      </div>
+      <svg class="linechart" viewBox="0 0 600 200" preserveAspectRatio="none" role="img" aria-label="Pain and fatigue over time">
+        <g stroke="rgba(255,255,255,0.08)" stroke-width="1">
+          <line x1="0" y1="50" x2="600" y2="50"/><line x1="0" y1="100" x2="600" y2="100"/><line x1="0" y1="150" x2="600" y2="150"/>
+        </g>
+        <polyline fill="none" stroke="#f5a623" stroke-width="2.5" points="0,55 150,80 300,95 450,120 600,130"/>
+        <polyline fill="none" stroke="#ff5e8a" stroke-width="2.5" points="0,110 150,118 300,125 450,132 600,140"/>
+        <circle cx="300" cy="95" r="4" fill="#f5a623"/><circle cx="300" cy="125" r="4" fill="#ff5e8a"/>
+      </svg>
+    </article>
+  </section>
+
+  <section class="dash-section">
+    <div class="section-row">
+      <span class="section-heading">At a glance</span>
+    </div>
+    <article class="card">
+      <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:var(--gap-block)">
+        <div class="insight">
+          <span class="k">Best streak</span>
+          <span class="v">3 days with at least one diary or pain entry.</span>
+        </div>
+        <div class="insight">
+          <span class="k">Missing data</span>
+          <span class="v">Diary missing on 4 tracked days.</span>
+        </div>
+        <div class="insight">
+          <span class="k">Pattern · Coffee × Pain</span>
+          <span class="v">Days with 3+ coffees average 1.4 more pain.</span>
+          <span class="conf">strong confidence</span>
+        </div>
+      </div>
+    </article>
+  </section>
+</div>
+</body>
+</html>
