@@ -265,6 +265,22 @@ export type Realm = (typeof realms)[number];
 export const DEFAULT_REALM: Realm = "health";
 export const REALM_STORAGE_KEY = "world-realm";
 
+/*
+ * What the two views are called, per screen. One map so the page and the
+ * mobile sticky head — which render the same control in two places —
+ * cannot drift apart. Movements says "Recurring" because its list is
+ * active state, not a past log.
+ */
+export const entryViewLabels: Partial<Record<NavItem, { newEntry: string; history: string }>> = {
+  pain: { newEntry: "New entry", history: "History" },
+  diary: { newEntry: "New entry", history: "History" },
+  cbt: { newEntry: "New entry", history: "History" },
+  dbt: { newEntry: "New entry", history: "History" },
+  "money-transactions": { newEntry: "New transaction", history: "History" },
+  "money-movements": { newEntry: "New movement", history: "Recurring" },
+  "money-snapshots": { newEntry: "New snapshot", history: "History" },
+};
+
 export const realmLabels: Record<Realm, string> = { health: "Health", money: "Money", settings: "Settings" };
 
 export const navItemsByRealm: Record<Realm, NavItem[]> = {

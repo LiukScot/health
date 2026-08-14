@@ -1,5 +1,6 @@
 import { type UseFormReturn } from "react-hook-form";
 import {
+  entryViewLabels,
   type CbtEntry,
   type CbtFormValues,
 } from "./core";
@@ -112,7 +113,7 @@ export function CbtSection({
           steps={steps}
           heading={
             <div className="grid gap-5 content-start">
-              <EntryViewTabs view={view} onChange={onViewChange} className="inline-flex max-mobile:hidden" />
+              <EntryViewTabs view={view} onChange={onViewChange} labels={entryViewLabels["cbt"]!} className="inline-flex max-mobile:hidden" />
               <h1 className={PAGE_TITLE}>CBT Thought Response</h1>
             </div>
           }
@@ -161,7 +162,7 @@ export function CbtSection({
       ) : (
       <div className="grid gap-page content-start min-w-0">
         <div className="grid gap-5 content-start">
-          <EntryViewTabs view={view} onChange={onViewChange} className="inline-flex max-mobile:hidden" />
+          <EntryViewTabs view={view} onChange={onViewChange} labels={entryViewLabels["cbt"]!} className="inline-flex max-mobile:hidden" />
           <h1 className={PAGE_TITLE}>CBT Thought Response</h1>
         </div>
       <PastEntries

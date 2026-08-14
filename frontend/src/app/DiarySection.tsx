@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { type UseFormReturn } from "react-hook-form";
 import {
+  entryViewLabels,
   csvToList,
   type DiaryEntry,
   type DiaryFormValues,
@@ -103,7 +104,7 @@ export function DiarySection({
           steps={steps}
           heading={
             <div className="grid gap-5 content-start">
-              <EntryViewTabs view={view} onChange={onViewChange} className="inline-flex max-mobile:hidden" />
+              <EntryViewTabs view={view} onChange={onViewChange} labels={entryViewLabels["diary"]!} className="inline-flex max-mobile:hidden" />
               <h1 className={PAGE_TITLE}>Diary</h1>
             </div>
           }
@@ -214,7 +215,7 @@ export function DiarySection({
       ) : (
       <div className="grid gap-page content-start min-w-0">
         <div className="grid gap-5 content-start">
-          <EntryViewTabs view={view} onChange={onViewChange} className="inline-flex max-mobile:hidden" />
+          <EntryViewTabs view={view} onChange={onViewChange} labels={entryViewLabels["diary"]!} className="inline-flex max-mobile:hidden" />
           <h1 className={PAGE_TITLE}>Diary</h1>
         </div>
       <PastEntries

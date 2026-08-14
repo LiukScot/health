@@ -3,6 +3,7 @@ import { type UseFormReturn } from "react-hook-form";
 import { Button } from "../../components/ui/Button";
 import { FieldLine } from "../../components/ui/FieldLine";
 import { EmptyState, PAGE, PAGE_TITLE } from "../screen-helpers";
+import { entryViewLabels } from "../core";
 import { FLAT_ACTIONS, FLAT_FORM, FLAT_ROW, FLAT_SHELL, StageField } from "../staged";
 import { SectionHead } from "../shared";
 import { FIELD_LINE_INPUT } from "../../components/ui/FieldLine";
@@ -18,6 +19,8 @@ import {
   ENTRY_ROW,
   ENTRY_SUMMARY,
   PastEntries,
+  EntryViewTabs,
+  type EntryView,
 } from "../entries";
 import { formatCurrency, formatTxDate, type Snapshot, type SnapshotFormValues } from "./core";
 
@@ -35,6 +38,8 @@ export function SnapshotsSection({
   onSubmit,
   onDeleteClick,
   onDeleteBlur,
+  view,
+  onViewChange,
 }: {
   snapshotForm: UseFormReturn<SnapshotFormValues>;
   snapshotMutationState: { isSuccess: boolean };
@@ -45,10 +50,14 @@ export function SnapshotsSection({
   onSubmit: (values: SnapshotFormValues) => void;
   onDeleteClick: (id: string) => void;
   onDeleteBlur: () => void;
+  view: EntryView;
+  onViewChange: (next: EntryView) => void;
 }) {
   return (
     <section className={PAGE}>
+      <EntryViewTabs view={view} onChange={onViewChange} labels={entryViewLabels["money-snapshots"]!} className="inline-flex max-mobile:hidden" />
       <h1 className={PAGE_TITLE}>Snapshots</h1>
+      {view === "new" ? (
       <form onSubmit={snapshotForm.handleSubmit(onSubmit)} className={FLAT_SHELL}>
         <div className={FLAT_FORM}>
         <div className={FLAT_ROW}>
@@ -89,7 +98,8 @@ export function SnapshotsSection({
           </Button>
         </div>
       </form>
-
+      ) : (
+      <div className="grid gap-page content-start min-w-0">
       {/* The risk chart used to render inside the entry list, above the
           rows, as if it were an entry. It is a reading of the whole log,
           so it gets its own titled section. */}
@@ -145,6 +155,8 @@ export function SnapshotsSection({
           );
         })}
       </PastEntries>
+      </div>
+      )}
     </section>
   );
 }

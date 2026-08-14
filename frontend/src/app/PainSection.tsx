@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { type UseFormReturn } from "react-hook-form";
 import {
+  entryViewLabels,
   csvToList,
   type PainEntry,
   type PainFieldKey,
@@ -130,7 +131,7 @@ export function PainSection({
           steps={steps}
           heading={
             <div className="grid gap-5 content-start">
-              <EntryViewTabs view={view} onChange={onViewChange} className="inline-flex max-mobile:hidden" />
+              <EntryViewTabs view={view} onChange={onViewChange} labels={entryViewLabels["pain"]!} className="inline-flex max-mobile:hidden" />
               <h1 className={PAGE_TITLE}>Pain</h1>
             </div>
           }
@@ -217,7 +218,7 @@ export function PainSection({
       ) : (
       <div className="grid gap-page content-start min-w-0">
         <div className="grid gap-5 content-start">
-          <EntryViewTabs view={view} onChange={onViewChange} className="inline-flex max-mobile:hidden" />
+          <EntryViewTabs view={view} onChange={onViewChange} labels={entryViewLabels["pain"]!} className="inline-flex max-mobile:hidden" />
           <h1 className={PAGE_TITLE}>Pain</h1>
         </div>
       <PastEntries

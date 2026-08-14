@@ -5,6 +5,7 @@ import { FieldLine, FIELD_LINE_LABEL } from "../../components/ui/FieldLine";
 import { Select } from "../../components/ui/select";
 import { AnimatedEditingLabel } from "../shared";
 import { EmptyState, PAGE, PAGE_TITLE } from "../screen-helpers";
+import { entryViewLabels } from "../core";
 import { FLAT_ACTIONS, FLAT_FORM, FLAT_ROW, FLAT_SHELL } from "../staged";
 import {
   DELETE_CONFIRM,
@@ -18,6 +19,8 @@ import {
   ENTRY_SUMMARY,
   PainBadge,
   PastEntries,
+  EntryViewTabs,
+  type EntryView,
   TAG_TAB_BTN,
 } from "../entries";
 import {
@@ -52,6 +55,8 @@ export function MovementsSection({
   onStartEdit,
   onDeleteClick,
   onDeleteBlur,
+  view,
+  onViewChange,
 }: {
   movementForm: UseFormReturn<MovementFormValues>;
   movementMutationState: { isSuccess: boolean };
@@ -64,6 +69,8 @@ export function MovementsSection({
   onStartEdit: (row: Movement) => void;
   onDeleteClick: (id: string) => void;
   onDeleteBlur: () => void;
+  view: EntryView;
+  onViewChange: (next: EntryView) => void;
 }) {
   const [period, setPeriod] = useState<Cadence>("monthly");
   // Ranking by the raw amount would put a yearly premium above a bigger
@@ -80,7 +87,9 @@ export function MovementsSection({
 
   return (
     <section className={PAGE}>
+      <EntryViewTabs view={view} onChange={onViewChange} labels={entryViewLabels["money-movements"]!} className="inline-flex max-mobile:hidden" />
       <h1 className={PAGE_TITLE}>Movements</h1>
+      {view === "new" ? (
       <form onSubmit={movementForm.handleSubmit(onSubmit)} className={FLAT_SHELL}>
         <div className={FLAT_FORM}>
         <div className={FLAT_ROW}>
@@ -154,6 +163,7 @@ export function MovementsSection({
           </Button>
         </div>
       </form>
+      ) : (
 
       <PastEntries
         title="Recurring"
@@ -245,6 +255,7 @@ export function MovementsSection({
           );
         })}
       </PastEntries>
+      )}
     </section>
   );
 }

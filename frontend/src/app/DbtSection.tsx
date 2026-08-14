@@ -1,5 +1,6 @@
 import { type UseFormReturn } from "react-hook-form";
 import {
+  entryViewLabels,
   type DbtEntry,
   type DbtFormValues,
 } from "./core";
@@ -136,7 +137,7 @@ export function DbtSection({
           steps={steps}
           heading={
             <div className="grid gap-5 content-start">
-              <EntryViewTabs view={view} onChange={onViewChange} className="inline-flex max-mobile:hidden" />
+              <EntryViewTabs view={view} onChange={onViewChange} labels={entryViewLabels["dbt"]!} className="inline-flex max-mobile:hidden" />
               <h1 className={PAGE_TITLE}>DBT Distress Tolerance</h1>
             </div>
           }
@@ -192,7 +193,7 @@ export function DbtSection({
       ) : (
       <div className="grid gap-page content-start min-w-0">
         <div className="grid gap-5 content-start">
-          <EntryViewTabs view={view} onChange={onViewChange} className="inline-flex max-mobile:hidden" />
+          <EntryViewTabs view={view} onChange={onViewChange} labels={entryViewLabels["dbt"]!} className="inline-flex max-mobile:hidden" />
           <h1 className={PAGE_TITLE}>DBT Distress Tolerance</h1>
         </div>
       <PastEntries

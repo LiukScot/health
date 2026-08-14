@@ -5,6 +5,7 @@ import { FieldLine, FIELD_LINE_LABEL } from "../../components/ui/FieldLine";
 import { Select } from "../../components/ui/select";
 import { AnimatedEditingLabel } from "../shared";
 import { EmptyState, PAGE, PAGE_TITLE } from "../screen-helpers";
+import { entryViewLabels } from "../core";
 import { FLAT_ACTIONS, FLAT_FORM, FLAT_ROW, FLAT_SHELL } from "../staged";
 import {
   DELETE_CONFIRM,
@@ -19,6 +20,8 @@ import {
   ENTRY_SUMMARY,
   PainBadge,
   PastEntries,
+  EntryViewTabs,
+  type EntryView,
 } from "../entries";
 import {
   formatCurrency,
@@ -44,6 +47,8 @@ export function TransactionsSection({
   onStartEdit,
   onDeleteClick,
   onDeleteBlur,
+  view,
+  onViewChange,
 }: {
   txForm: UseFormReturn<TxFormValues>;
   txMutationState: { isSuccess: boolean };
@@ -57,6 +62,8 @@ export function TransactionsSection({
   onStartEdit: (row: Transaction) => void;
   onDeleteClick: (id: string) => void;
   onDeleteBlur: () => void;
+  view: EntryView;
+  onViewChange: (next: EntryView) => void;
 }) {
   const assetListId = useId();
   const watchedTipo = txForm.watch("tipo");
@@ -65,7 +72,9 @@ export function TransactionsSection({
 
   return (
     <section className={PAGE}>
+      <EntryViewTabs view={view} onChange={onViewChange} labels={entryViewLabels["money-transactions"]!} className="inline-flex max-mobile:hidden" />
       <h1 className={PAGE_TITLE}>Transactions</h1>
+      {view === "new" ? (
       <form onSubmit={txForm.handleSubmit(onSubmit)} className={FLAT_SHELL}>
         <div className={FLAT_FORM}>
         <div className={FLAT_ROW}>
@@ -157,6 +166,7 @@ export function TransactionsSection({
           </Button>
         </div>
       </form>
+      ) : (
 
       <PastEntries
         title="History"
@@ -219,6 +229,7 @@ export function TransactionsSection({
           );
         })}
       </PastEntries>
+      )}
     </section>
   );
 }

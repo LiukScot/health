@@ -174,7 +174,7 @@ export const FLAT_FORM = "grid gap-5 content-start p-5 rounded-md bg-card-soft m
 export const FLAT_ROW = "grid gap-3 min-w-0 @2xl:grid-cols-2";
 export const FLAT_ACTIONS = "flex justify-end gap-3";
 
-const RAIL_STEP = "flex items-center gap-2.5 py-2 px-2.5 text-control font-semibold";
+const RAIL_STEP = "flex items-center gap-2.5 py-2 text-control font-semibold";
 const RAIL_DOT = "grid place-items-center w-[22px] h-[22px] flex-none rounded-full text-micro font-extrabold";
 
 export type RailStep = { title: string; done: boolean };
@@ -206,7 +206,7 @@ export function StageRail({
   children: ReactNode;
 }) {
   return (
-    <nav className="grid gap-page content-start min-w-0 wide:sticky wide:top-5 wide:max-h-[calc(100dvh-80px)] wide:overflow-y-auto" aria-label="Stages">
+    <nav className="grid gap-page content-start min-w-0 wide:sticky wide:top-0 wide:max-h-[calc(100dvh-80px)] wide:overflow-y-auto" aria-label="Stages">
       {heading}
       <ol className="grid gap-1 m-0 p-0 list-none max-wide:hidden">
         {steps.map((step, index) => (

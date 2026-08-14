@@ -50,13 +50,13 @@ const VIEW_TAB_OFF = "bg-transparent text-muted hover:text-text";
 export function EntryViewTabs({
   view,
   onChange,
-  historyLabel = "History",
+  labels,
   className = "",
 }: {
   view: EntryView;
   onChange: (next: EntryView) => void;
-  /** Movements calls its log "Recurring": it is active state, not a past log. */
-  historyLabel?: string;
+  /** From entryViewLabels: one source for the page and the mobile head. */
+  labels: { newEntry: string; history: string };
   /** Must set a display: the component declares none, so a caller's
    *  `hidden` cannot lose a source-order fight with a base `inline-flex`. */
   className: string;
@@ -70,7 +70,7 @@ export function EntryViewTabs({
         className={`${VIEW_TAB} ${view === "new" ? VIEW_TAB_ON : VIEW_TAB_OFF}`}
         onClick={() => onChange("new")}
       >
-        New entry
+        {labels.newEntry}
       </button>
       <button
         type="button"
@@ -79,7 +79,7 @@ export function EntryViewTabs({
         className={`${VIEW_TAB} ${view === "history" ? VIEW_TAB_ON : VIEW_TAB_OFF}`}
         onClick={() => onChange("history")}
       >
-        {historyLabel}
+        {labels.history}
       </button>
     </div>
   );

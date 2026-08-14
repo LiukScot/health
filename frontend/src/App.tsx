@@ -11,7 +11,7 @@ import { SectionErrorBoundary } from "./app/ErrorBoundary";
 import { EntryViewTabs, type EntryView } from "./app/entries";
 import { StageHeadSlot } from "./app/stage-head-slot";
 import {
-  formatDocumentTitle, navItemsByRealm, navLabels, readStoredRealm, realmOf,
+  entryViewLabels, formatDocumentTitle, navItemsByRealm, navLabels, readStoredRealm, realmOf,
   REALM_STORAGE_KEY, type NavItem,
 } from "./app/core";
 
@@ -33,7 +33,10 @@ const MoneyDashboardSection = lazy(() => import("./app/money/MoneyDashboardSecti
 
 // Pages that split into a form and a log. Listed rather than derived: the
 // set is not a property of the nav item, it is a property of the screen.
-const ENTRY_VIEW_PAGES = new Set<NavItem>(["pain", "diary", "cbt", "dbt"]);
+const ENTRY_VIEW_PAGES = new Set<NavItem>([
+  "pain", "diary", "cbt", "dbt",
+  "money-transactions", "money-movements", "money-snapshots",
+]);
 
 function App() {
   const auth = useAuth();
@@ -365,7 +368,7 @@ function App() {
               navigation, and navigation must not scroll away. */}
           <div className="flex items-center gap-3">
             {ENTRY_VIEW_PAGES.has(nav) ? (
-              <EntryViewTabs view={entryView} onChange={setEntryView} className="flex" />
+              <EntryViewTabs view={entryView} onChange={setEntryView} labels={entryViewLabels[nav]!} className="flex" />
             ) : null}
             <div ref={setHeadSlot} className="ml-auto empty:hidden" />
           </div>
@@ -442,6 +445,8 @@ function App() {
 
         {nav === "money-transactions" && (
           <TransactionsSection
+            view={entryView}
+            onViewChange={setEntryView}
             txForm={moneyTx.txForm} txMutationState={{ isSuccess: moneyTx.txMutation.isSuccess }}
             isLoading={moneyTx.isLoading} editingTx={moneyTx.editingTx}
             transactions={moneyTx.transactions} assetOptions={moneyTx.assetOptions}
@@ -454,6 +459,8 @@ function App() {
 
         {nav === "money-movements" && (
           <MovementsSection
+            view={entryView}
+            onViewChange={setEntryView}
             movementForm={moneyMovements.movementForm}
             movementMutationState={{ isSuccess: moneyMovements.movementMutation.isSuccess }}
             isLoading={moneyMovements.isLoading} editingMovement={moneyMovements.editingMovement}
@@ -466,6 +473,8 @@ function App() {
 
         {nav === "money-snapshots" && (
           <SnapshotsSection
+            view={entryView}
+            onViewChange={setEntryView}
             snapshotForm={moneySnapshots.snapshotForm}
             snapshotMutationState={{ isSuccess: moneySnapshots.snapshotMutation.isSuccess }}
             isLoading={moneySnapshots.isLoading} canSave={moneySnapshots.canSave}
