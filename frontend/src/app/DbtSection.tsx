@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { type UseFormReturn } from "react-hook-form";
 import {
   type DbtEntry,
@@ -112,7 +111,6 @@ export function DbtSection({
     },
   ];
 
-  const [stage, setStage] = useState(-1);
   const touched = dbtForm.formState.dirtyFields;
   const steps = dbtGroups.map((group) => ({
     title: group.title,
@@ -133,11 +131,9 @@ export function DbtSection({
     <section className={PAGE}>
       {view === "new" ? (
       <form onSubmit={dbtForm.handleSubmit(onSubmit)} className={STAGE_SPLIT}>
-        <StageProgress steps={steps} current={stage} />
+        <StageProgress steps={steps} />
         <StageRail
           steps={steps}
-          current={stage}
-          onJump={setStage}
           heading={
             <div className="grid gap-5 content-start">
               <EntryViewTabs view={view} onChange={onViewChange} className="inline-flex max-mobile:hidden" />

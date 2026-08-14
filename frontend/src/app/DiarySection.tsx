@@ -66,7 +66,6 @@ export function DiarySection({
   onViewChange: (next: EntryView) => void;
 }) {
   const [moodTab, setMoodTab] = useState<"positive" | "negative" | "general">("positive");
-  const [stage, setStage] = useState(-1);
 
   const moodLevels = diaryForm.watch(["moodLevel", "depressionLevel", "anxietyLevel"]);
   const [moodLevel, depressionLevel, anxietyLevel] = moodLevels;
@@ -99,11 +98,9 @@ export function DiarySection({
           <input type="hidden" {...diaryForm.register("anxietyLevel", { valueAsNumber: true })} />
         </div>
 
-        <StageProgress steps={steps} current={stage} />
+        <StageProgress steps={steps} />
         <StageRail
           steps={steps}
-          current={stage}
-          onJump={setStage}
           heading={
             <div className="grid gap-5 content-start">
               <EntryViewTabs view={view} onChange={onViewChange} className="inline-flex max-mobile:hidden" />

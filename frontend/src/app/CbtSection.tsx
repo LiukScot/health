@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { type UseFormReturn } from "react-hook-form";
 import {
   type CbtEntry,
@@ -97,7 +96,6 @@ export function CbtSection({
   ];
   // The expanded entry still lists every field, in the same order.
   const cbtFields = cbtStages.flatMap((stageGroup) => stageGroup.fields);
-  const [stage, setStage] = useState(-1);
   const touched = cbtForm.formState.dirtyFields;
   const steps = cbtStages.map((stageGroup) => ({
     title: stageGroup.title,
@@ -109,11 +107,9 @@ export function CbtSection({
     <section className={PAGE}>
       {view === "new" ? (
       <form onSubmit={cbtForm.handleSubmit(onSubmit)} className={STAGE_SPLIT}>
-        <StageProgress steps={steps} current={stage} />
+        <StageProgress steps={steps} />
         <StageRail
           steps={steps}
-          current={stage}
-          onJump={setStage}
           heading={
             <div className="grid gap-5 content-start">
               <EntryViewTabs view={view} onChange={onViewChange} className="inline-flex max-mobile:hidden" />

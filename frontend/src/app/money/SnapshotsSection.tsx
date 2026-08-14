@@ -3,7 +3,7 @@ import { type UseFormReturn } from "react-hook-form";
 import { Button } from "../../components/ui/Button";
 import { FieldLine } from "../../components/ui/FieldLine";
 import { EmptyState, PAGE, PAGE_TITLE } from "../screen-helpers";
-import { FLAT_ACTIONS, FLAT_FORM, FLAT_NARROW, FLAT_ROW, StageField } from "../staged";
+import { FLAT_ACTIONS, FLAT_FORM, FLAT_ROW, FLAT_SHELL, StageField } from "../staged";
 import { SectionHead } from "../shared";
 import { FIELD_LINE_INPUT } from "../../components/ui/FieldLine";
 import {
@@ -49,12 +49,12 @@ export function SnapshotsSection({
   return (
     <section className={PAGE}>
       <h1 className={PAGE_TITLE}>Snapshots</h1>
-      <form onSubmit={snapshotForm.handleSubmit(onSubmit)} className={FLAT_FORM}>
+      <form onSubmit={snapshotForm.handleSubmit(onSubmit)} className={FLAT_SHELL}>
+        <div className={FLAT_FORM}>
         <div className={FLAT_ROW}>
           <FieldLine
             label="Date"
             type="date"
-            className={FLAT_NARROW}
             aria-label="Date"
             {...snapshotForm.register("snapshotDate")}
             onClick={(e) => {
@@ -72,10 +72,12 @@ export function SnapshotsSection({
               type="number"
               step="0.01"
               placeholder="0"
-              className={`${FIELD_LINE_INPUT} ${FLAT_NARROW}`}
+              className={FIELD_LINE_INPUT}
               {...snapshotForm.register("liquid")}
             />
           </StageField>
+        </div>
+
         </div>
 
         <div className={FLAT_ACTIONS}>

@@ -158,34 +158,43 @@ export function StageStepper({
  * the tab order the reading order — the old two-column split sent Tab
  * down the left column and then back up to the right.
  */
+/*
+ * The form is the card plus the action under it: the button that ends
+ * the form is not one of its fields, so it sits outside the surface the
+ * fields share.
+ */
+export const FLAT_SHELL = "grid gap-5 min-w-0";
 export const FLAT_FORM = "grid gap-5 content-start p-5 rounded-md bg-card-soft min-w-0";
+/*
+ * Two equal cells, and every field fills the one it is in. Capping some
+ * fields and not others left one row with a short left and a long right
+ * and the next row the other way round, which reads as an accident
+ * rather than a decision — and the cell is already only half the card.
+ */
 export const FLAT_ROW = "grid gap-3 min-w-0 @2xl:grid-cols-2";
-/** Amounts and dates read at their own width; stretching them to 600px was the cost of the old split. */
-export const FLAT_NARROW = "max-w-[220px]";
 export const FLAT_ACTIONS = "flex justify-end gap-3";
 
-const RAIL_STEP = "flex items-center gap-2.5 py-2 px-2.5 rounded-sm text-control font-semibold text-left bg-transparent border-0 shadow-none cursor-pointer";
+const RAIL_STEP = "flex items-center gap-2.5 py-2 px-2.5 text-control font-semibold";
 const RAIL_DOT = "grid place-items-center w-[22px] h-[22px] flex-none rounded-full text-micro font-extrabold";
 
 export type RailStep = { title: string; done: boolean };
 
 /*
- * Desktop: the path on the left, plus the date and Save. Save lives here
- * so that saving after the first stage reads as the normal thing to do
- * rather than as an escape hatch — most of these entries are one stage
- * deep. Mobile hides the rail: its sticky head carries the same dots.
+ * The path, and where you have got to. Read-only: the steps used to be
+ * buttons, but clicking one only moved a highlight — the stages are all
+ * on screen already, so there was nowhere for a click to take you. A
+ * control that only changes its own appearance is a control that lies
+ * about being one.
+ *
+ * Desktop only. Below `wide` there is one column, so this becomes a
+ * plain block carrying the date, and the dots move to the sticky head.
  */
 export function StageRail({
   steps,
-  current,
-  onJump,
   heading,
   children,
 }: {
   steps: RailStep[];
-  current: number;
-  /** -1 until the reader picks one: highlighting step 1 on arrival claims a position nobody took. */
-  onJump: (index: number) => void;
   /*
    * The view tabs and the page title. They belong to this column rather
    * than to the page above it: everything that says where you are should
@@ -193,43 +202,26 @@ export function StageRail({
    * scrolls away takes the answer to "which screen is this" with it.
    */
   heading?: ReactNode;
-  /** Date and the save button. */
+  /** The date field. */
   children: ReactNode;
 }) {
   return (
     <nav className="grid gap-page content-start min-w-0 wide:sticky wide:top-5 wide:max-h-[calc(100dvh-80px)] wide:overflow-y-auto" aria-label="Stages">
       {heading}
-      {/* Named steps need the column beside the stages. Below `wide` there
-          is only one column, so the nav becomes a plain block above the
-          form and keeps only what it must carry: the date and Save. The
-          stage dots live in the mobile sticky head instead. */}
-      <div className="grid gap-1 max-wide:hidden">
-        {steps.map((step, index) => {
-          const isCurrent = index === current;
-          const tone = isCurrent
-            ? "text-accent bg-[color-mix(in_srgb,var(--accent)_10%,transparent)]"
-            : step.done
-              ? "text-text"
-              : "text-muted";
-          const dotTone = isCurrent
-            ? "bg-accent text-accent-fg"
-            : step.done
-              ? "bg-success text-success-fg"
-              : "bg-[var(--control)] text-muted";
-          return (
-            <button
-              key={step.title}
-              type="button"
-              className={`${RAIL_STEP} ${tone}`}
-              aria-current={isCurrent ? "step" : undefined}
-              onClick={() => onJump(index)}
+      <ol className="grid gap-1 m-0 p-0 list-none max-wide:hidden">
+        {steps.map((step, index) => (
+          <li key={step.title} className={`${RAIL_STEP} ${step.done ? "text-text" : "text-muted"}`}>
+            <span
+              className={`${RAIL_DOT} ${step.done ? "bg-success text-success-fg" : "bg-[var(--control)] text-muted"}`}
+              aria-hidden="true"
             >
-              <span className={`${RAIL_DOT} ${dotTone}`} aria-hidden="true">{step.done ? "✓" : index + 1}</span>
-              <span>{step.title}</span>
-            </button>
-          );
-        })}
-      </div>
+              {step.done ? "✓" : index + 1}
+            </span>
+            <span>{step.title}</span>
+            {step.done ? <span className="sr-only">— filled in</span> : null}
+          </li>
+        ))}
+      </ol>
       <div className="grid gap-2 wide:pt-3 wide:border-t wide:border-border">{children}</div>
     </nav>
   );
@@ -242,28 +234,22 @@ export const STAGE_SPLIT = "grid gap-page items-start min-w-0 wide:grid-cols-[22
  * step names, but "how many stages, which one am I on" is exactly what
  * you lose when the rail is hidden.
  */
-export function StageProgress({ steps, current }: { steps: RailStep[]; current: number }) {
+export function StageProgress({ steps }: { steps: RailStep[] }) {
   const slot = useContext(StageHeadSlot);
   if (!slot) {
     return null;
   }
 
-  return createPortal(<StageDots steps={steps} current={current} />, slot);
+  return createPortal(<StageDots steps={steps} />, slot);
 }
 
-export function StageDots({ steps, current }: { steps: RailStep[]; current: number }) {
+export function StageDots({ steps }: { steps: RailStep[] }) {
   return (
     <div className="flex items-center gap-1.5" aria-hidden="true">
       {steps.map((step, index) => (
         <span
           key={step.title}
-          className={`${RAIL_DOT} ${
-            index === current
-              ? "bg-accent text-accent-fg"
-              : step.done
-                ? "bg-success text-success-fg"
-                : "bg-[color-mix(in_srgb,white_6%,var(--card))] text-muted"
-          }`}
+          className={`${RAIL_DOT} ${step.done ? "bg-success text-success-fg" : "bg-[var(--control)] text-muted"}`}
         >
           {step.done ? "✓" : index + 1}
         </span>

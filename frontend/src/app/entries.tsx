@@ -104,8 +104,10 @@ export function PastEntries({
   emptyState: ReactNode;
   children: ReactNode;
 }) {
+  // The gap is the container's: EntriesHeading carries no margin of its
+  // own, so without this the heading sits on top of the first row.
   return (
-    <div className="min-w-0">
+    <div className="grid gap-5 content-start min-w-0">
       {isLoading && <p className="text-muted text-control">{loadingText}</p>}
       {title ? <EntriesHeading>{title}</EntriesHeading> : null}
       {isEmpty ? emptyState : children}

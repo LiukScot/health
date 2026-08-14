@@ -5,7 +5,7 @@ import { FieldLine, FIELD_LINE_LABEL } from "../../components/ui/FieldLine";
 import { Select } from "../../components/ui/select";
 import { AnimatedEditingLabel } from "../shared";
 import { EmptyState, PAGE, PAGE_TITLE } from "../screen-helpers";
-import { FLAT_ACTIONS, FLAT_FORM, FLAT_NARROW, FLAT_ROW } from "../staged";
+import { FLAT_ACTIONS, FLAT_FORM, FLAT_ROW, FLAT_SHELL } from "../staged";
 import {
   DELETE_CONFIRM,
   DETAIL_ACTIONS,
@@ -66,12 +66,12 @@ export function TransactionsSection({
   return (
     <section className={PAGE}>
       <h1 className={PAGE_TITLE}>Transactions</h1>
-      <form onSubmit={txForm.handleSubmit(onSubmit)} className={FLAT_FORM}>
+      <form onSubmit={txForm.handleSubmit(onSubmit)} className={FLAT_SHELL}>
+        <div className={FLAT_FORM}>
         <div className={FLAT_ROW}>
           <FieldLine
             label="Date"
             type="date"
-            className={FLAT_NARROW}
             aria-label="Date"
             {...txForm.register("txDate")}
             onClick={(e) => {
@@ -124,7 +124,6 @@ export function TransactionsSection({
               type="number"
               step="0.01"
               placeholder="0"
-              className={FLAT_NARROW}
               aria-label="Buy value"
               {...txForm.register("buyValue")}
             />
@@ -134,7 +133,6 @@ export function TransactionsSection({
               type="number"
               step="0.01"
               placeholder="0"
-              className={FLAT_NARROW}
               aria-label="PnL"
               {...txForm.register("pnl")}
             />
@@ -150,6 +148,8 @@ export function TransactionsSection({
           aria-label="Note"
           {...txForm.register("note")}
         />
+
+        </div>
 
         <div className={FLAT_ACTIONS}>
           <Button type="submit" variant={txMutationState.isSuccess ? "success" : "primary"}>

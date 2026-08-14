@@ -78,9 +78,6 @@ export function PainSection({
   onViewChange: (next: EntryView) => void;
 }) {
   const [painTab, setPainTab] = useState<PainFieldKey>("area");
-  // Which stage the rail highlights. Clicking a step scrolls to it; the
-  // stages all stay rendered, so this only drives the highlight.
-  const [stage, setStage] = useState(-1);
 
   const [painLevel, fatigueLevel, coffeeCount] = painForm.watch(["painLevel", "fatigueLevel", "coffeeCount"]);
 
@@ -128,11 +125,9 @@ export function PainSection({
           <input type="hidden" {...painForm.register("coffeeCount", { valueAsNumber: true })} />
         </div>
 
-        <StageProgress steps={steps} current={stage} />
+        <StageProgress steps={steps} />
         <StageRail
           steps={steps}
-          current={stage}
-          onJump={setStage}
           heading={
             <div className="grid gap-5 content-start">
               <EntryViewTabs view={view} onChange={onViewChange} className="inline-flex max-mobile:hidden" />

@@ -5,7 +5,7 @@ import { FieldLine, FIELD_LINE_LABEL } from "../../components/ui/FieldLine";
 import { Select } from "../../components/ui/select";
 import { AnimatedEditingLabel } from "../shared";
 import { EmptyState, PAGE, PAGE_TITLE } from "../screen-helpers";
-import { FLAT_ACTIONS, FLAT_FORM, FLAT_NARROW, FLAT_ROW } from "../staged";
+import { FLAT_ACTIONS, FLAT_FORM, FLAT_ROW, FLAT_SHELL } from "../staged";
 import {
   DELETE_CONFIRM,
   DETAIL_ACTIONS,
@@ -81,7 +81,8 @@ export function MovementsSection({
   return (
     <section className={PAGE}>
       <h1 className={PAGE_TITLE}>Movements</h1>
-      <form onSubmit={movementForm.handleSubmit(onSubmit)} className={FLAT_FORM}>
+      <form onSubmit={movementForm.handleSubmit(onSubmit)} className={FLAT_SHELL}>
+        <div className={FLAT_FORM}>
         <div className={FLAT_ROW}>
           <FieldLine
             label="Name"
@@ -95,7 +96,6 @@ export function MovementsSection({
             type="number"
             step="0.01"
             placeholder="0"
-            className={FLAT_NARROW}
             aria-label="Amount"
             {...movementForm.register("amount")}
           />
@@ -146,6 +146,8 @@ export function MovementsSection({
           {...movementForm.register("note")}
         />
 
+        </div>
+
         <div className={FLAT_ACTIONS}>
           <Button type="submit" variant={movementMutationState.isSuccess ? "success" : "primary"}>
             {movementMutationState.isSuccess ? "✓ Saved" : editingMovement ? "Update movement" : "Save movement"}
@@ -166,7 +168,7 @@ export function MovementsSection({
         }
       >
         {rows.length > 0 ? (
-          <div className="flex flex-wrap items-center justify-between gap-x-5 gap-y-1 mb-3">
+          <div className="flex flex-wrap items-center justify-between gap-x-5 gap-y-1">
             <nav className="flex flex-wrap gap-x-5 gap-y-1" role="tablist" aria-label="Show amounts">
               {PERIOD_TABS.map((tab) => (
                 <button
