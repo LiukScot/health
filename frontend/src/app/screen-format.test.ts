@@ -33,6 +33,15 @@ describe("groupByMonth", () => {
     expect(groups).toHaveLength(1);
     expect(groups[0].label).toBe("");
   });
+
+  test("does not merge two overflow dates that share a prefix", () => {
+    // Both parse without NaN and both roll into March, so a plain
+    // slice(0, 7) would file them under one heading labelled February.
+    const groups = groupByMonth([{ d: "2026-02-31" }, { d: "2026-02-30" }], (r) => r.d);
+
+    expect(groups).toHaveLength(2);
+    expect(groups.map((g) => g.label)).toEqual(["2026-02-31", "2026-02-30"]);
+  });
 });
 
 describe("formatMonthLabel", () => {

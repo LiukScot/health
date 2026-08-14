@@ -11,7 +11,7 @@ import { SectionErrorBoundary } from "./app/ErrorBoundary";
 import { EntryViewTabs, type EntryView } from "./app/entries";
 import { StageHeadSlot } from "./app/stage-head-slot";
 import {
-  entryViewLabels, formatDocumentTitle, navItemsByRealm, navLabels, readStoredRealm, realmOf,
+  entryViewLabels, formatDocumentTitle, hasEntryViews, navItemsByRealm, navLabels, readStoredRealm, realmOf,
   REALM_STORAGE_KEY, type NavItem,
 } from "./app/core";
 
@@ -30,13 +30,6 @@ const TransactionsSection = lazy(() => import("./app/money/TransactionsSection")
 const MovementsSection = lazy(() => import("./app/money/MovementsSection").then((m) => ({ default: m.MovementsSection })));
 const SnapshotsSection = lazy(() => import("./app/money/SnapshotsSection").then((m) => ({ default: m.SnapshotsSection })));
 const MoneyDashboardSection = lazy(() => import("./app/money/MoneyDashboardSection").then((m) => ({ default: m.MoneyDashboardSection })));
-
-// Pages that split into a form and a log. Listed rather than derived: the
-// set is not a property of the nav item, it is a property of the screen.
-const ENTRY_VIEW_PAGES = new Set<NavItem>([
-  "pain", "diary", "cbt", "dbt",
-  "money-transactions", "money-movements", "money-snapshots",
-]);
 
 function App() {
   const auth = useAuth();
@@ -120,7 +113,7 @@ function App() {
   // screen doesn't start mid-scroll.
   useEffect(() => {
     mainRef.current?.scrollTo(0, 0);
-  }, [nav]);
+  }, [nav, entryView]);
 
   useEffect(() => {
     document.title = loggedIn
@@ -367,8 +360,8 @@ function App() {
           {/* Second row, inside the sticky strip: switching view is
               navigation, and navigation must not scroll away. */}
           <div className="flex items-center gap-3">
-            {ENTRY_VIEW_PAGES.has(nav) ? (
-              <EntryViewTabs view={entryView} onChange={setEntryView} labels={entryViewLabels[nav]!} className="flex" />
+            {hasEntryViews(nav) ? (
+              <EntryViewTabs view={entryView} onChange={setEntryView} labels={entryViewLabels[nav]} className="flex" />
             ) : null}
             <div ref={setHeadSlot} className="ml-auto empty:hidden" />
           </div>

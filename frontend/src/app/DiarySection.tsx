@@ -104,13 +104,14 @@ export function DiarySection({
           steps={steps}
           heading={
             <div className="grid gap-page content-start">
-              <EntryViewTabs view={view} onChange={onViewChange} labels={entryViewLabels["diary"]!} className="inline-flex max-mobile:hidden" />
+              <EntryViewTabs view={view} onChange={onViewChange} labels={entryViewLabels["diary"]} className="inline-flex max-mobile:hidden" />
               <h1 className={PAGE_TITLE}>Diary</h1>
             </div>
           }
         >
           <FieldLine
             label="Date & time"
+            id="diary-datetime"
             type="datetime-local"
             className="w-full max-w-full cursor-pointer tabular-nums [&::-webkit-calendar-picker-indicator]:cursor-pointer [&::-webkit-calendar-picker-indicator]:invert [&::-webkit-calendar-picker-indicator]:opacity-60 hover:[&::-webkit-calendar-picker-indicator]:opacity-100"
             {...diaryForm.register("dateTime")}
@@ -215,7 +216,7 @@ export function DiarySection({
       ) : (
       <div className="grid gap-page content-start min-w-0">
         <div className="grid gap-page content-start">
-          <EntryViewTabs view={view} onChange={onViewChange} labels={entryViewLabels["diary"]!} className="inline-flex max-mobile:hidden" />
+          <EntryViewTabs view={view} onChange={onViewChange} labels={entryViewLabels["diary"]} className="inline-flex max-mobile:hidden" />
           <h1 className={PAGE_TITLE}>Diary</h1>
         </div>
       <PastEntries

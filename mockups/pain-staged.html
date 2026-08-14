@@ -267,13 +267,13 @@
 </div>
 
 <div class="page">
-    <nav class="page-tabs">
+    <nav class="page-tabs" aria-label="Entry or history">
     <a class="current" href="#">New entry</a>
     <a href="#">History</a>
   </nav>
   <header class="m-head">
     <div class="m-titlerow">
-      <button class="m-burger" aria-label="Open navigation" aria-haspopup="dialog"><svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M2 4.5h14M2 9h14M2 13.5h14"/></svg></button>
+      <button type="button" class="m-burger" aria-label="Open navigation" aria-haspopup="dialog"><svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M2 4.5h14M2 9h14M2 13.5h14"/></svg></button>
       <h1 class="m-title">Pain</h1>
       <div class="m-progress">
         <span class="dot done">✓</span>
@@ -286,7 +286,7 @@
         <a class="current" href="#">New entry</a>
         <a href="#">History</a>
       </nav>
-      <button class="chip m-date">Apr 17, 14:30</button>
+      <button type="button" class="chip m-date">Apr 17, 14:30</button>
     </div>
   </header>
 
@@ -298,14 +298,14 @@
       <a class="current" href="#"><span class="dot">2</span><span class="label-text">Where &amp; what</span></a>
       <a href="#"><span class="dot">3</span><span class="label-text">Details</span></a>
       <div class="meta">
-        <span class="field-label">Date &amp; time</span>
-        <input type="datetime-local" value="2026-04-17T14:30" style="background:var(--card-strong)">
+        <span class="field-label" id="pain-datetime-label">Date &amp; time</span>
+        <input type="datetime-local" id="pain-datetime" name="datetime" value="2026-04-17T14:30" style="background:var(--card-strong)">
         <div class="quick">
-          <button class="chip active">Now</button>
-          <button class="chip">1h ago</button>
-          <button class="chip">Morning</button>
+          <button type="button" class="chip active">Now</button>
+          <button type="button" class="chip">1h ago</button>
+          <button type="button" class="chip">Morning</button>
         </div>
-        <button class="btn btn-primary" style="margin-top:8px">Save entry</button>
+        <button type="button" class="btn btn-primary" style="margin-top:8px">Save entry</button>
       </div>
     </nav>
 
@@ -319,15 +319,15 @@
           <span class="field-label">Pain level</span>
           <div class="scale">
             <div class="row">
-              <button class="on low">1</button>
-              <button class="on low">2</button>
-              <button class="on low">3</button>
-              <button class="on mid">4</button>
-              <button class="on mid">5</button>
-              <button class="on mid">6</button>
-              <button class="on high">7</button>
-              <button>8</button>
-              <button>9</button>
+              <button type="button" class="on low">1</button>
+              <button type="button" class="on low">2</button>
+              <button type="button" class="on low">3</button>
+              <button type="button" class="on mid">4</button>
+              <button type="button" class="on mid">5</button>
+              <button type="button" class="on mid">6</button>
+              <button type="button" class="on high">7</button>
+              <button type="button">8</button>
+              <button type="button">9</button>
             </div>
             <div class="labels"><span>mild</span><span>moderate</span><span>severe</span></div>
           </div>
@@ -336,15 +336,15 @@
           <span class="field-label">Fatigue</span>
           <div class="scale">
             <div class="row">
-              <button class="on low">1</button>
-              <button class="on low">2</button>
-              <button class="on low">3</button>
-              <button class="on mid">4</button>
-              <button class="on mid">5</button>
-              <button>6</button>
-              <button>7</button>
-              <button>8</button>
-              <button>9</button>
+              <button type="button" class="on low">1</button>
+              <button type="button" class="on low">2</button>
+              <button type="button" class="on low">3</button>
+              <button type="button" class="on mid">4</button>
+              <button type="button" class="on mid">5</button>
+              <button type="button">6</button>
+              <button type="button">7</button>
+              <button type="button">8</button>
+              <button type="button">9</button>
             </div>
             <div class="labels"><span>fresh</span><span>tired</span><span>drained</span></div>
           </div>
@@ -352,9 +352,9 @@
         <div class="field">
           <span class="field-label">Coffee today</span>
           <div class="stepper">
-            <button>−</button>
+            <button type="button">−</button>
             <span class="value">2</span>
-            <button>+</button>
+            <button type="button">+</button>
           </div>
         </div>
       </section>
@@ -368,39 +368,39 @@
         <div class="field">
           <span class="field-label">Body area</span>
           <div class="chips">
-            <button class="chip">tmj</button>
-            <button class="chip">legs</button>
-            <button class="chip">shoulders</button>
-            <button class="chip">chest</button>
-            <button class="chip active">neck</button>
-            <button class="chip active">head</button>
-            <button class="chip">back</button>
-            <button class="chip">abdomen</button>
-            <button class="add-new">+ add area</button>
+            <button type="button" class="chip">tmj</button>
+            <button type="button" class="chip">legs</button>
+            <button type="button" class="chip">shoulders</button>
+            <button type="button" class="chip">chest</button>
+            <button type="button" class="chip active">neck</button>
+            <button type="button" class="chip active">head</button>
+            <button type="button" class="chip">back</button>
+            <button type="button" class="chip">abdomen</button>
+            <button type="button" class="add-new">+ add area</button>
           </div>
         </div>
         <div class="field">
           <span class="field-label">Symptoms</span>
           <div class="chips">
-            <button class="chip">running nose</button>
-            <button class="chip">coughing</button>
-            <button class="chip active">nausea</button>
-            <button class="chip">short breath</button>
-            <button class="chip">stiffness</button>
-            <button class="chip">palpitation</button>
-            <button class="chip">fever</button>
-            <button class="add-new">+ add symptom</button>
+            <button type="button" class="chip">running nose</button>
+            <button type="button" class="chip">coughing</button>
+            <button type="button" class="chip active">nausea</button>
+            <button type="button" class="chip">short breath</button>
+            <button type="button" class="chip">stiffness</button>
+            <button type="button" class="chip">palpitation</button>
+            <button type="button" class="chip">fever</button>
+            <button type="button" class="add-new">+ add symptom</button>
           </div>
         </div>
         <div class="field">
           <span class="field-label">What were you doing?</span>
           <div class="chips">
-            <button class="chip">walking</button>
-            <button class="chip">sitting</button>
-            <button class="chip">exercise</button>
-            <button class="chip">driving</button>
-            <button class="chip">sleeping</button>
-            <button class="add-new">+ add activity</button>
+            <button type="button" class="chip">walking</button>
+            <button type="button" class="chip">sitting</button>
+            <button type="button" class="chip">exercise</button>
+            <button type="button" class="chip">driving</button>
+            <button type="button" class="chip">sleeping</button>
+            <button type="button" class="add-new">+ add activity</button>
           </div>
         </div>
       </section>
@@ -414,19 +414,19 @@
         <div class="field">
           <span class="field-label">Medicines taken</span>
           <div class="chips">
-            <button class="chip active">200mg celebrex</button>
-            <button class="chip active">4mg sirdalud</button>
-            <button class="add-new">+ add medicine</button>
+            <button type="button" class="chip active">200mg celebrex</button>
+            <button type="button" class="chip active">4mg sirdalud</button>
+            <button type="button" class="add-new">+ add medicine</button>
           </div>
         </div>
         <div class="field">
           <span class="field-label">Habits</span>
           <div class="chips">
-            <button class="chip">skipped meal</button>
-            <button class="chip active">slept badly</button>
-            <button class="chip">screen late</button>
-            <button class="chip">alcohol</button>
-            <button class="add-new">+ add habit</button>
+            <button type="button" class="chip">skipped meal</button>
+            <button type="button" class="chip active">slept badly</button>
+            <button type="button" class="chip">screen late</button>
+            <button type="button" class="chip">alcohol</button>
+            <button type="button" class="add-new">+ add habit</button>
           </div>
         </div>
         <div class="field">
@@ -437,7 +437,7 @@
       </section>
 
       <div class="actions">
-        <button class="btn btn-primary">Save entry</button>
+        <button type="button" class="btn btn-primary">Save entry</button>
       </div>
     </div>
   </div>

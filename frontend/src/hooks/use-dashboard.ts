@@ -361,7 +361,8 @@ export function useDashboard(enabled: boolean) {
     return [
       { label: "Journal entries", emoji: "\u{1F4D2}", value: cur.diaryCount, formattedValue: String(cur.diaryCount), previous: prev.diaryCount },
       { label: "Pain entries", emoji: "\u{1F4D3}", value: cur.painCount, formattedValue: String(cur.painCount), previous: prev.painCount },
-      { label: "Mood avg", emoji: "\u{1F642}", value: cur.moodAvg, formattedValue: formatNumber(cur.moodAvg), previous: prev.moodAvg },
+      // The reading the page is about; the counts say how much data backs it.
+      { label: "Mood avg", emoji: "\u{1F642}", value: cur.moodAvg, formattedValue: formatNumber(cur.moodAvg), previous: prev.moodAvg, primary: true },
       { label: "Depression avg", emoji: "\u{1F614}", value: cur.depressionAvg, formattedValue: formatNumber(cur.depressionAvg), previous: prev.depressionAvg, invertDelta: true },
       { label: "Anxiety avg", emoji: "\u{1F628}", value: cur.anxietyAvg, formattedValue: formatNumber(cur.anxietyAvg), previous: prev.anxietyAvg, invertDelta: true },
       { label: "Pain avg", emoji: "\u{1F915}", value: cur.painAvg, formattedValue: formatNumber(cur.painAvg), previous: prev.painAvg, invertDelta: true },

@@ -13,8 +13,9 @@ import {
 } from "./core";
 import { EmptyState, PAGE, PAGE_TITLE } from "./screen-helpers";
 import {
-  DASH_CARD_SURFACE, DASH_SECTION, Kpi, KPI_TIER, SectionRow, type KpiTone,
+  DASH_CARD_SURFACE, DASH_SECTION, Kpi, KPI_TIER, SectionRow,
 } from "./dashboard-cards";
+import { toneOfDelta } from "./dashboard-tone";
 import { FIELD_LINE_LABEL } from "../components/ui/FieldLine";
 import { DateInput } from "../components/ui/DateInput";
 
@@ -25,14 +26,6 @@ const QUICK_RANGE_BASE =
 const QUICK_RANGE_IDLE =
   "text-muted bg-[color-mix(in_srgb,var(--text)_5%,transparent)] hover:text-text hover:bg-[color-mix(in_srgb,var(--text)_10%,transparent)] [[data-theme=oled]_&]:bg-card-soft [[data-theme=oled]_&]:hover:bg-[color-mix(in_srgb,white_8%,var(--card-soft))]";
 const QUICK_RANGE_ACTIVE = "text-accent bg-[color-mix(in_srgb,var(--accent)_15%,transparent)]";
-// getDeltaStyle's class name is the app's existing "is this good or bad"
-// answer; the dashboard cards only need it as a tone.
-const toneOfDelta = (className: string): KpiTone =>
-  className.includes("up") || className.includes("good") || className.includes("success")
-    ? "positive"
-    : className.includes("down") || className.includes("bad") || className.includes("danger")
-      ? "negative"
-      : "flat";
 
 const CONFIDENCE_TONE: Record<string, string> = {
   strong: "text-success bg-[color-mix(in_srgb,var(--success)_14%,transparent)]",
@@ -66,7 +59,7 @@ export function DashboardSection({
   hasEntriesOverall: boolean;
   onDateChange: (field: "from" | "to", value: string) => void;
   onQuickRange: (range: DashboardQuickRange) => void;
-  dashboardCards: Array<{ label: string; emoji: string; value: number | null; formattedValue: string; previous: number | null; invertDelta?: boolean }>;
+  dashboardCards: Array<{ label: string; emoji: string; value: number | null; formattedValue: string; previous: number | null; invertDelta?: boolean; primary?: boolean }>;
   dashboardInsights: DashboardInsight[];
   dashboardConnections: DashboardConnection[];
   wellbeingSeries: WellbeingSeries[];
@@ -75,7 +68,7 @@ export function DashboardSection({
   wellbeingChart: WellbeingChartView;
   anniversaryCards: MemorableDay[];
 }) {
-  const heroCard = dashboardCards.find((card) => /mood/i.test(card.label)) ?? dashboardCards[0];
+  const heroCard = dashboardCards.find((card) => card.primary) ?? dashboardCards[0];
   const tierCards = dashboardCards.filter((card) => card !== heroCard);
   const kpiProps = (card: (typeof dashboardCards)[number]) => {
     const deltaPct = calcDeltaPercent(card.value, card.previous);

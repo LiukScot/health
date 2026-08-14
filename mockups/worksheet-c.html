@@ -85,6 +85,11 @@
     .page { padding: var(--gap-block); gap: var(--gap-block); }
     .pair .q, .pair.answered .a { max-width: 100%; }
   }
+
+  /* NOTE for implementation: the .55 opacity below is a mockup shortcut.
+     In the app, de-emphasised prompts must use a distinct muted token —
+     opacity multiplies the text and the surface together and drops the
+     contrast ratio below 4.5:1. */
 </style>
 </head>
 <body>
@@ -116,14 +121,14 @@
       <span class="who">1 · Situation</span>
       <p class="q">What's the <b>situation</b>?</p>
       <p class="a">Standup ran long, I got cut off mid-sentence.</p>
-      <button class="edit">edit answer</button>
+      <button type="button" class="edit">edit answer</button>
     </div>
 
     <div class="pair answered">
       <span class="who">2 · Thoughts</span>
       <p class="q">What <b>thoughts</b> are running through your mind? How much do you believe each one?</p>
       <p class="a">Everyone thinks I ramble — 80%. They'd rather I didn't speak — 45%.</p>
-      <button class="edit">edit answer</button>
+      <button type="button" class="edit">edit answer</button>
     </div>
 
     <div class="pair">
@@ -148,8 +153,8 @@
   </div>
 
   <div class="actions prose" style="width:100%">
-    <button class="btn">Cancel edit</button>
-    <button class="btn btn-primary">Save entry</button>
+    <button type="button" class="btn">Cancel edit</button>
+    <button type="button" class="btn btn-primary">Save entry</button>
   </div>
 
   <div>

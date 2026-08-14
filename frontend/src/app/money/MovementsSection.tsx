@@ -87,7 +87,7 @@ export function MovementsSection({
 
   return (
     <section className={PAGE}>
-      <EntryViewTabs view={view} onChange={onViewChange} labels={entryViewLabels["money-movements"]!} className="inline-flex max-mobile:hidden" />
+      <EntryViewTabs view={view} onChange={onViewChange} labels={entryViewLabels["money-movements"]} className="inline-flex max-mobile:hidden" />
       <h1 className={PAGE_TITLE}>Movements</h1>
       {view === "new" ? (
       <form onSubmit={movementForm.handleSubmit(onSubmit)} className={FLAT_SHELL}>

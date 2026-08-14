@@ -9,11 +9,20 @@ export function formatEntrySummaryDate(entryDate: string, entryTime: string): st
 
 const MONTH_LABEL = new Intl.DateTimeFormat(undefined, { month: "long", year: "numeric" });
 
-/** "August 2026" — the heading the entry log groups rows under. */
+/*
+ * "August 2026" — the heading the entry log groups rows under.
+ *
+ * The components are checked against the date they produce, because the
+ * Date constructor rolls overflow forward: 2026-02-31 parses fine and
+ * comes back as March, so a NaN check alone would relabel it.
+ */
 export function formatMonthLabel(entryDate: string): string {
-  const d = new Date(`${entryDate}T00:00:00`);
-  if (Number.isNaN(d.getTime())) return entryDate;
-  return MONTH_LABEL.format(d);
+  const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(entryDate);
+  if (!match) return entryDate;
+  const [, year, month, day] = match.map(Number);
+  const d = new Date(year, month - 1, day);
+  const roundTrips = d.getFullYear() === year && d.getMonth() === month - 1 && d.getDate() === day;
+  return roundTrips ? MONTH_LABEL.format(d) : entryDate;
 }
 
 /**
@@ -24,12 +33,16 @@ export function formatMonthLabel(entryDate: string): string {
  */
 export function groupByMonth<T>(rows: T[], dateOf: (row: T) => string): { key: string; label: string; rows: T[] }[] {
   const groups: { key: string; label: string; rows: T[] }[] = [];
-  for (const row of rows) {
+  for (const [index, row] of rows.entries()) {
     const date = dateOf(row);
-    const key = date.slice(0, 7);
+    const label = formatMonthLabel(date);
+    // An unparseable date has no month to share, so it gets a run of its
+    // own rather than joining whatever else starts with the same seven
+    // characters.
+    const key = label === date ? `invalid:${index}` : date.slice(0, 7);
     const last = groups[groups.length - 1];
     if (last?.key === key) last.rows.push(row);
-    else groups.push({ key, label: formatMonthLabel(date), rows: [row] });
+    else groups.push({ key, label, rows: [row] });
   }
   return groups;
 }

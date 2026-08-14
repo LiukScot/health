@@ -271,7 +271,7 @@ export const REALM_STORAGE_KEY = "world-realm";
  * cannot drift apart. Movements says "Recurring" because its list is
  * active state, not a past log.
  */
-export const entryViewLabels: Partial<Record<NavItem, { newEntry: string; history: string }>> = {
+export const entryViewLabels = {
   pain: { newEntry: "New entry", history: "History" },
   diary: { newEntry: "New entry", history: "History" },
   cbt: { newEntry: "New entry", history: "History" },
@@ -279,7 +279,14 @@ export const entryViewLabels: Partial<Record<NavItem, { newEntry: string; histor
   "money-transactions": { newEntry: "New transaction", history: "History" },
   "money-movements": { newEntry: "New movement", history: "Recurring" },
   "money-snapshots": { newEntry: "New snapshot", history: "History" },
-};
+} satisfies Partial<Record<NavItem, { newEntry: string; history: string }>>;
+
+/** The screens that split into a form and a log — exactly the keys above. */
+export type EntryViewPage = keyof typeof entryViewLabels;
+
+export function hasEntryViews(nav: NavItem): nav is EntryViewPage {
+  return nav in entryViewLabels;
+}
 
 export const realmLabels: Record<Realm, string> = { health: "Health", money: "Money", settings: "Settings" };
 
@@ -384,6 +391,8 @@ export type DashboardCard = {
   formattedValue: string;
   previous: number | null;
   invertDelta?: boolean;
+  /** The one the dashboard leads with. */
+  primary?: boolean;
 };
 
 export type DashboardInsight = {

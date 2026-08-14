@@ -204,7 +204,7 @@
 <div class="page">
   <header class="m-head">
     <div class="m-titlerow">
-      <button class="m-burger" aria-label="Open navigation" aria-haspopup="dialog"><svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M2 4.5h14M2 9h14M2 13.5h14"/></svg></button>
+      <button type="button" class="m-burger" aria-label="Open navigation" aria-haspopup="dialog"><svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M2 4.5h14M2 9h14M2 13.5h14"/></svg></button>
       <h1 class="m-title">Pain</h1>
       <span class="m-count">38 entries</span>
     </div>
@@ -214,7 +214,7 @@
     </nav>
   </header>
 
-  <nav class="page-tabs">
+  <nav class="page-tabs" aria-label="Entry or history">
     <a href="pain-staged.html">New entry</a>
     <a class="current" href="#">History</a>
   </nav>
@@ -223,10 +223,10 @@
 
   <div class="filters">
     <input type="search" name="q" id="q" placeholder="Search notes, areas, symptoms…" aria-label="Search entries">
-    <button class="chip active">All time</button>
-    <button class="chip">2026</button>
-    <button class="chip">2025</button>
-    <button class="chip">High pain only</button>
+    <button type="button" class="chip active">All time</button>
+    <button type="button" class="chip">2026</button>
+    <button type="button" class="chip">2025</button>
+    <button type="button" class="chip">High pain only</button>
     <span class="count">38 entries · showing 18</span>
   </div>
 
@@ -252,8 +252,8 @@
           <div class="e-foot">
             <span class="hint">Empty fields are hidden</span>
             <div class="btns">
-              <button class="btn-ghost">Edit</button>
-              <button class="btn-ghost danger">Delete</button>
+              <button type="button" class="btn-ghost">Edit</button>
+              <button type="button" class="btn-ghost danger">Delete</button>
             </div>
           </div>
         </div>
@@ -284,8 +284,8 @@
           <div class="e-foot">
             <span class="hint">Empty fields are hidden</span>
             <div class="btns">
-              <button class="btn-ghost">Edit</button>
-              <button class="btn-ghost danger">Delete</button>
+              <button type="button" class="btn-ghost">Edit</button>
+              <button type="button" class="btn-ghost danger">Delete</button>
             </div>
           </div>
         </div>
@@ -326,7 +326,7 @@
   </section>
 
   <div class="more">
-    <button class="btn">Show older</button>
+    <button type="button" class="btn">Show older</button>
     <span class="hint">18 of 38</span>
   </div>
 </div>

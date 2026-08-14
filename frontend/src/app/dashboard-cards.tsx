@@ -4,9 +4,9 @@ import type { ReactNode } from "react";
  * Dashboard anatomy, shared by the Health and Money dashboards.
  *
  * Two problems it answers. Every card carried the same weight, so no
- * number led and the page had no subject (audit H2, #16). And the two
+ * number led and the page had no subject. And the two
  * dashboards had grown different card grammars — one with emoji and
- * delta pills, one bare — so the realms read as two apps (C3).
+ * delta pills, one bare — so the realms read as two apps.
  *
  * Here one metric is the hero and the rest are a tier below it, and the
  * columns are declared per breakpoint rather than auto-filled: an orphan

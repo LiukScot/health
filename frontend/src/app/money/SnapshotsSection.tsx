@@ -55,7 +55,7 @@ export function SnapshotsSection({
 }) {
   return (
     <section className={PAGE}>
-      <EntryViewTabs view={view} onChange={onViewChange} labels={entryViewLabels["money-snapshots"]!} className="inline-flex max-mobile:hidden" />
+      <EntryViewTabs view={view} onChange={onViewChange} labels={entryViewLabels["money-snapshots"]} className="inline-flex max-mobile:hidden" />
       <h1 className={PAGE_TITLE}>Snapshots</h1>
       {view === "new" ? (
       <form onSubmit={snapshotForm.handleSubmit(onSubmit)} className={FLAT_SHELL}>
@@ -63,6 +63,7 @@ export function SnapshotsSection({
         <div className={FLAT_ROW}>
           <FieldLine
             label="Date"
+            id="snapshot-date"
             type="date"
             aria-label="Date"
             {...snapshotForm.register("snapshotDate")}
@@ -103,6 +104,7 @@ export function SnapshotsSection({
       {/* The risk chart used to render inside the entry list, above the
           rows, as if it were an entry. It is a reading of the whole log,
           so it gets its own titled section. */}
+      {snapshots.length > 0 ? (
       <section className="grid gap-3">
         <SectionHead title="Risk over time" variant="dashboard" aside={snapshots.length === 1 ? "1 snapshot" : `${snapshots.length} snapshots`} />
         <div className="grid gap-3 p-3 rounded-md bg-card-soft">
@@ -111,6 +113,7 @@ export function SnapshotsSection({
           </Suspense>
         </div>
       </section>
+      ) : null}
 
       <PastEntries
         title="History"

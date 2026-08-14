@@ -255,13 +255,13 @@
 </div>
 
 <div class="page">
-    <nav class="page-tabs">
+    <nav class="page-tabs" aria-label="Entry or history">
     <a class="current" href="#">New entry</a>
     <a href="#">History</a>
   </nav>
   <header class="m-head">
     <div class="m-titlerow">
-      <button class="m-burger" aria-label="Open navigation" aria-haspopup="dialog"><svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M2 4.5h14M2 9h14M2 13.5h14"/></svg></button>
+      <button type="button" class="m-burger" aria-label="Open navigation" aria-haspopup="dialog"><svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M2 4.5h14M2 9h14M2 13.5h14"/></svg></button>
       <h1 class="m-title">Diary</h1>
       <div class="m-progress">
         <span class="dot done">✓</span>
@@ -274,7 +274,7 @@
         <a class="current" href="#">New entry</a>
         <a href="#">History</a>
       </nav>
-      <button class="chip m-date">Apr 18, 20:25</button>
+      <button type="button" class="chip m-date">Apr 18, 20:25</button>
     </div>
   </header>
 
@@ -286,13 +286,13 @@
       <a class="current" href="#"><span class="dot">2</span><span class="label-text">Emotions</span></a>
       <a href="#"><span class="dot">3</span><span class="label-text">In your words</span></a>
       <div class="meta">
-        <span class="field-label">Date &amp; time</span>
-        <input type="datetime-local" value="2026-04-18T20:25" style="background:var(--card-strong)">
+        <span class="field-label" id="diary-datetime-label">Date &amp; time</span>
+        <input type="datetime-local" id="diary-datetime" name="datetime" value="2026-04-18T20:25" style="background:var(--card-strong)">
         <div class="quick">
-          <button class="chip active">Now</button>
-          <button class="chip">This morning</button>
+          <button type="button" class="chip active">Now</button>
+          <button type="button" class="chip">This morning</button>
         </div>
-        <button class="btn btn-primary" style="margin-top:8px">Save entry</button>
+        <button type="button" class="btn btn-primary" style="margin-top:8px">Save entry</button>
       </div>
     </nav>
 
@@ -306,15 +306,15 @@
           <span class="field-label">Mood</span>
           <div class="scale">
             <div class="row">
-              <button class="on high">1</button>
-              <button class="on high">2</button>
-              <button class="on high">3</button>
-              <button class="on mid">4</button>
-              <button class="on mid">5</button>
-              <button class="on low">6</button>
-              <button>7</button>
-              <button>8</button>
-              <button>9</button>
+              <button type="button" class="on high">1</button>
+              <button type="button" class="on high">2</button>
+              <button type="button" class="on high">3</button>
+              <button type="button" class="on mid">4</button>
+              <button type="button" class="on mid">5</button>
+              <button type="button" class="on low">6</button>
+              <button type="button">7</button>
+              <button type="button">8</button>
+              <button type="button">9</button>
             </div>
             <div class="labels"><span>heavy</span><span>okay</span><span>great</span></div>
           </div>
@@ -323,15 +323,15 @@
           <span class="field-label">Depression</span>
           <div class="scale">
             <div class="row">
-              <button class="on low">1</button>
-              <button class="on low">2</button>
-              <button class="on low">3</button>
-              <button class="on mid">4</button>
-              <button>5</button>
-              <button>6</button>
-              <button>7</button>
-              <button>8</button>
-              <button>9</button>
+              <button type="button" class="on low">1</button>
+              <button type="button" class="on low">2</button>
+              <button type="button" class="on low">3</button>
+              <button type="button" class="on mid">4</button>
+              <button type="button">5</button>
+              <button type="button">6</button>
+              <button type="button">7</button>
+              <button type="button">8</button>
+              <button type="button">9</button>
             </div>
             <div class="labels"><span>none</span><span>present</span><span>crushing</span></div>
           </div>
@@ -340,15 +340,15 @@
           <span class="field-label">Anxiety</span>
           <div class="scale">
             <div class="row">
-              <button class="on low">1</button>
-              <button class="on low">2</button>
-              <button class="on low">3</button>
-              <button class="on mid">4</button>
-              <button>5</button>
-              <button>6</button>
-              <button>7</button>
-              <button>8</button>
-              <button>9</button>
+              <button type="button" class="on low">1</button>
+              <button type="button" class="on low">2</button>
+              <button type="button" class="on low">3</button>
+              <button type="button" class="on mid">4</button>
+              <button type="button">5</button>
+              <button type="button">6</button>
+              <button type="button">7</button>
+              <button type="button">8</button>
+              <button type="button">9</button>
             </div>
             <div class="labels"><span>calm</span><span>tense</span><span>panicked</span></div>
           </div>
@@ -364,34 +364,34 @@
         <div class="chip-group">
           <span class="field-label">Positive</span>
           <div class="chips">
-            <button class="chip active">happy</button>
-            <button class="chip">calm</button>
-            <button class="chip active">grateful</button>
-            <button class="chip">energetic</button>
-            <button class="chip">hopeful</button>
-            <button class="chip">relaxed</button>
-            <button class="chip">confident</button>
-            <button class="add-new">+ add</button>
+            <button type="button" class="chip active">happy</button>
+            <button type="button" class="chip">calm</button>
+            <button type="button" class="chip active">grateful</button>
+            <button type="button" class="chip">energetic</button>
+            <button type="button" class="chip">hopeful</button>
+            <button type="button" class="chip">relaxed</button>
+            <button type="button" class="chip">confident</button>
+            <button type="button" class="add-new">+ add</button>
           </div>
         </div>
         <div class="chip-group">
           <span class="field-label">Negative</span>
           <div class="chips">
-            <button class="chip">sad</button>
-            <button class="chip">angry</button>
-            <button class="chip active">worried</button>
-            <button class="chip">lonely</button>
-            <button class="chip">overwhelmed</button>
-            <button class="add-new">+ add</button>
+            <button type="button" class="chip">sad</button>
+            <button type="button" class="chip">angry</button>
+            <button type="button" class="chip active">worried</button>
+            <button type="button" class="chip">lonely</button>
+            <button type="button" class="chip">overwhelmed</button>
+            <button type="button" class="add-new">+ add</button>
           </div>
         </div>
         <div class="chip-group">
           <span class="field-label">General</span>
           <div class="chips">
-            <button class="chip">tired</button>
-            <button class="chip">focused</button>
-            <button class="chip">restless</button>
-            <button class="add-new">+ add</button>
+            <button type="button" class="chip">tired</button>
+            <button type="button" class="chip">focused</button>
+            <button type="button" class="chip">restless</button>
+            <button type="button" class="add-new">+ add</button>
           </div>
         </div>
       </section>
@@ -415,7 +415,7 @@
       </section>
 
       <div class="actions">
-        <button class="btn btn-primary">Save entry</button>
+        <button type="button" class="btn btn-primary">Save entry</button>
       </div>
     </div>
   </div>

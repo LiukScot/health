@@ -18,8 +18,10 @@ type FieldLineProps = InputHTMLAttributes<HTMLInputElement> &
 
 export function FieldLine({ label, multiline = false, compact = false, className = "", ...rest }: FieldLineProps) {
   const minH = compact ? "min-h-[54px]" : "min-h-[64px]";
+  // The wrapping label associates implicitly; htmlFor is added when the
+  // caller gives the control an id, so the pair is explicit as well.
   return (
-    <label className="grid gap-2 content-start">
+    <label className="grid gap-2 content-start" htmlFor={rest.id}>
       <span className={FIELD_LINE_LABEL}>{label}</span>
       {multiline ? (
         // rest is the input∩textarea intersection; narrow to the rendered element.

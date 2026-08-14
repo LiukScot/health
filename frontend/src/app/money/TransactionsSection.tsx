@@ -20,6 +20,7 @@ import {
   ENTRY_SUMMARY,
   PainBadge,
   PastEntries,
+  EntryMonths,
   EntryViewTabs,
   type EntryView,
 } from "../entries";
@@ -72,7 +73,7 @@ export function TransactionsSection({
 
   return (
     <section className={PAGE}>
-      <EntryViewTabs view={view} onChange={onViewChange} labels={entryViewLabels["money-transactions"]!} className="inline-flex max-mobile:hidden" />
+      <EntryViewTabs view={view} onChange={onViewChange} labels={entryViewLabels["money-transactions"]} className="inline-flex max-mobile:hidden" />
       <h1 className={PAGE_TITLE}>Transactions</h1>
       {view === "new" ? (
       <form onSubmit={txForm.handleSubmit(onSubmit)} className={FLAT_SHELL}>
@@ -80,6 +81,7 @@ export function TransactionsSection({
         <div className={FLAT_ROW}>
           <FieldLine
             label="Date"
+            id="tx-date"
             type="date"
             aria-label="Date"
             {...txForm.register("txDate")}
@@ -180,7 +182,10 @@ export function TransactionsSection({
           />
         }
       >
-        {transactions.map((row) => {
+        <EntryMonths
+          rows={transactions}
+          dateOf={(row) => row.txDate}
+          renderRow={(row) => {
           const gain = row.pnl > 0;
           const loss = row.pnl < 0;
           return (
@@ -230,7 +235,8 @@ export function TransactionsSection({
               </div>
             </details>
           );
-        })}
+        }}
+        />
       </PastEntries>
       )}
     </section>

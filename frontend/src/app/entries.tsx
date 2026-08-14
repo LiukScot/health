@@ -26,7 +26,7 @@ export const DATETIME_FIELD =
   "!w-auto max-w-full justify-self-start cursor-pointer tabular-nums [&::-webkit-calendar-picker-indicator]:cursor-pointer [&::-webkit-calendar-picker-indicator]:ml-2 [&::-webkit-calendar-picker-indicator]:invert [&::-webkit-calendar-picker-indicator]:opacity-60 hover:[&::-webkit-calendar-picker-indicator]:opacity-100";
 
 // No outer margin: every caller was passing mt-0 to undo one, which is the
-// tell that the constant owned spacing it had no business owning (#196).
+// tell that the constant owned spacing it had no business owning.
 export function EntriesHeading({ children, className = "" }: { children: ReactNode; className?: string }) {
   return (
     <h2 className={`[text-box:trim-both_cap_alphabetic] text-control text-accent uppercase tracking-[0.16em] font-bold ${className}`}>
@@ -62,11 +62,16 @@ export function EntryViewTabs({
   className: string;
 }) {
   return (
-    <div className={`gap-1 p-1 justify-self-start rounded-full bg-card-strong ${className}`} role="tablist" aria-label="Entry or history">
+    /*
+     * A toggle group, not a tablist: there is no tabpanel to point
+     * aria-controls at, and role="tab" carries a keyboard contract
+     * (roving tabindex, arrow keys) that a two-button switch does not
+     * need. Buttons with aria-pressed say the same thing honestly.
+     */
+    <div className={`gap-1 p-1 justify-self-start rounded-full bg-card-strong ${className}`} role="group" aria-label="Entry or history">
       <button
         type="button"
-        role="tab"
-        aria-selected={view === "new"}
+        aria-pressed={view === "new"}
         className={`${VIEW_TAB} ${view === "new" ? VIEW_TAB_ON : VIEW_TAB_OFF}`}
         onClick={() => onChange("new")}
       >
@@ -74,8 +79,7 @@ export function EntryViewTabs({
       </button>
       <button
         type="button"
-        role="tab"
-        aria-selected={view === "history"}
+        aria-pressed={view === "history"}
         className={`${VIEW_TAB} ${view === "history" ? VIEW_TAB_ON : VIEW_TAB_OFF}`}
         onClick={() => onChange("history")}
       >

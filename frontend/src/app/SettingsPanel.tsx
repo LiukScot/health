@@ -62,19 +62,26 @@ function ThemeBlock() {
       <SectionHead title="Theme" aside="applies to every realm" />
       {/* Named cards, not bare colour circles: the swatches were the only
           thing telling the three apart, and colour alone is not a label
-          you can read, search or hear (audit R4). */}
-      <div className="grid gap-3 grid-cols-2 wide:grid-cols-3" role="radiogroup" aria-label="Theme">
+          you can read, search or hear. */}
+      {/* Native radios, visually hidden inside the cards: one tab stop and
+          arrow-key selection come with the input, where a div with
+          role="radio" would owe both by hand. */}
+      <div className="grid gap-3 grid-cols-2 wide:grid-cols-3">
         {THEMES.map((t) => {
           const selected = t.id === theme;
           return (
-            <button
+            <label
               key={t.id}
-              type="button"
-              role="radio"
-              aria-checked={selected}
-              className={`grid gap-2 content-start p-3 text-left bg-card-soft rounded-md shadow-none cursor-pointer border ${selected ? "border-text" : "border-transparent hover:border-border"}`}
-              onClick={() => setTheme(t.id)}
+              className={`grid gap-2 content-start p-3 text-left bg-card-soft rounded-md cursor-pointer border has-[:focus-visible]:shadow-[0_0_0_2px_var(--ring)] ${selected ? "border-text" : "border-transparent hover:border-border"}`}
             >
+              <input
+                type="radio"
+                name="theme"
+                value={t.id}
+                checked={selected}
+                onChange={() => setTheme(t.id)}
+                className="sr-only"
+              />
               <span
                 className="grid content-between h-14 p-2 rounded-sm border border-[color-mix(in_srgb,var(--border)_45%,transparent)]"
                 style={{ background: t.bg }}
@@ -88,7 +95,7 @@ function ThemeBlock() {
                 {t.label}
               </span>
               <span className="text-micro text-muted-soft">{t.hint}</span>
-            </button>
+            </label>
           );
         })}
       </div>
@@ -235,7 +242,7 @@ function AccountIdentity({ auth }: Pick<SettingsSectionProps, "auth">) {
         <div className="text-xs text-muted tabular-nums">{email}</div>
       </div>
       {/* Log out sits with the identity it ends. Right-aligned under the
-          password form it read as that form's second step (audit R3). */}
+          password form it read as that form's second step. */}
       <Button
         type="button"
         className="ml-auto flex-none"

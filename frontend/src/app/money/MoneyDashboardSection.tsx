@@ -32,10 +32,11 @@ export function MoneyDashboardSection({
     <section className={PAGE}>
       <h1 className={PAGE_TITLE}>Dashboard</h1>
 
-      <section className={DASH_SECTION}>
+      <section className={DASH_SECTION} aria-busy={isLoading}>
         <SectionRow title="Portfolio" aside={kpis.lastTxDate ? `updated ${formatTxDate(kpis.lastTxDate)}` : undefined} />
         {isLoading ? (
           <>
+            <p className="sr-only">Loading portfolio figures…</p>
             <KpiSkeleton hero />
             <div className={KPI_TIER}>
               <KpiSkeleton />

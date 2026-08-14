@@ -154,8 +154,8 @@ export async function navigateTo(page: Page, section: string) {
  * control, so target the visible one.
  */
 export async function openEntryView(page: Page, view: "new" | "history") {
-  const tabs = page.getByRole("tablist", { name: "Entry or history" });
-  await tabs.first().getByRole("tab").nth(view === "new" ? 0 : 1).click();
+  const group = page.getByRole("group", { name: "Entry or history" });
+  await group.first().getByRole("button").nth(view === "new" ? 0 : 1).click();
 }
 
 export async function saveBirthday(

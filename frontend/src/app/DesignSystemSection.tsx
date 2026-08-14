@@ -199,8 +199,8 @@ export function DesignSystemSection() {
             <SectionHead title="Stage" aside="StageHead · StageField" variant="ds" />
             <div className={STAGE}>
               <StageHead step={1} title="How bad is it?" aside="optional" />
-              <StageField label="Situation" prompt="The prompt is a line, not a placeholder: it has to survive being answered.">
-                <input type="text" className={FIELD_LINE_INPUT} readOnly value="Started after the meeting" />
+              <StageField label="Situation" prompt="The prompt is a line, not a placeholder: it has to survive being answered." htmlFor="ds-situation">
+                <input id="ds-situation" name="ds-situation" type="text" className={FIELD_LINE_INPUT} readOnly value="Started after the meeting" />
               </StageField>
             </div>
           </section>

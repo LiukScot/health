@@ -113,6 +113,11 @@ export function StageScale({
               onClick={() => onChange(current === slot ? null : slot)}
             >
               {slot}
+              {current === slot ? (
+                // The chosen slot must differ by more than its fill: a ring
+                // says "this one" to a reader who cannot tell the bands apart.
+                <span className="block mx-auto mt-0.5 w-1.5 h-1.5 rounded-full bg-current" aria-hidden="true" />
+              ) : null}
             </button>
           );
         })}
