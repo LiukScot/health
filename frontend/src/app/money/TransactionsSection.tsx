@@ -211,6 +211,9 @@ export function TransactionsSection({
                         return;
                       }
                       onStartEdit(row);
+                      // Editing means going back to the form, which the log view is not
+                      // showing: filling a form nobody can see is not an edit.
+                      onViewChange("new");
                     }}
                   >
                     <AnimatedEditingLabel active={editingTx?.id === row.id} />

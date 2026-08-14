@@ -45,7 +45,7 @@ test("changes password and restores the original password", async ({ page }) => 
 test("switches theme and persists it across reload", async ({ page }) => {
   await openSettingsSection(page, "Appearance");
 
-  await page.getByRole("button", { name: "Grey" }).click();
+  await page.getByRole("radio", { name: /Grey/ }).click();
   await expect(page.locator("html")).toHaveAttribute("data-theme", "grey");
 
   await page.reload();

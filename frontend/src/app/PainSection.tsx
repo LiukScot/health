@@ -228,7 +228,7 @@ export function PainSection({
         emptyState={
           <EmptyState
             title="No pain entries yet"
-            description="Track your first session with the form above. Your pain history will show up here once you save it."
+            description="Nothing saved yet. Open New entry to record a flare; your pain history lands here."
           />
         }
       >
@@ -273,6 +273,9 @@ export function PainSection({
                         return;
                       }
                       onStartEdit(entry);
+                      // Editing means going back to the form, which the log view is not
+                      // showing: filling a form nobody can see is not an edit.
+                      onViewChange("new");
                     }}
                   >
                     <AnimatedEditingLabel active={editingPain?.id === entry.id} />

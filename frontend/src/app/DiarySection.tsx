@@ -225,7 +225,7 @@ export function DiarySection({
         emptyState={
           <EmptyState
             title="No diary entries yet"
-            description="Use the form above to log your first mood entry. Once you save it, it will appear here."
+            description="Nothing saved yet. Open New entry to log how today felt; saved entries land here."
           />
         }
       >
@@ -266,6 +266,9 @@ export function DiarySection({
                         return;
                       }
                       onStartEdit(entry);
+                      // Editing means going back to the form, which the log view is not
+                      // showing: filling a form nobody can see is not an edit.
+                      onViewChange("new");
                     }}
                   >
                     <AnimatedEditingLabel active={editingDiary?.id === entry.id} />

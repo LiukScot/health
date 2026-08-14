@@ -1,5 +1,5 @@
 import { expect, test } from "@playwright/test";
-import { loginUi, navigateTo, purgeUserData, uniqueText } from "./helpers";
+import { openEntryView, loginUi, navigateTo, purgeUserData, uniqueText } from "./helpers";
 
 test.beforeEach(async ({ request, page }) => {
   await purgeUserData(request);
@@ -23,6 +23,7 @@ test("creates, edits, and deletes a CBT thought-record entry", async ({ page }) 
 
   await page.getByRole("button", { name: /Save entry/i }).click();
 
+  await openEntryView(page, "history");
   const entryRow = page.locator("details").filter({ hasText: situation });
   await expect(entryRow).toBeVisible();
   await entryRow.click();
@@ -32,6 +33,7 @@ test("creates, edits, and deletes a CBT thought-record entry", async ({ page }) 
   await page.getByLabel("Situation").fill(updatedSituation);
   await page.getByRole("button", { name: /Update entry/i }).click();
 
+  await openEntryView(page, "history");
   const updatedRow = page.locator("details").filter({ hasText: updatedSituation });
   await expect(updatedRow).toBeVisible();
   await updatedRow.click();

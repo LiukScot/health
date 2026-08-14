@@ -204,7 +204,7 @@ export function DbtSection({
         emptyState={
           <EmptyState
             title="No DBT entries yet"
-            description="Work through the steps above to log your first distress-tolerance practice. Saved entries will appear here."
+            description="Nothing saved yet. Open New entry to work through the steps; saved practices land here."
           />
         }
       >
@@ -234,6 +234,9 @@ export function DbtSection({
                       return;
                     }
                     onStartEdit(entry);
+                    // Editing means going back to the form, which the log view is not
+                    // showing: filling a form nobody can see is not an edit.
+                    onViewChange("new");
                   }}
                 >
                   <AnimatedEditingLabel active={editingDbt?.id === entry.id} />

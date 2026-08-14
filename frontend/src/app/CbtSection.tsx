@@ -179,7 +179,7 @@ export function CbtSection({
         emptyState={
           <EmptyState
             title="No CBT entries yet"
-            description="Use the prompts above to record your first thought response. Completed reflections will appear here."
+            description="Nothing saved yet. Open New entry to work through the prompts; completed reflections land here."
           />
         }
       >
@@ -210,6 +210,9 @@ export function CbtSection({
                       return;
                     }
                     onStartEdit(entry);
+                    // Editing means going back to the form, which the log view is not
+                    // showing: filling a form nobody can see is not an edit.
+                    onViewChange("new");
                   }}
                 >
                   <AnimatedEditingLabel active={editingCbt?.id === entry.id} />
