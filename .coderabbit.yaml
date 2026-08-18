@@ -1,0 +1,11 @@
+# yaml-language-server: $schema=https://storage.googleapis.com/coderabbit_public_assets/schema.v2.json
+#
+# The docstring coverage check is off because it argues with AGENTS.md §7,
+# which asks for a comment only where the *why* is non-obvious and forbids
+# restating what the identifiers already say. A coverage percentage is
+# satisfied by exactly the comments that rule rejects, so the two cannot
+# both be followed. §7 is the one the code is written to.
+reviews:
+  pre_merge_checks:
+    docstrings:
+      mode: "off"
