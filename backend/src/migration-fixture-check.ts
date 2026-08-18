@@ -136,7 +136,7 @@ const report = JSON.parse(fs.readFileSync(reportPath, "utf8")) as Record<string,
 assert(report.usersCopied === 2, "Expected 2 migrated users");
 assert(report.diaryRows === 2, "Expected 2 diary rows");
 assert(report.painRows === 1, "Expected 1 pain row");
-// AI key migration was removed when the Mistral chatbot was replaced by MCP.
+// AI key migration was removed with the Mistral chatbot.
 assert(report.aiKeys === 0, "Expected 0 AI keys after Mistral deprecation");
 
 const target = new Database(targetPath, { readonly: true });

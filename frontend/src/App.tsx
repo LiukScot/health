@@ -139,7 +139,7 @@ function App() {
   const dbt = useDbt(loggedIn);
   const dashboard = useDashboard(loggedIn);
   const memorable = useMemorableDays(loggedIn);
-  const settings = useSettings(loggedIn);
+  const settings = useSettings();
   // Only fetched once you're actually in the Money realm — the health realm
   // has no use for it and shouldn't pay for the request.
   const moneyTx = useMoneyTransactions(loggedIn && realm === "money");
@@ -481,9 +481,6 @@ function App() {
 
         {realm === "settings" && (
           <SettingsSection nav={nav} money={moneySettings} auth={auth}
-            birthday={settings.prefsValue.birthday ?? null}
-            birthdayPending={settings.prefsMutation.isPending}
-            onSaveBirthday={settings.onSaveBirthday}
             purgeConfirmArmed={settings.purgeConfirmArmed}
             purgePending={settings.purgePending} purgeError={settings.purgeError}
             onPurgeArm={settings.onPurgeArm} onPurgeConfirm={settings.onPurgeConfirm}

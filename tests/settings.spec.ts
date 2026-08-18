@@ -55,20 +55,3 @@ test("switches theme and persists it across reload", async ({ page }) => {
   await page.reload();
   await expect(page.locator("html")).toHaveAttribute("data-theme", "grey");
 });
-
-test("saves birthday in settings", async ({ page }) => {
-  await openSettingsSection(page, "Health");
-
-  // Birthday autosaves on change: register the response listener before filling
-  // the native date input that triggers the PUT, otherwise it can land first.
-  const responsePromise = page.waitForResponse(response =>
-    response.url().includes('/api/v1/preferences') && response.request().method() === 'PUT'
-  );
-  await page.getByLabel("Birthday").fill("1995-06-12");
-  await responsePromise;
-
-  await page.reload();
-  await openSettingsRealm(page);
-  await openSettingsSection(page, "Health");
-  await expect(page.getByLabel("Birthday")).toHaveValue("1995-06-12");
-});

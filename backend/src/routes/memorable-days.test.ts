@@ -1,14 +1,12 @@
 import { describe, expect, test } from "bun:test";
 import authRoute from "./auth.ts";
 import memorableDaysRoute from "./memorable-days.ts";
-import preferencesRoute from "./preferences.ts";
 import { extractSessionCookie, seedUser, setupAuthedApp } from "../test-helpers.ts";
 
 async function setup() {
   const s = await setupAuthedApp([
     { path: "/auth", route: authRoute },
     { path: "/memorable-days", route: memorableDaysRoute },
-    { path: "/preferences", route: preferencesRoute },
   ]);
   return { ctx: s.ctx, app: s.app, cookie: s.cookie, userId: s.user.id };
 }
@@ -18,7 +16,6 @@ const validBody = {
   title: "Summer trip",
   emoji: "🏖️",
   description: "beach week",
-  repeatMode: "yearly" as const,
 };
 
 describe("memorable-days auth", () => {
@@ -72,15 +69,6 @@ describe("POST /memorable-days", () => {
     expect(res.status).toBe(400);
   });
 
-  test("rejects unknown repeat mode with 400", async () => {
-    const { app, cookie } = await setup();
-    const res = await app.request("/memorable-days", {
-      method: "POST",
-      headers: { "Content-Type": "application/json", cookie },
-      body: JSON.stringify({ ...validBody, repeatMode: "weekly" }),
-    });
-    expect(res.status).toBe(400);
-  });
 });
 
 describe("GET /memorable-days", () => {
@@ -92,38 +80,19 @@ describe("GET /memorable-days", () => {
     expect(body.data).toEqual([]);
   });
 
-  test("returns birthday as virtual item when set in preferences", async () => {
-    const { app, cookie } = await setup();
-    await app.request("/preferences", {
-      method: "PUT",
-      headers: { "Content-Type": "application/json", cookie },
-      body: JSON.stringify({
-        model: "mistral-small-latest",
-        chatRange: "all",
-        lastRange: "all",
-        graphSelection: {},
-        birthday: "1990-06-15",
-      }),
-    });
-    const res = await app.request("/memorable-days?today=2026-05-16", { headers: { cookie } });
-    const body = await res.json();
-    expect(body.data.length).toBeGreaterThan(0);
-    expect(body.data[0].source).toBe("birthday");
-    expect(body.data[0].title).toBe("Birth");
-  });
-
-  test("today param drives the occurrence label", async () => {
+  test("returns the stored entry on its own date, with no recurrence fields", async () => {
     const { app, cookie } = await setup();
     await app.request("/memorable-days", {
       method: "POST",
       headers: { "Content-Type": "application/json", cookie },
-      body: JSON.stringify({ ...validBody, date: "2026-04-15", repeatMode: "monthly" }),
+      body: JSON.stringify(validBody),
     });
-    const res = await app.request("/memorable-days?today=2026-06-15", { headers: { cookie } });
+    const res = await app.request("/memorable-days", { headers: { cookie } });
     const body = await res.json();
-    const item = body.data.find((d: { title: string }) => d.title === validBody.title);
-    expect(item.occurrenceCount).toBe(2);
-    expect(item.occurrenceLabel).toBe("2 months since Summer trip");
+    expect(body.data).toHaveLength(1);
+    expect(body.data[0]).toMatchObject({ date: validBody.date, title: validBody.title });
+    expect(body.data[0]).not.toHaveProperty("repeatMode");
+    expect(body.data[0]).not.toHaveProperty("occurrenceLabel");
   });
 
   test("isolates entries across users (IDOR)", async () => {

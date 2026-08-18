@@ -8,7 +8,6 @@ import {
   dbtSchema,
   prefsSchema,
   memorableDaySchema,
-  mcpTokenCreateSchema,
   backupImportSchema,
   optionFieldSchema,
 } from "./schemas.ts";
@@ -155,57 +154,33 @@ describe("dbtSchema", () => {
 });
 
 describe("prefsSchema", () => {
-  test("accepts valid payload with birthday", () => {
+  test("accepts a valid payload", () => {
     const r = prefsSchema.safeParse({
       model: "x",
       chatRange: "all",
       lastRange: "all",
       graphSelection: {},
-      birthday: "1990-06-15",
     });
     expect(r.success).toBe(true);
   });
 
-  test("rejects malformed birthday string", () => {
-    const r = prefsSchema.safeParse({
-      model: "x",
-      chatRange: "all",
-      lastRange: "all",
-      graphSelection: {},
-      birthday: "1990/06/15",
-    });
-    expect(r.success).toBe(false);
+  test("applies defaults for an empty payload", () => {
+    const r = prefsSchema.parse({});
+    expect(r.chatRange).toBe("all");
+    expect(r.graphSelection).toEqual({});
   });
 
-  test("rejects nonexistent calendar date birthday", () => {
-    const r = prefsSchema.safeParse({
-      model: "x",
-      chatRange: "all",
-      lastRange: "all",
-      graphSelection: {},
-      birthday: "1990-02-30",
-    });
+  test("rejects a model longer than 200 chars", () => {
+    const r = prefsSchema.safeParse({ model: "x".repeat(201) });
     expect(r.success).toBe(false);
-  });
-
-  test("accepts null birthday", () => {
-    const r = prefsSchema.safeParse({
-      model: "x",
-      chatRange: "all",
-      lastRange: "all",
-      graphSelection: {},
-      birthday: null,
-    });
-    expect(r.success).toBe(true);
   });
 });
 
 describe("memorableDaySchema", () => {
-  test("accepts valid yearly event", () => {
+  test("accepts a minimal event", () => {
     const r = memorableDaySchema.safeParse({
       date: "2026-08-15",
       title: "Trip",
-      repeatMode: "yearly",
     });
     expect(r.success).toBe(true);
   });
@@ -214,7 +189,6 @@ describe("memorableDaySchema", () => {
     const r = memorableDaySchema.safeParse({
       date: "2026-08-15",
       title: "   ",
-      repeatMode: "one-time",
     });
     expect(r.success).toBe(false);
   });
@@ -223,16 +197,6 @@ describe("memorableDaySchema", () => {
     const r = memorableDaySchema.safeParse({
       date: "2026-08-15",
       title: "x".repeat(121),
-      repeatMode: "one-time",
-    });
-    expect(r.success).toBe(false);
-  });
-
-  test("rejects unknown repeat mode", () => {
-    const r = memorableDaySchema.safeParse({
-      date: "2026-08-15",
-      title: "Trip",
-      repeatMode: "weekly",
     });
     expect(r.success).toBe(false);
   });
@@ -241,7 +205,6 @@ describe("memorableDaySchema", () => {
     const r = memorableDaySchema.safeParse({
       date: "2026-02-30",
       title: "Trip",
-      repeatMode: "one-time",
     });
     expect(r.success).toBe(false);
   });
@@ -251,26 +214,7 @@ describe("memorableDaySchema", () => {
       date: "2026-08-15",
       title: "Trip",
       emoji: "x".repeat(17),
-      repeatMode: "yearly",
     });
-    expect(r.success).toBe(false);
-  });
-});
-
-describe("mcpTokenCreateSchema", () => {
-  test("accepts empty body (defaults applied)", () => {
-    const r = mcpTokenCreateSchema.parse({});
-    expect(r.label).toBe("");
-    expect(r.expiresAt).toBeNull();
-  });
-
-  test("rejects label longer than 100 chars", () => {
-    const r = mcpTokenCreateSchema.safeParse({ label: "x".repeat(101) });
-    expect(r.success).toBe(false);
-  });
-
-  test("rejects invalid expiresAt format", () => {
-    const r = mcpTokenCreateSchema.safeParse({ expiresAt: "not-a-date" });
     expect(r.success).toBe(false);
   });
 });

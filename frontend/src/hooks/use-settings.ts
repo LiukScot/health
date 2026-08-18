@@ -23,18 +23,17 @@ export function usePrefs(enabled: boolean) {
   });
 
   const prefsMutation = useMutation({
-    mutationFn: async (values: { model: string; chatRange: string; lastRange: string; graphSelection: Record<string, unknown>; birthday: string | null }) =>
+    mutationFn: async (values: { model: string; chatRange: string; lastRange: string; graphSelection: Record<string, unknown> }) =>
       apiFetch("/api/v1/preferences", { method: "PUT", body: JSON.stringify(values) }, (raw) =>
         apiEnvelopeSchema(z.object({ ok: z.boolean() })).parse(raw).data,
       ),
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: ["prefs"] });
-      await queryClient.invalidateQueries({ queryKey: ["memorable-days"] });
     },
   });
 
   const savePrefsPatch = (
-    patch: Partial<{ model: string; chatRange: string; lastRange: string; graphSelection: Record<string, unknown>; birthday: string | null }>,
+    patch: Partial<{ model: string; chatRange: string; lastRange: string; graphSelection: Record<string, unknown> }>,
   ) => {
     const base = prefsQuery.data ?? defaultPrefsValue;
     prefsMutation.mutate({
@@ -42,16 +41,14 @@ export function usePrefs(enabled: boolean) {
       chatRange: patch.chatRange ?? base.chatRange,
       lastRange: patch.lastRange ?? base.lastRange,
       graphSelection: patch.graphSelection ?? base.graphSelection,
-      birthday: patch.birthday === undefined ? base.birthday : patch.birthday,
     });
   };
 
   return { prefsQuery, prefsMutation, savePrefsPatch };
 }
 
-export function useSettings(enabled: boolean) {
+export function useSettings() {
   const queryClient = useQueryClient();
-  const { prefsQuery, prefsMutation, savePrefsPatch } = usePrefs(enabled);
   const [purgeConfirmArmed, setPurgeConfirmArmed] = useState(false);
 
   const purgeMutation = useMutation({
@@ -133,9 +130,6 @@ export function useSettings(enabled: boolean) {
   };
 
   return {
-    prefsValue: prefsQuery.data ?? defaultPrefsValue,
-    prefsMutation,
-    onSaveBirthday: (birthday: string | null) => savePrefsPatch({ birthday }),
     purgeConfirmArmed,
     purgePending: purgeMutation.isPending,
     purgeError: purgeMutation.error ? { tone: "error" as const, text: getErrorMessage(purgeMutation.error) } : null,

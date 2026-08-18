@@ -158,34 +158,6 @@ export async function openEntryView(page: Page, view: "new" | "history") {
   await group.first().getByRole("button").nth(view === "new" ? 0 : 1).click();
 }
 
-export async function saveBirthday(
-  request: APIRequestContext,
-  birthday: string | null,
-  password = e2eUser.password,
-) {
-  await loginApi(request, password);
-  // Fetch existing preferences to merge properly
-  const getResponse = await request.get("/api/v1/preferences");
-  const existingPrefs = getResponse.ok() ? await getResponse.json() : null;
-  const base = existingPrefs?.data ?? {
-    model: "mistral-small-latest",
-    chatRange: "all",
-    lastRange: "all",
-    graphSelection: {},
-  };
-
-  const response = await request.put("/api/v1/preferences", {
-    data: {
-      model: base.model,
-      chatRange: base.chatRange,
-      lastRange: base.lastRange,
-      graphSelection: base.graphSelection,
-      birthday,
-    },
-  });
-  expect(response.ok(), "expected birthday save to succeed").toBeTruthy();
-}
-
 export async function seedMemorableDay(
   request: APIRequestContext,
   overrides: Partial<{
@@ -193,7 +165,6 @@ export async function seedMemorableDay(
     title: string;
     emoji: string;
     description: string;
-    repeatMode: "one-time" | "monthly" | "yearly";
   }> = {},
   password = e2eUser.password,
 ) {
@@ -204,7 +175,6 @@ export async function seedMemorableDay(
       title: uniqueText("memorable"),
       emoji: "✨",
       description: "important date",
-      repeatMode: "monthly",
       ...overrides,
     },
   });

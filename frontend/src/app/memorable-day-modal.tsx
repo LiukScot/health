@@ -6,7 +6,6 @@ import { emojiCatalog, emojiCategoryLabels, type EmojiCategory, type EmojiRecord
 import { getErrorMessage } from "../lib";
 import { memorableDayPayloadSchema } from "../hooks/use-memorable-days";
 import { DateInput } from "../components/ui/DateInput";
-import { Select } from "../components/ui/select";
 import { Button, buttonClass } from "../components/ui/Button";
 import { FieldLine, FIELD_LINE_LABEL } from "../components/ui/FieldLine";
 import {
@@ -14,7 +13,6 @@ import {
   MEMO_BACKDROP,
   MEMO_MODAL,
   MEMO_MODAL_ACTIONS,
-  REPEAT_OPTIONS,
 } from "./memorable-days-constants";
 
 const EMOJI_TAB =
@@ -28,8 +26,6 @@ export type DraftState = {
   title: string;
   emoji: string;
   description: string;
-  repeatMode: "one-time" | "monthly" | "yearly";
-  locked: boolean;
 };
 
 type EmojiPickerScrollTopByCategory = Record<EmojiCategory, number>;
@@ -197,7 +193,7 @@ export function MemorableDayModal({ initialDraft, isSaving, onSave, onDelete, on
     try {
       const payload = memorableDayPayloadSchema.parse({
         date: draft.date, title: draft.title, emoji: draft.emoji,
-        description: draft.description, repeatMode: draft.repeatMode,
+        description: draft.description,
       });
       await onSave({ ...draft, ...payload });
     } catch (error) {
@@ -328,25 +324,11 @@ export function MemorableDayModal({ initialDraft, isSaving, onSave, onDelete, on
           value={draft.description}
           onChange={(event) => setDraft((current) => ({ ...current, description: event.target.value }))}
         />
-        <div className="grid gap-2 content-start">
-          <span className={FIELD_LINE_LABEL}>Repeat</span>
-          <Select
-            ariaLabel="Repeat"
-            value={draft.repeatMode}
-            onValueChange={(value) => {
-              const option = REPEAT_OPTIONS.find((item) => item.value === value);
-              if (option) setDraft((current) => ({ ...current, repeatMode: option.value }));
-            }}
-            options={REPEAT_OPTIONS}
-            disabled={draft.locked}
-          />
-        </div>
-        {draft.locked ? <p className="text-muted text-control">Edit birthday in Settings. Same truth, less duplication.</p> : null}
         <div className={MEMO_MODAL_ACTIONS}>
-          <Button variant="primary" onClick={() => void handleSave()} disabled={isSaving || draft.locked}>
+          <Button variant="primary" onClick={() => void handleSave()} disabled={isSaving}>
             Save
           </Button>
-          {draft.id && !draft.locked ? (
+          {draft.id ? (
             <Button variant="danger" onClick={() => void handleDelete()} disabled={isSaving}>
               Delete
             </Button>

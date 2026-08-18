@@ -15,6 +15,7 @@ import { EmptyState, PAGE, PAGE_TITLE } from "./screen-helpers";
 import { FLAT_ACTIONS, STAGE, STAGES, STAGE_SPLIT, StageField, StageHead, StageProgress, StageRail, StageScale, StageStepper } from "./staged";
 import { bandNine, painPreview, formatEntrySummaryDate } from "./screen-format";
 import { Button } from "../components/ui/Button";
+import { DATE_TIME_INPUT } from "../components/ui/DateInput";
 import { FieldLine, FIELD_LINE_INPUT } from "../components/ui/FieldLine";
 import {
   DELETE_CONFIRM,
@@ -140,7 +141,7 @@ export function PainSection({
             label="Date & time"
             id="pain-datetime"
             type="datetime-local"
-            className="w-full max-w-full cursor-pointer tabular-nums [&::-webkit-calendar-picker-indicator]:cursor-pointer [&::-webkit-calendar-picker-indicator]:invert [&::-webkit-calendar-picker-indicator]:opacity-60 hover:[&::-webkit-calendar-picker-indicator]:opacity-100"
+            className={DATE_TIME_INPUT}
             {...painForm.register("dateTime")}
             aria-label="Date/time"
             onClick={(e) => {

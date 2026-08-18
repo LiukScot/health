@@ -1,5 +1,5 @@
 import { expect, test } from "@playwright/test";
-import { loginUi, purgeUserData, saveBirthday, seedDiaryEntry, seedMemorableDay, seedPainEntry } from "./helpers";
+import { loginUi, purgeUserData, seedDiaryEntry, seedMemorableDay, seedPainEntry } from "./helpers";
 
 test.beforeEach(async ({ request }) => {
   await purgeUserData(request);
@@ -132,19 +132,18 @@ test("renders dashboard data and supports chart toggles", async ({ page }) => {
 
 test("shows anniversary cards above averages", async ({ page, request }) => {
   const now = new Date();
-  const yyyy = now.getFullYear() - 2;
+  const yyyy = now.getFullYear();
   const mm = String(now.getMonth() + 1).padStart(2, "0");
   const dd = String(now.getDate()).padStart(2, "0");
   await seedMemorableDay(request, {
     date: `${yyyy}-${mm}-${dd}`,
     title: "Wedding",
     emoji: "💍",
-    repeatMode: "monthly",
+    description: "civil ceremony",
   });
-  await saveBirthday(request, `1995-${mm}-${dd}`);
   await loginUi(page);
 
   await expect(page.getByText("Anniversaries today")).toBeVisible();
-  await expect(page.getByText(/months since wedding/i)).toBeVisible();
-  await expect(page.getByText(/years since birth/i)).toBeVisible();
+  await expect(page.getByText("💍 Wedding")).toBeVisible();
+  await expect(page.getByText("civil ceremony")).toBeVisible();
 });

@@ -32,8 +32,6 @@ test("desktop shows calendar and list, create/edit/delete works", async ({ page 
   await expect(page.getByText("Title is required.")).toBeVisible();
   await page.getByLabel("Title").fill("Wedding");
   await page.getByLabel("Description").fill("civil ceremony");
-  await page.getByRole("button", { name: "Repeat" }).click();
-  await page.getByRole("option", { name: "Monthly" }).click();
   await page.getByRole("button", { name: "Save" }).click();
 
   const weddingListItem = page.getByRole("button").filter({ hasText: "Wedding" });
@@ -48,4 +46,20 @@ test("desktop shows calendar and list, create/edit/delete works", async ({ page 
   await weddingListItem.click();
   await page.getByRole("button", { name: "Delete" }).click();
   await expect(page.getByRole("button").filter({ hasText: "Wedding" })).toHaveCount(0);
+});
+
+test("mobile drops the calendar and creates from the floating button", async ({ page }) => {
+  await page.setViewportSize({ width: 375, height: 812 });
+  await loginUi(page);
+  await page.getByRole("button", { name: "Open menu" }).click();
+  await page.getByRole("button", { name: "Memorable days" }).click();
+
+  await expect(page.getByRole("button", { name: "Prev" })).toBeHidden();
+  await expect(page.getByRole("button", { name: "Add new" })).toBeHidden();
+  await expect(page.getByRole("heading", { name: "All memorable days" })).toBeVisible();
+
+  await page.getByRole("button", { name: "Add memorable day" }).click();
+  await page.getByLabel("Title").fill("Wedding");
+  await page.getByRole("button", { name: "Save" }).click();
+  await expect(page.getByRole("button").filter({ hasText: "Wedding" })).toBeVisible();
 });

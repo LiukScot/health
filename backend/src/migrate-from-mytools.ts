@@ -193,8 +193,6 @@ function main() {
       );
 
     // AI key migration removed: the user_ai_settings table no longer exists
-    // (Mistral chatbot replaced by MCP server). Users now manage Personal
-    // Access Tokens from the Settings → MCP Access UI instead.
     report.aiKeys = 0;
 
     report.usersCopied = users.length;
