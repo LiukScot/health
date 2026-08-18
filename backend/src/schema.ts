@@ -1,4 +1,4 @@
-export const SCHEMA_VERSION = 13;
+export const SCHEMA_VERSION = 16;
 
 export const METRIC_KINDS = ["scale", "counter", "tags", "text", "measure"] as const;
 export type MetricKind = (typeof METRIC_KINDS)[number];
@@ -132,14 +132,14 @@ export const migrationStatements: string[] = [
     chat_range TEXT NOT NULL DEFAULT 'all',
     last_range TEXT NOT NULL DEFAULT 'all',
     graph_selection_json TEXT NOT NULL DEFAULT '{}',
-    birthday TEXT,
     show_zero_assets INTEGER NOT NULL DEFAULT 0,
     updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
   )`,
-  // schema-v9: birthday column added to CREATE TABLE above; schema-v12:
-  // show_zero_assets. ALTER TABLE for existing databases is handled
-  // separately in db.ts via columnExists guard.
+  // schema-v12: show_zero_assets added to CREATE TABLE above; ALTER TABLE for
+  // existing databases is handled separately in db.ts via columnExists guard,
+  // which also drops the columns left by removed features (birthday,
+  // repeat_mode).
   `CREATE TABLE IF NOT EXISTS memorable_days (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     user_id INTEGER NOT NULL,
@@ -147,13 +147,12 @@ export const migrationStatements: string[] = [
     title TEXT NOT NULL,
     emoji TEXT NOT NULL DEFAULT '',
     description TEXT NOT NULL DEFAULT '',
-    repeat_mode TEXT NOT NULL,
     created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
   )`,
   `CREATE INDEX IF NOT EXISTS idx_memorable_days_user_date ON memorable_days(user_id, date DESC, id DESC)`,
-  // user_ai_settings dropped — Mistral chatbot replaced by MCP server.
+  // user_ai_settings dropped with the Mistral chatbot.
   `DROP TABLE IF EXISTS user_ai_settings`,
   `CREATE TABLE IF NOT EXISTS app_meta (
     key TEXT PRIMARY KEY,
@@ -316,18 +315,11 @@ export const migrationStatements: string[] = [
   )`,
   `CREATE INDEX IF NOT EXISTS idx_dbt_user_date ON dbt_entries(user_id, entry_date DESC, entry_time DESC)`,
 
-  // ── MCP server: personal access tokens ─────────────────────────────────
-  `CREATE TABLE IF NOT EXISTS mcp_tokens (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    user_id INTEGER NOT NULL,
-    token_hash TEXT NOT NULL UNIQUE,
-    label TEXT NOT NULL DEFAULT '',
-    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    expires_at TEXT,
-    last_used_at TEXT,
-    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
-  )`,
-  `CREATE INDEX IF NOT EXISTS idx_mcp_tokens_user ON mcp_tokens(user_id)`,
+  // The MCP server and its personal access tokens were removed; the table
+  // goes with them. One-way on purpose — the tokens were credentials, and
+  // reissuing them is cheaper than keeping dead hashes around.
+  `DROP INDEX IF EXISTS idx_mcp_tokens_user`,
+  `DROP TABLE IF EXISTS mcp_tokens`,
 
   // ── FTS5: diary_fts ────────────────────────────────────────────────────
   `CREATE VIRTUAL TABLE IF NOT EXISTS diary_fts USING fts5(

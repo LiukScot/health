@@ -95,7 +95,7 @@ export function buildBackupPayload(db: DrizzleDB, userId: number) {
 /**
  * Deletes this user's money rows. Preferences are *reset*, never deleted:
  * user_preferences is one row shared with the health realm, so dropping it
- * would take the birthday and graph selection with it.
+ * would take the graph selection with it.
  */
 export function wipeMoneyData(db: DrizzleDB, userId: number, includeStyles: boolean, includePrefs: boolean): void {
   db.delete(transactions).where(eq(transactions.userId, userId)).run();

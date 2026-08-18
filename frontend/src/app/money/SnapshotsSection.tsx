@@ -1,6 +1,7 @@
 import { lazy, Suspense } from "react";
 import { type UseFormReturn } from "react-hook-form";
 import { Button } from "../../components/ui/Button";
+import { DATE_TIME_INPUT } from "../../components/ui/DateInput";
 import { FieldLine } from "../../components/ui/FieldLine";
 import { EmptyState, PAGE, PAGE_TITLE } from "../screen-helpers";
 import { entryViewLabels } from "../core";
@@ -66,6 +67,7 @@ export function SnapshotsSection({
             id="snapshot-date"
             type="date"
             aria-label="Date"
+            className={DATE_TIME_INPUT}
             {...snapshotForm.register("snapshotDate")}
             onClick={(e) => {
               const el = e.currentTarget as HTMLInputElement & { showPicker?: () => void };

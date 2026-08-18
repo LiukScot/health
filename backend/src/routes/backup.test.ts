@@ -305,7 +305,7 @@ function seedAllUserTables(rawDb: SQLiteDB, userId: number): void {
   rawDb.query("INSERT INTO pain_entries (user_id, entry_date, entry_time) VALUES (?, '2026-05-16', '09:00')").run(userId);
   rawDb.query("INSERT INTO cbt_entries (user_id, entry_date, entry_time) VALUES (?, '2026-05-16', '10:00')").run(userId);
   rawDb.query("INSERT INTO dbt_entries (user_id, entry_date, entry_time) VALUES (?, '2026-05-16', '11:00')").run(userId);
-  rawDb.query("INSERT INTO memorable_days (user_id, date, title, repeat_mode) VALUES (?, '2026-05-16', 'Anniversary', 'yearly')").run(userId);
+  rawDb.query("INSERT INTO memorable_days (user_id, date, title) VALUES (?, '2026-05-16', 'Anniversary')").run(userId);
   rawDb.query("INSERT INTO user_preferences (user_id) VALUES (?)").run(userId);
 }
 

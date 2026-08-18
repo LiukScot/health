@@ -17,14 +17,12 @@ import memorableDays from "./routes/memorable-days.ts";
 import cbt from "./routes/cbt.ts";
 import dbt from "./routes/dbt.ts";
 import backup from "./routes/backup.ts";
-import mcpTokens from "./routes/mcp-tokens.ts";
 import moneyTransactions from "./routes/money-transactions.ts";
 import moneyMovements from "./routes/money-movements.ts";
 import moneySnapshots from "./routes/money-snapshots.ts";
 import moneyStyles from "./routes/money-styles.ts";
 import moneyPrefs from "./routes/money-prefs.ts";
 import moneyBackup from "./routes/money-backup.ts";
-import { createMcpApp } from "./mcp/server.ts";
 
 // Initialize database
 fs.mkdirSync(path.dirname(env.DB_PATH), { recursive: true });
@@ -98,7 +96,6 @@ app.route("/api/v1/preferences", preferences);
 app.route("/api/v1/memorable-days", memorableDays);
 app.route("/api/v1/backup", backup);
 app.route("/api/v1/data", backup);
-app.route("/api/v1/mcp/tokens", mcpTokens);
 
 // Money realm. Namespaced because /preferences and /backup would otherwise
 // collide with the health routes above.
@@ -114,11 +111,6 @@ app.route("/api/v1/money/data", moneyBackup);
 app.all("/api/*", (c) => {
   return c.json({ error: { code: "NOT_FOUND", message: "Route not found" } }, 404);
 });
-
-// MCP server protocol endpoint. Mounted on /mcp with its own auth (PAT) and
-// CORS — completely separate from the cookie-authenticated /api/* routes.
-// Must be mounted BEFORE the SPA fallback (`app.get("*", ...)`).
-app.route("/mcp", createMcpApp(db, rawDb));
 
 // Block other app routes that don't belong to this app
 const blockedPrefixes = ["/hub", "/myhealth", "/health", "/mymoney"];

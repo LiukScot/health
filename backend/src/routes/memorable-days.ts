@@ -1,10 +1,9 @@
 import { Hono } from "hono";
 import { and, desc, eq, sql } from "drizzle-orm";
 import type { DrizzleDB } from "../db/index.ts";
-import { memorableDays, userPreferences } from "../db/index.ts";
+import { memorableDays } from "../db/index.ts";
 import type { SQLiteDB } from "../db.ts";
-import { parseJson, parseIdParam, DATE_RE } from "../helpers.ts";
-import { deriveBirthdayMemorableDay, toMemorableDayView } from "../helpers/memorable-days.ts";
+import { parseJson, parseIdParam } from "../helpers.ts";
 import { memorableDaySchema } from "../schemas.ts";
 import { requireAuth } from "../middleware/auth.ts";
 
@@ -14,51 +13,26 @@ const memorableDaysRoute = new Hono<Env>();
 
 memorableDaysRoute.use(requireAuth);
 
-function todayIso() {
-  return new Date().toISOString().slice(0, 10);
-}
-
 memorableDaysRoute.get("/", (c) => {
   const db = c.get("db");
   const userId = c.get("userId");
-  const todayParam = c.req.query("today");
-  if (todayParam && !DATE_RE.test(todayParam)) {
-    return c.json({ error: { code: "INVALID_DATE", message: "today must be YYYY-MM-DD" } }, 400);
-  }
-  const today = todayParam || todayIso();
 
   const rows = db
-    .select()
+    .select({
+      id: memorableDays.id,
+      date: memorableDays.date,
+      title: memorableDays.title,
+      emoji: memorableDays.emoji,
+      description: memorableDays.description,
+      createdAt: memorableDays.createdAt,
+      updatedAt: memorableDays.updatedAt,
+    })
     .from(memorableDays)
     .where(eq(memorableDays.userId, userId))
     .orderBy(desc(memorableDays.date), desc(memorableDays.id))
     .all();
 
-  const prefs = db
-    .select({ birthday: userPreferences.birthday })
-    .from(userPreferences)
-    .where(eq(userPreferences.userId, userId))
-    .limit(1)
-    .get();
-
-  const items = rows.map((row) =>
-    toMemorableDayView(
-      {
-        id: row.id,
-        date: row.date,
-        title: row.title,
-        emoji: row.emoji,
-        description: row.description,
-        repeatMode: row.repeatMode as "one-time" | "monthly" | "yearly",
-        createdAt: row.createdAt,
-        updatedAt: row.updatedAt,
-      },
-      today,
-    ),
-  );
-
-  const birthdayItem = prefs?.birthday ? deriveBirthdayMemorableDay(prefs.birthday, today) : null;
-  return c.json({ data: birthdayItem ? [birthdayItem, ...items] : items });
+  return c.json({ data: rows });
 });
 
 memorableDaysRoute.post("/", async (c) => {
@@ -73,7 +47,6 @@ memorableDaysRoute.post("/", async (c) => {
       title: body.title.trim(),
       emoji: body.emoji?.trim() ?? "",
       description: body.description?.trim() ?? "",
-      repeatMode: body.repeatMode,
     })
     .returning({ id: memorableDays.id })
     .get();
@@ -95,7 +68,6 @@ memorableDaysRoute.put("/:id", async (c) => {
       title: body.title.trim(),
       emoji: body.emoji?.trim() ?? "",
       description: body.description?.trim() ?? "",
-      repeatMode: body.repeatMode,
       updatedAt: sql`CURRENT_TIMESTAMP`,
     })
     .where(and(eq(memorableDays.id, id), eq(memorableDays.userId, userId)))

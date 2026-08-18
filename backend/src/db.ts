@@ -26,6 +26,7 @@ const ALLOWED_TABLE_NAMES = new Set([
   "user_preferences",
   "pain_options",
   "monthly_movements",
+  "memorable_days",
 ]);
 
 function columnExists(db: SQLiteDB, tableName: string, columnName: string): boolean {
@@ -34,6 +35,18 @@ function columnExists(db: SQLiteDB, tableName: string, columnName: string): bool
   }
   const rows = db.query(`PRAGMA table_info(${tableName})`).all() as Array<{ name: string }>;
   return rows.some((row) => row.name === columnName);
+}
+
+// Columns left behind by removed features. Guarded by columnExists so the drop
+// runs once against an existing database and is a no-op from then on; SQLite
+// rebuilds the table, which is why this is not in the plain statement list.
+function dropRemovedColumns(db: SQLiteDB): void {
+  if (columnExists(db, "user_preferences", "birthday")) {
+    db.exec(`ALTER TABLE user_preferences DROP COLUMN birthday`);
+  }
+  if (columnExists(db, "memorable_days", "repeat_mode")) {
+    db.exec(`ALTER TABLE memorable_days DROP COLUMN repeat_mode`);
+  }
 }
 
 function ensureMoodColumns(db: SQLiteDB): void {
@@ -55,9 +68,6 @@ function ensurePainColumns(db: SQLiteDB): void {
 }
 
 function ensureUserPreferenceColumns(db: SQLiteDB): void {
-  if (!columnExists(db, "user_preferences", "birthday")) {
-    db.exec(`ALTER TABLE user_preferences ADD COLUMN birthday TEXT`);
-  }
   if (!columnExists(db, "user_preferences", "show_zero_assets")) {
     db.exec(`ALTER TABLE user_preferences ADD COLUMN show_zero_assets INTEGER NOT NULL DEFAULT 0`);
   }
@@ -176,6 +186,7 @@ export function runMigrations(db: SQLiteDB): void {
     ensureMovementColumns(db);
     backfillPainColumnsFromLegacyTags(db);
     dropLegacyPainTables(db);
+    dropRemovedColumns(db);
     backfillFtsTables(db);
 
     db.query(

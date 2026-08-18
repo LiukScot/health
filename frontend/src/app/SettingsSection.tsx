@@ -17,9 +17,6 @@ export function SettingsSection({
   nav: NavItem;
   money: MoneySettingsProps;
   auth: ReturnType<typeof useAuth>;
-  birthday: string | null;
-  birthdayPending: boolean;
-  onSaveBirthday: (birthday: string | null) => void;
   purgeConfirmArmed: boolean;
   purgePending: boolean;
   purgeError: InlineMessage | null;

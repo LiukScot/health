@@ -39,7 +39,6 @@ backup.get("/json", (c) => {
     chatRange: userPreferences.chatRange,
     lastRange: userPreferences.lastRange,
     graphSelectionJson: userPreferences.graphSelectionJson,
-    birthday: userPreferences.birthday,
   }).from(userPreferences).where(eq(userPreferences.userId, userId)).limit(1).get();
 
   // Map Drizzle rows to the format rowsToHealthBackup expects (snake_case)
@@ -87,7 +86,6 @@ backup.get("/json", (c) => {
           try { return prefs?.graphSelectionJson ? JSON.parse(prefs.graphSelectionJson) : {}; }
           catch (err) { console.error("Failed to parse graphSelectionJson:", err); return {}; }
         })(),
-        birthday: prefs?.birthday ?? null,
       }
     }
   });
@@ -202,16 +200,15 @@ backup.post("/json/import", async (c) => {
     if (parsedPrefs) {
       const pref = parsedPrefs;
       rawDb.query(
-        `INSERT INTO user_preferences (user_id, model, chat_range, last_range, graph_selection_json, birthday, updated_at)
-         VALUES (?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
+        `INSERT INTO user_preferences (user_id, model, chat_range, last_range, graph_selection_json, updated_at)
+         VALUES (?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
          ON CONFLICT(user_id) DO UPDATE SET
           model=excluded.model,
           chat_range=excluded.chat_range,
           last_range=excluded.last_range,
           graph_selection_json=excluded.graph_selection_json,
-          birthday=excluded.birthday,
           updated_at=CURRENT_TIMESTAMP`
-      ).run(userId, pref.model, pref.chatRange, pref.lastRange, JSON.stringify(pref.graphSelection ?? {}), pref.birthday ?? null);
+      ).run(userId, pref.model, pref.chatRange, pref.lastRange, JSON.stringify(pref.graphSelection ?? {}));
     }
   });
 
@@ -412,7 +409,6 @@ backup.post("/purge", async (c) => {
     rawDb.query(`DELETE FROM pain_options WHERE user_id = ?`).run(userId);
     rawDb.query(`DELETE FROM pain_removed_options WHERE user_id = ?`).run(userId);
     rawDb.query(`DELETE FROM mood_options WHERE user_id = ?`).run(userId);
-    rawDb.query(`DELETE FROM mcp_tokens WHERE user_id = ?`).run(userId);
   });
   tx();
   return c.json({ data: { ok: true } });

@@ -3,15 +3,13 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { z } from "zod";
 import { toast } from "sonner";
 import { apiEnvelopeSchema, apiFetch, getErrorMessage } from "../lib";
-import { memorableDayListSchema, memorableRepeatModeSchema } from "../app/core";
-import type { MemorableDay, MemorableRepeatMode } from "../app/core";
+import { memorableDayListSchema } from "../app/core";
 
 type MemorableDayPayload = {
   date: string;
   title: string;
   emoji: string;
   description: string;
-  repeatMode: MemorableRepeatMode;
 };
 
 function todayKey() {
@@ -20,15 +18,6 @@ function todayKey() {
   const mm = String(now.getMonth() + 1).padStart(2, '0');
   const dd = String(now.getDate()).padStart(2, '0');
   return `${yyyy}-${mm}-${dd}`;
-}
-
-export function matchesMemorableDate(item: MemorableDay, date: string) {
-  if (date < item.date) return false;
-  const [, itemMonth, itemDay] = item.date.split("-").map(Number);
-  const [, dateMonth, dateDay] = date.split("-").map(Number);
-  if (item.repeatMode === "one-time") return item.date === date;
-  if (item.repeatMode === "monthly") return itemDay === dateDay;
-  return itemMonth === dateMonth && itemDay === dateDay;
 }
 
 export function useMemorableDays(enabled: boolean) {
@@ -44,7 +33,7 @@ export function useMemorableDays(enabled: boolean) {
     queryKey: ["memorable-days", today],
     enabled,
     queryFn: async () =>
-      apiFetch(`/api/v1/memorable-days?today=${today}`, { method: "GET" }, (raw) => memorableDayListSchema.parse(raw).data),
+      apiFetch("/api/v1/memorable-days", { method: "GET" }, (raw) => memorableDayListSchema.parse(raw).data),
   });
 
   const mutationParser = (raw: unknown) => apiEnvelopeSchema(z.object({ ok: z.boolean().optional(), id: z.number().optional() })).parse(raw).data;
@@ -80,7 +69,7 @@ export function useMemorableDays(enabled: boolean) {
     () => [...(memorableDaysQuery.data ?? [])].sort((left, right) => right.date.localeCompare(left.date) || left.title.localeCompare(right.title)),
     [memorableDaysQuery.data],
   );
-  const todayItems = useMemo(() => sortedItems.filter((item) => matchesMemorableDate(item, todayKey())), [sortedItems]);
+  const todayItems = useMemo(() => sortedItems.filter((item) => item.date === today), [sortedItems, today]);
 
   return {
     memorableDays: sortedItems,
@@ -103,5 +92,4 @@ export const memorableDayPayloadSchema = z.object({
   title: z.string().trim().min(1),
   emoji: z.string().trim().max(16).default(""),
   description: z.string().max(1000).default(""),
-  repeatMode: memorableRepeatModeSchema,
 });

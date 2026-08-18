@@ -85,13 +85,13 @@ export function DashboardSection({
       <h1 className={PAGE_TITLE}>Dashboard</h1>
 
       <div className="flex flex-wrap gap-3 items-end">
-        <label className="flex flex-col gap-2">
+        <label className="flex flex-col gap-2 flex-1 mobile:flex-none" htmlFor="dashboard-from">
           <span className={FIELD_LINE_LABEL}>From</span>
-          <DateInput value={dashboardFrom} onChange={(v) => onDateChange("from", v)} ariaLabel="From date" />
+          <DateInput id="dashboard-from" name="dashboard-from" value={dashboardFrom} onChange={(v) => onDateChange("from", v)} ariaLabel="From date" />
         </label>
-        <label className="flex flex-col gap-2">
+        <label className="flex flex-col gap-2 flex-1 mobile:flex-none" htmlFor="dashboard-to">
           <span className={FIELD_LINE_LABEL}>To</span>
-          <DateInput value={dashboardTo} onChange={(v) => onDateChange("to", v)} ariaLabel="To date" />
+          <DateInput id="dashboard-to" name="dashboard-to" value={dashboardTo} onChange={(v) => onDateChange("to", v)} ariaLabel="To date" />
         </label>
         <div className="flex gap-2 flex-wrap">
           {dashboardQuickRanges.map((range) => (
@@ -127,10 +127,9 @@ export function DashboardSection({
               <div className="grid gap-3 min-w-0 grid-cols-[repeat(2,minmax(0,1fr))] wide:grid-cols-4">
                 {anniversaryCards.map((card) => (
                   <Kpi
-                    key={`${card.source}-${card.id}-${card.date}`}
+                    key={card.id}
                     label={`${card.emoji || "✨"} ${card.title}`}
-                    value={card.occurrenceLabel}
-                    sub={card.locked ? undefined : card.repeatMode}
+                    value={card.description || "Today"}
                   />
                 ))}
               </div>

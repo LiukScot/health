@@ -75,11 +75,8 @@ export const prefsSchema = apiEnvelopeSchema(
     chatRange: z.string(),
     lastRange: z.string(),
     graphSelection: z.record(z.string(), z.boolean()),
-    birthday: z.union([z.string().regex(/^\d{4}-\d{2}-\d{2}$/, { message: "Birthday must be in YYYY-MM-DD format" }), z.null()]).nullable().optional().default(null),
   }),
 );
-
-export const memorableRepeatModeSchema = z.enum(["one-time", "monthly", "yearly"]);
 
 export const memorableDaySchema = z.object({
   id: z.number(),
@@ -87,13 +84,8 @@ export const memorableDaySchema = z.object({
   title: z.string(),
   emoji: z.string(),
   description: z.string(),
-  repeatMode: memorableRepeatModeSchema,
   createdAt: z.string(),
   updatedAt: z.string(),
-  locked: z.boolean(),
-  source: z.enum(["user", "birthday"]),
-  occurrenceLabel: z.string(),
-  occurrenceCount: z.number().nullable(),
 });
 
 export const memorableDayListSchema = apiEnvelopeSchema(z.array(memorableDaySchema));
@@ -220,7 +212,6 @@ export type DiaryEntry = z.infer<typeof diaryEntrySchema>;
 export type PainEntry = z.infer<typeof painEntrySchema>;
 export type CbtEntry = z.infer<typeof cbtEntrySchema>;
 export type DbtEntry = z.infer<typeof dbtEntrySchema>;
-export type MemorableRepeatMode = z.infer<typeof memorableRepeatModeSchema>;
 export type MemorableDay = z.infer<typeof memorableDaySchema>;
 export type DiaryFormValues = z.infer<typeof diaryFormSchema>;
 export type PainFormValues = z.infer<typeof painFormSchema>;
@@ -342,13 +333,11 @@ export type WellbeingSeriesKey = (typeof wellbeingSeriesKeys)[number];
 export const wellbeingGraphId = "graph-wellbeing";
 export const defaultPrefsValue = {
   // model and chatRange are kept for backwards compatibility with the
-  // user_preferences DB columns but no longer surfaced in the UI (Mistral
-  // chatbot was replaced by the MCP server).
+  // user_preferences DB columns but no longer surfaced in the UI.
   model: "",
   chatRange: "all",
   lastRange: "all",
   graphSelection: {},
-  birthday: null,
 };
 
 export function formatMonthLabel(value: Date) {

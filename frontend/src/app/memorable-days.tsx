@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { SectionHead, useSplitColumnHeightSync } from "./shared";
 import { MS_PER_DAY, toDateKey, type MemorableDay } from "./core";
-import { matchesMemorableDate, type useMemorableDays } from "../hooks/use-memorable-days";
+import { type useMemorableDays } from "../hooks/use-memorable-days";
 import { Button, buttonClass } from "../components/ui/Button";
 import { EntriesHeading } from "./entries";
 import { MemorableDayModal, type DraftState } from "./memorable-day-modal";
@@ -19,12 +19,6 @@ export { MEMO_DAY_CELL, MEMO_LIST_ITEM, DAY_NUMBER, EMOJI_TRIGGER } from "./memo
 
 type Props = {
   memorable: ReturnType<typeof useMemorableDays>;
-};
-
-type MemorableLookups = {
-  oneTimeByDate: Map<string, MemorableDay[]>;
-  monthlyByDay: Map<number, MemorableDay[]>;
-  yearlyByMonthDay: Map<string, MemorableDay[]>;
 };
 
 function buildCalendarDays(month: Date, weekStart: "sunday" | "monday") {
@@ -45,29 +39,15 @@ function buildCalendarDays(month: Date, weekStart: "sunday" | "monday") {
 }
 
 function emptyDraft(date: string): DraftState {
-  return { id: null, date, title: "", emoji: "", description: "", repeatMode: "one-time", locked: false };
+  return { id: null, date, title: "", emoji: "", description: "" };
 }
 
-function buildMemorableLookups(items: MemorableDay[]): MemorableLookups {
-  const oneTimeByDate = new Map<string, MemorableDay[]>();
-  const monthlyByDay = new Map<number, MemorableDay[]>();
-  const yearlyByMonthDay = new Map<string, MemorableDay[]>();
-
+function buildMemorableLookup(items: MemorableDay[]): Map<string, MemorableDay[]> {
+  const byDate = new Map<string, MemorableDay[]>();
   for (const item of items) {
-    const [, month, day] = item.date.split("-").map(Number);
-    if (item.repeatMode === "one-time") {
-      oneTimeByDate.set(item.date, [...(oneTimeByDate.get(item.date) ?? []), item]);
-      continue;
-    }
-    if (item.repeatMode === "monthly") {
-      monthlyByDay.set(day, [...(monthlyByDay.get(day) ?? []), item]);
-      continue;
-    }
-    const monthDayKey = `${String(month).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
-    yearlyByMonthDay.set(monthDayKey, [...(yearlyByMonthDay.get(monthDayKey) ?? []), item]);
+    byDate.set(item.date, [...(byDate.get(item.date) ?? []), item]);
   }
-
-  return { oneTimeByDate, monthlyByDay, yearlyByMonthDay };
+  return byDate;
 }
 
 export function MemorableDaysSection({ memorable }: Props) {
@@ -80,19 +60,10 @@ export function MemorableDaysSection({ memorable }: Props) {
     ? ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
     : ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
   const days = useMemo(() => buildCalendarDays(memorable.visibleMonth, memorable.weekStart), [memorable.visibleMonth, memorable.weekStart]);
-  const lookups = useMemo(() => buildMemorableLookups(memorable.memorableDays), [memorable.memorableDays]);
+  const itemsByDate = useMemo(() => buildMemorableLookup(memorable.memorableDays), [memorable.memorableDays]);
   const todayKey = toDateKey(new Date());
   const { leftColRef, rightColRef } = useSplitColumnHeightSync([days.length, memorable.memorableDays.length, memorable.isLoading]);
-  const popoverItems = useMemo(() => {
-    if (!popoverDateKey) return [];
-    const [,, day] = popoverDateKey.split("-").map(Number);
-    const monthDayKey = popoverDateKey.slice(5);
-    return [
-      ...(lookups.oneTimeByDate.get(popoverDateKey) ?? []),
-      ...(lookups.monthlyByDay.get(day) ?? []),
-      ...(lookups.yearlyByMonthDay.get(monthDayKey) ?? []),
-    ].filter((item) => matchesMemorableDate(item, popoverDateKey));
-  }, [popoverDateKey, lookups]);
+  const popoverItems = popoverDateKey ? itemsByDate.get(popoverDateKey) ?? [] : [];
 
   useEffect(() => {
     if (!successDateKey) return;
@@ -128,13 +99,11 @@ export function MemorableDaysSection({ memorable }: Props) {
     memorable.setSelectedDate(item.date);
     memorable.setVisibleMonth(new Date(`${item.date}T00:00:00`));
     setDraft({
-      id: item.id > 0 ? item.id : null,
+      id: item.id,
       date: item.date,
       title: item.title,
       emoji: item.emoji,
       description: item.description,
-      repeatMode: item.repeatMode,
-      locked: item.locked,
     });
   };
 
@@ -144,7 +113,6 @@ export function MemorableDaysSection({ memorable }: Props) {
       title: savedDraft.title,
       emoji: savedDraft.emoji,
       description: savedDraft.description,
-      repeatMode: savedDraft.repeatMode,
     };
     if (savedDraft.id) await memorable.updateMemorableDay(savedDraft.id, payload);
     else await memorable.createMemorableDay(payload);
@@ -179,13 +147,15 @@ export function MemorableDaysSection({ memorable }: Props) {
       <div>
         <div>
           <h1 className={`${PAGE_TITLE} mb-page`}>Memorable days</h1>
-          <SectionHead title="Calendar" variant="dashboard" />
+          <div className="max-mobile:hidden">
+            <SectionHead title="Calendar" variant="dashboard" />
+          </div>
         </div>
       </div>
-      <Button variant="primary" className="absolute top-8 right-2" onClick={() => openCreate(toDateKey(new Date()))}>Add new</Button>
+      <Button variant="primary" className="absolute top-8 right-2 max-mobile:hidden" onClick={() => openCreate(toDateKey(new Date()))}>Add new</Button>
 
       <div className="grid gap-12 items-start grid-cols-[minmax(0,1.55fr)_minmax(280px,0.9fr)] max-xwide:grid-cols-1 max-xwide:gap-0">
-        <section ref={leftColRef} className="min-w-0 p-0 max-xwide:border-b max-xwide:border-border max-xwide:pb-8">
+        <section ref={leftColRef} className="min-w-0 p-0 max-xwide:border-b max-xwide:border-border max-xwide:pb-8 max-mobile:hidden">
           <div className="flex items-center justify-between gap-2 mb-8 min-w-0">
             <Button className="flex-shrink-0 tracking-[0.01em]" onClick={() => memorable.setVisibleMonth(new Date(memorable.visibleMonth.getFullYear(), memorable.visibleMonth.getMonth() - 1, 1))}>
               Prev
@@ -210,12 +180,7 @@ export function MemorableDaysSection({ memorable }: Props) {
               const monthMatch = day.getMonth() === memorable.visibleMonth.getMonth();
               const isToday = dayKey === todayKey;
               const isSuccess = dayKey === successDateKey;
-              const monthDayKey = dayKey.slice(5);
-              const items = [
-                ...(lookups.oneTimeByDate.get(dayKey) ?? []),
-                ...(lookups.monthlyByDay.get(day.getDate()) ?? []),
-                ...(lookups.yearlyByMonthDay.get(monthDayKey) ?? []),
-              ].filter((item) => matchesMemorableDate(item, dayKey));
+              const items = itemsByDate.get(dayKey) ?? [];
               return (
                 <div
                   key={dayKey}
@@ -242,7 +207,7 @@ export function MemorableDaysSection({ memorable }: Props) {
                   </span>
                   <span className="flex flex-col gap-2">
                     {items.slice(0, 2).map((item) => (
-                      <span key={`${item.source}-${item.id}-${item.date}`} className="text-xs leading-snug text-muted whitespace-nowrap overflow-hidden text-ellipsis">
+                      <span key={item.id} className="text-xs leading-snug text-muted whitespace-nowrap overflow-hidden text-ellipsis">
                         {item.emoji || "•"} {item.title}
                       </span>
                     ))}
@@ -263,14 +228,14 @@ export function MemorableDaysSection({ memorable }: Props) {
           ) : memorable.memorableDays.length === 0 ? (
             <div className="grid gap-2 my-3">
               <p className="text-control font-semibold text-text m-0">No memorable days yet</p>
-              <p className="max-w-[60ch] text-control text-muted leading-normal m-0">Add one birthday, anniversary, or event to start the list.</p>
+              <p className="max-w-[60ch] text-control text-muted leading-normal m-0">Add one date worth remembering to start the list.</p>
             </div>
           ) : (
-            <div className="memorable-list flex flex-col flex-[1_1_auto] min-h-0 overflow-y-auto overflow-x-hidden gap-3 [scrollbar-width:thin] [scrollbar-color:transparent_transparent] hover:[scrollbar-color:rgba(255,255,255,0.18)_transparent] focus-within:[scrollbar-color:rgba(255,255,255,0.18)_transparent] max-xwide:max-h-none">
+            <div className="memorable-list flex flex-col flex-[1_1_auto] min-h-0 overflow-y-auto overflow-x-hidden gap-3 [scrollbar-width:thin] [scrollbar-color:transparent_transparent] hover:[scrollbar-color:rgba(255,255,255,0.18)_transparent] focus-within:[scrollbar-color:rgba(255,255,255,0.18)_transparent] max-xwide:max-h-none max-mobile:pb-20">
               {memorable.memorableDays.map((item) => (
                 <button
                   type="button"
-                  key={`${item.source}-${item.id}-${item.date}`}
+                  key={item.id}
                   className={MEMO_LIST_ITEM}
                   onWheelCapture={onListItemWheel}
                   onClick={() => openEdit(item)}
@@ -281,7 +246,9 @@ export function MemorableDaysSection({ memorable }: Props) {
                       <strong className="text-base min-w-0 text-text">{item.title}</strong>
                       <span className="text-muted text-control flex-shrink-0 text-right">{item.date}</span>
                     </span>
-                    <span className="text-micro text-muted-soft">{item.locked ? "Locked from Settings" : item.repeatMode}</span>
+                    {item.description ? (
+                      <span className="text-micro text-muted-soft w-full text-left truncate">{item.description}</span>
+                    ) : null}
                   </span>
                 </button>
               ))}
@@ -289,6 +256,15 @@ export function MemorableDaysSection({ memorable }: Props) {
           )}
         </section>
       </div>
+
+      <button
+        type="button"
+        className="mobile:hidden fixed bottom-6 right-6 z-20 w-14 h-14 flex items-center justify-center rounded-full border-0 cursor-pointer bg-accent text-accent-fg text-2xl leading-none shadow-[var(--shadow)] focus-visible:outline-none focus-visible:shadow-[0_0_0_2px_var(--ring)]"
+        aria-label="Add memorable day"
+        onClick={() => openCreate(toDateKey(new Date()))}
+      >
+        +
+      </button>
 
       {draft ? (
         <MemorableDayModal
@@ -308,7 +284,7 @@ export function MemorableDaysSection({ memorable }: Props) {
             <div className="flex flex-col gap-2 m-0 mb-2">
               {popoverItems.map((item) => (
                 <button
-                  key={`${item.source}-${item.id}-${item.date}`}
+                  key={item.id}
                   type="button"
                   className="flex items-center gap-3 bg-card-soft border-0 shadow-none min-h-0 p-[8px_12px] rounded-md text-text text-left cursor-pointer w-full transition-[background] duration-150 ease-[ease] hover:bg-[color-mix(in_srgb,var(--accent)_10%,transparent)]"
                   onClick={() => {
@@ -319,7 +295,7 @@ export function MemorableDaysSection({ memorable }: Props) {
                   <span className="text-xl flex-shrink-0">{item.emoji || "✨"}</span>
                   <span className="flex flex-col gap-[2px]">
                     <strong className="text-text">{item.title}</strong>
-                    <span className="text-micro text-muted-soft">{item.repeatMode}</span>
+                    {item.description ? <span className="text-micro text-muted-soft">{item.description}</span> : null}
                   </span>
                 </button>
               ))}

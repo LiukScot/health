@@ -104,17 +104,17 @@ describe("copyMoneyData", () => {
     seedMoney(source);
     const { rawDb, userId } = await setupTarget();
     rawDb
-      .query(`INSERT INTO user_preferences (user_id, birthday, model) VALUES (?, '1990-06-15', 'custom')`)
+      .query(`INSERT INTO user_preferences (user_id, chat_range, model) VALUES (?, '30d', 'custom')`)
       .run(userId);
 
     copyMoneyData(source, rawDb, EMAIL);
 
-    const row = rawDb.query(`SELECT birthday, model, show_zero_assets FROM user_preferences`).get() as {
-      birthday: string;
+    const row = rawDb.query(`SELECT chat_range, model, show_zero_assets FROM user_preferences`).get() as {
+      chat_range: string;
       model: string;
       show_zero_assets: number;
     };
-    expect(row).toMatchObject({ birthday: "1990-06-15", model: "custom", show_zero_assets: 1 });
+    expect(row).toMatchObject({ chat_range: "30d", model: "custom", show_zero_assets: 1 });
   });
 
   test("refuses to run when the email is missing on either side", async () => {

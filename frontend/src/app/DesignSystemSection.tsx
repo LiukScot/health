@@ -3,6 +3,7 @@ import { PAGE_TITLE } from "./screen-helpers";
 import { STAGE, StageField, StageHead, StageScale, StageStepper } from "./staged";
 import { FIELD_LINE_INPUT } from "../components/ui/FieldLine";
 import { Button } from "../components/ui/Button";
+import { DATE_TIME_INPUT } from "../components/ui/DateInput";
 import { FieldLine } from "../components/ui/FieldLine";
 import { SectionHead } from "./shared";
 import { NAV_ITEM, NAV_ITEM_ACTIVE, NAV_ITEM_IDLE } from "./Sidebar";
@@ -175,7 +176,7 @@ export function DesignSystemSection() {
             <SectionHead title="Form fields" aside="Field-line" variant="ds" />
             <div className="flex flex-col gap-3">
               <FieldLine label="Text" type="text" defaultValue="Sample value" aria-label="Text" />
-              <FieldLine label="Date & time" type="datetime-local" defaultValue="2026-04-18T17:30" aria-label="Date/time" className="!w-auto justify-self-start" />
+              <FieldLine label="Date & time" id="ds-datetime" name="ds-datetime" type="datetime-local" defaultValue="2026-04-18T17:30" aria-label="Date/time" className={DATE_TIME_INPUT} />
               <FieldLine label="Description" multiline rows={2} placeholder="Free text area…" aria-label="Description" />
             </div>
           </section>

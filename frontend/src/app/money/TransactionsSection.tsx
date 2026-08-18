@@ -1,6 +1,7 @@
 import { useId } from "react";
 import { Controller, type UseFormReturn } from "react-hook-form";
 import { Button } from "../../components/ui/Button";
+import { DATE_TIME_INPUT } from "../../components/ui/DateInput";
 import { FieldLine, FIELD_LINE_LABEL } from "../../components/ui/FieldLine";
 import { Select } from "../../components/ui/select";
 import { AnimatedEditingLabel } from "../shared";
@@ -84,6 +85,7 @@ export function TransactionsSection({
             id="tx-date"
             type="date"
             aria-label="Date"
+            className={DATE_TIME_INPUT}
             {...txForm.register("txDate")}
             onClick={(e) => {
               const el = e.currentTarget as HTMLInputElement & { showPicker?: () => void };

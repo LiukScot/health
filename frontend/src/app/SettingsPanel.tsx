@@ -1,22 +1,16 @@
-import { useEffect, useState } from "react";
 import type { InlineMessage, NavItem } from "./core";
 import { THEMES } from "./core";
 import type { useAuth } from "../hooks/use-auth";
 import { useTheme } from "../hooks/use-theme";
 import { getErrorMessage } from "../lib";
 import { InlineFeedback, SectionHead } from "./shared";
-import { McpAccessSection } from "./McpAccessSection";
 import { MedicinePreselectionSection } from "./MedicinePreselectionSection";
-import { DateInput } from "../components/ui/DateInput";
 import { Button, buttonClass } from "../components/ui/Button";
 import { FieldLine } from "../components/ui/FieldLine";
 import { MoneySettings, type MoneySettingsProps } from "./money/MoneySettings";
 
 type SettingsSectionProps = {
   auth: ReturnType<typeof useAuth>;
-  birthday: string | null;
-  birthdayPending: boolean;
-  onSaveBirthday: (birthday: string | null) => void;
   purgeConfirmArmed: boolean;
   purgePending: boolean;
   purgeError: InlineMessage | null;
@@ -28,32 +22,6 @@ type SettingsSectionProps = {
   onExportXlsx: () => void;
   onImportXlsx: (file: File) => void;
 };
-
-function BirthdayBlock({
-  birthday,
-  birthdayPending,
-  onSaveBirthday,
-}: Pick<SettingsSectionProps, "birthday" | "birthdayPending" | "onSaveBirthday">) {
-  const [value, setValue] = useState(birthday ?? "");
-
-  // eslint-disable-next-line react-hooks/set-state-in-effect
-  useEffect(() => { setValue(birthday ?? ""); }, [birthday]);
-
-  const handleChange = (next: string) => {
-    setValue(next);
-    onSaveBirthday(next || null);
-  };
-
-  return (
-    <div className="grid gap-3">
-      <SectionHead title="Birthday" />
-      <label className="grid gap-2 content-start">
-        <DateInput value={value} onChange={handleChange} ariaLabel="Birthday" />
-      </label>
-      <p className="text-muted text-control">Why: this becomes a locked birthday item in Memorable days.{birthdayPending ? " Saving…" : ""}</p>
-    </div>
-  );
-}
 
 function ThemeBlock() {
   const { theme, setTheme } = useTheme();
@@ -274,11 +242,6 @@ export function SettingsScreen({ nav, money, ...props }: SettingsSectionProps & 
     case "settings-health":
       return (
         <div className="grid grid-cols-1 gap-5">
-          <BirthdayBlock
-            birthday={props.birthday}
-            birthdayPending={props.birthdayPending}
-            onSaveBirthday={props.onSaveBirthday}
-          />
           <MedicinePreselectionSection enabled />
           <SectionHead title="Backup" />
           <BackupBlock
@@ -287,7 +250,6 @@ export function SettingsScreen({ nav, money, ...props }: SettingsSectionProps & 
             onExportXlsx={props.onExportXlsx}
             onImportXlsx={props.onImportXlsx}
           />
-          <McpAccessSection enabled />
           <SectionHead title="Danger zone" />
           <DangerBlock
             purgeConfirmArmed={props.purgeConfirmArmed}

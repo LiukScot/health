@@ -21,7 +21,6 @@ export {
   painRemovedOptions,
   painOptions,
   moodOptions,
-  mcpTokens,
   memorableDays,
   metricTypes,
   transactions,

@@ -22,7 +22,6 @@ preferences.get("/", (c) => {
       chatRange: userPreferences.chatRange,
       lastRange: userPreferences.lastRange,
       graphSelectionJson: userPreferences.graphSelectionJson,
-      birthday: userPreferences.birthday,
       updatedAt: userPreferences.updatedAt,
     })
     .from(userPreferences)
@@ -37,7 +36,6 @@ preferences.get("/", (c) => {
         chatRange: "all",
         lastRange: "all",
         graphSelection: {},
-        birthday: null,
       }
     });
   }
@@ -56,7 +54,6 @@ preferences.get("/", (c) => {
       chatRange: row.chatRange,
       lastRange: row.lastRange,
       graphSelection,
-      birthday: row.birthday ?? null,
       updatedAt: row.updatedAt
     }
   });
@@ -73,7 +70,6 @@ preferences.put("/", async (c) => {
       chatRange: body.chatRange,
       lastRange: body.lastRange,
       graphSelectionJson: JSON.stringify(body.graphSelection ?? {}),
-      birthday: body.birthday ?? null,
       updatedAt: sql`CURRENT_TIMESTAMP`,
     })
     .onConflictDoUpdate({
@@ -83,7 +79,6 @@ preferences.put("/", async (c) => {
         chatRange: sql`excluded.chat_range`,
         lastRange: sql`excluded.last_range`,
         graphSelectionJson: sql`excluded.graph_selection_json`,
-        birthday: sql`excluded.birthday`,
         updatedAt: sql`CURRENT_TIMESTAMP`,
       },
     })

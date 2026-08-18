@@ -113,7 +113,6 @@ export const userPreferences = sqliteTable("user_preferences", {
   chatRange: text("chat_range").notNull().default("all"),
   lastRange: text("last_range").notNull().default("all"),
   graphSelectionJson: text("graph_selection_json").notNull().default("{}"),
-  birthday: text("birthday"),
   // Money realm: kept here rather than in a second preferences table, since
   // there is one row per user either way.
   showZeroAssets: integer("show_zero_assets").notNull().default(0),
@@ -129,7 +128,6 @@ export const memorableDays = sqliteTable(
     title: text("title").notNull(),
     emoji: text("emoji").notNull().default(""),
     description: text("description").notNull().default(""),
-    repeatMode: text("repeat_mode").notNull(),
     createdAt: text("created_at").notNull().default(sql`CURRENT_TIMESTAMP`),
     updatedAt: text("updated_at").notNull().default(sql`CURRENT_TIMESTAMP`),
   },
@@ -197,22 +195,6 @@ export const metricTypes = sqliteTable(
   },
   (table) => [
     uniqueIndex("idx_metric_types_user_key").on(table.userId, table.key),
-  ]
-);
-
-export const mcpTokens = sqliteTable(
-  "mcp_tokens",
-  {
-    id: integer("id").primaryKey({ autoIncrement: true }),
-    userId: integer("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
-    tokenHash: text("token_hash").notNull().unique(),
-    label: text("label").notNull().default(""),
-    createdAt: text("created_at").notNull().default(sql`CURRENT_TIMESTAMP`),
-    expiresAt: text("expires_at"),
-    lastUsedAt: text("last_used_at"),
-  },
-  (table) => [
-    index("idx_mcp_tokens_user").on(table.userId),
   ]
 );
 

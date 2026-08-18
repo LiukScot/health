@@ -93,12 +93,7 @@ export const prefsSchema = z.object({
   chatRange: z.string().max(50).default("all"),
   lastRange: z.string().max(50).default("all"),
   graphSelection: z.record(z.string(), z.unknown()).default({}),
-  birthday: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).refine(isoDateRefine, {
-    message: "Invalid birthday: must be a valid calendar date in YYYY-MM-DD format"
-  }).nullable().optional().default(null),
 });
-
-export const memorableRepeatModeSchema = z.enum(["one-time", "monthly", "yearly"]);
 
 export const memorableDaySchema = z.object({
   date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).refine(isoDateRefine, {
@@ -107,25 +102,6 @@ export const memorableDaySchema = z.object({
   title: z.string().trim().min(1).max(120),
   emoji: z.string().trim().max(16).optional().default(""),
   description: z.string().max(1000).optional().default(""),
-  repeatMode: memorableRepeatModeSchema,
-});
-
-export const mcpTokenCreateSchema = z.object({
-  label: z.string().min(0).max(100).optional().default(""),
-  // expiresAt is either an ISO timestamp string or null (= never expires).
-  // Frontend computes the absolute timestamp client-side from the chosen
-  // duration ("30d", "90d", "1y", "never") so the server stays simple.
-  expiresAt: z.string().datetime().nullable().optional().default(null).refine(
-    (val) => {
-      if (!val) return true;
-      const ts = new Date(val).getTime();
-      if (ts < Date.now()) return false;
-      const max = new Date();
-      max.setFullYear(max.getFullYear() + 1);
-      return ts <= max.getTime();
-    },
-    { message: "Expiry must be in the future and within 1 year from now" }
-  ),
 });
 
 const BACKUP_MAX_ROWS = 50_000;

@@ -233,14 +233,13 @@ describe("money purge", () => {
         chatRange: "30d",
         lastRange: "7d",
         graphSelection: { mood: true },
-        birthday: "1990-06-15",
       }),
     });
 
     await app.request("/money/data/purge", { method: "POST", headers: { cookie } });
 
     const prefs = await (await app.request("/preferences", { headers: { cookie } })).json();
-    expect(prefs.data).toMatchObject({ model: "custom-model", birthday: "1990-06-15" });
+    expect(prefs.data).toMatchObject({ model: "custom-model", chatRange: "30d", lastRange: "7d" });
     expect(prefs.data.graphSelection).toEqual({ mood: true });
   });
 
@@ -249,12 +248,12 @@ describe("money purge", () => {
     await app.request("/preferences", {
       method: "PUT",
       headers: { "Content-Type": "application/json", cookie },
-      body: JSON.stringify({ model: "m", chatRange: "all", lastRange: "all", graphSelection: {}, birthday: "1985-01-02" }),
+      body: JSON.stringify({ model: "m", chatRange: "90d", lastRange: "all", graphSelection: {} }),
     });
 
     await importJson(app, cookie, { preferences: { showZeroAssets: true } });
 
     const prefs = await (await app.request("/preferences", { headers: { cookie } })).json();
-    expect(prefs.data.birthday).toBe("1985-01-02");
+    expect(prefs.data.chatRange).toBe("90d");
   });
 });
