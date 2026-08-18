@@ -67,8 +67,8 @@ describe("money preferences", () => {
 describe("money and health preferences share one row", () => {
   test("saving money preferences keeps the health ones", async () => {
     const { app, cookie } = await setup();
-    await putHealth(app, cookie, "30d");
-    await putMoney(app, cookie, true);
+    expect((await putHealth(app, cookie, "30d")).status).toBe(200);
+    expect((await putMoney(app, cookie, true)).status).toBe(200);
 
     const health = await (await app.request("/preferences", { headers: { cookie } })).json();
     expect(health.data.chatRange).toBe("30d");
@@ -78,8 +78,8 @@ describe("money and health preferences share one row", () => {
 
   test("saving health preferences keeps the money one", async () => {
     const { app, cookie } = await setup();
-    await putMoney(app, cookie, true);
-    await putHealth(app, cookie, "1985-01-02");
+    expect((await putMoney(app, cookie, true)).status).toBe(200);
+    expect((await putHealth(app, cookie, "90d")).status).toBe(200);
 
     const money = await (await app.request("/money/preferences", { headers: { cookie } })).json();
     expect(money.data.showZeroAssets).toBe(true);

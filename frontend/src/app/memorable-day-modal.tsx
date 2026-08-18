@@ -216,9 +216,9 @@ export function MemorableDayModal({ initialDraft, isSaving, onSave, onDelete, on
         <SectionHead title={draft.id ? "Edit memorable day" : "Add memorable day"} variant="dashboard" />
         {feedback?.tone === "error" ? <InlineFeedback message={feedback} /> : null}
         <div className="grid grid-cols-[168px_88px] gap-3 items-start justify-start">
-          <label className="grid gap-2 content-start min-w-0">
+          <label className="grid gap-2 content-start min-w-0" htmlFor="memorable-date">
             <span className={FIELD_LINE_LABEL}>Date</span>
-            <DateInput value={draft.date} onChange={(value) => setDraft((current) => ({ ...current, date: value }))} ariaLabel="Date" />
+            <DateInput id="memorable-date" name="memorable-date" value={draft.date} onChange={(value) => setDraft((current) => ({ ...current, date: value }))} ariaLabel="Date" />
           </label>
           <label className="grid gap-2 content-start w-[88px] min-w-[88px] justify-self-end self-start">
             <span className={FIELD_LINE_LABEL}>Emoji</span>
