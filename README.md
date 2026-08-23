@@ -88,26 +88,23 @@ For a production-style local run, use Docker directly.
 
 The server does not build anything and does not need a git checkout. Every push
 to `main` publishes `ghcr.io/liukscot/world:latest` from GitHub Actions, and
-Watchtower on the server pulls it and restarts the container within five
-minutes.
+Watchtower on the server pulls it and restarts the container on its next poll.
 
 First-time setup on the server:
 
 ```bash
 curl -O https://raw.githubusercontent.com/LiukScot/world/main/docker-compose.prod.yml
-curl -O https://raw.githubusercontent.com/LiukScot/world/main/docker-compose.watchtower.yml
 echo "ALLOWED_ORIGINS=https://your.public.url" > .env
 docker compose -f docker-compose.prod.yml up -d
-docker compose -f docker-compose.watchtower.yml up -d
 ```
 
-Watchtower updates **every** container on the host labelled
-`com.centurylinklabs.watchtower.enable=true`, so start it once for the whole
-server — not once per app.
+Watchtower itself is not part of this repo: one instance runs for the whole
+host and picks this container up automatically, because the image is tagged
+`:latest`.
 
-Nothing else is needed after that. Any nightly `git pull && docker compose up
---build` cron on the server should be removed: it would rebuild from source and
-overwrite the published image.
+Nothing else is needed after that. A nightly `git pull && docker compose up
+--build` cron must not rebuild this app: that would overwrite the published
+image with a local build.
 
 To roll back, pin the image to a commit SHA in `docker-compose.prod.yml`
 (`ghcr.io/liukscot/world:<sha>`) and run `docker compose -f
