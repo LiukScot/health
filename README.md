@@ -86,9 +86,9 @@ For a production-style local run, use Docker directly.
 
 ## Deploying to a server
 
-The server does not build anything and does not need a git checkout. Every push
-to `main` publishes `ghcr.io/liukscot/world:latest` from GitHub Actions, and
-Watchtower on the server pulls it and restarts the container on its next poll.
+The server no longer builds anything. Every push to `main` publishes
+`ghcr.io/liukscot/world:latest` from GitHub Actions, and Watchtower on the
+server pulls it and restarts the container on its next poll.
 
 First-time setup on the server:
 
@@ -98,9 +98,13 @@ echo "ALLOWED_ORIGINS=https://your.public.url" > .env
 docker compose -f docker-compose.prod.yml up -d
 ```
 
-Watchtower itself is not part of this repo: one instance runs for the whole
-host and picks this container up automatically, because the image is tagged
-`:latest`.
+A checkout is optional: keeping one means this compose file arrives with a
+`git pull` instead of being copied by hand, which is worth it if the server
+already pulls on a schedule.
+
+Watchtower itself is not part of this repo, and neither is the choice of which
+instance watches this container: that is host topology, configured on the
+server. This file only has to tag the image `:latest` for a poller to find it.
 
 Nothing else is needed after that. A nightly `git pull && docker compose up
 --build` cron must not rebuild this app: that would overwrite the published

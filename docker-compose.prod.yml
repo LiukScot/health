@@ -26,9 +26,4 @@ services:
     volumes:
       - ./data:/app/data
     restart: unless-stopped
-    labels:
-      # Handed to the "apps" Watchtower instance, which polls often, instead of
-      # the host-wide one that polls daily. An instance with no scope configured
-      # only manages containers without this label, so the two never overlap.
-      com.centurylinklabs.watchtower.scope: apps
     # Healthcheck comes from the Dockerfile; no need to repeat it here.
