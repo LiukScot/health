@@ -84,6 +84,37 @@ For a production-style local run, use Docker directly.
 
 ---
 
+## Deploying to a server
+
+The server does not build anything and does not need a git checkout. Every push
+to `main` publishes `ghcr.io/liukscot/world:latest` from GitHub Actions, and
+Watchtower on the server pulls it and restarts the container within five
+minutes.
+
+First-time setup on the server:
+
+```bash
+curl -O https://raw.githubusercontent.com/LiukScot/world/main/docker-compose.prod.yml
+curl -O https://raw.githubusercontent.com/LiukScot/world/main/docker-compose.watchtower.yml
+echo "ALLOWED_ORIGINS=https://your.public.url" > .env
+docker compose -f docker-compose.prod.yml up -d
+docker compose -f docker-compose.watchtower.yml up -d
+```
+
+Watchtower updates **every** container on the host labelled
+`com.centurylinklabs.watchtower.enable=true`, so start it once for the whole
+server — not once per app.
+
+Nothing else is needed after that. Any nightly `git pull && docker compose up
+--build` cron on the server should be removed: it would rebuild from source and
+overwrite the published image.
+
+To roll back, pin the image to a commit SHA in `docker-compose.prod.yml`
+(`ghcr.io/liukscot/world:<sha>`) and run `docker compose -f
+docker-compose.prod.yml up -d`. Watchtower leaves pinned tags alone until you
+point them back at `:latest`.
+---
+
 ## Data & backup
 
 Your data is stored in `data/world.sqlite`. The app runs migrations automatically on startup — no manual steps needed.

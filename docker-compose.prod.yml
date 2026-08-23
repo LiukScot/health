@@ -1,0 +1,31 @@
+# Production stack. Runs the image published by .github/workflows/release.yml
+# instead of building locally, so the server needs only this file and a .env —
+# no git checkout, no build toolchain.
+#
+#   docker compose -f docker-compose.prod.yml up -d
+#
+# Updates are handled by Watchtower (see docker-compose.watchtower.yml).
+services:
+  world:
+    image: ghcr.io/liukscot/world:latest
+    pull_policy: always
+    container_name: world
+    ports:
+      - "5555:5555"
+    mem_limit: 512m
+    cpus: "0.5"
+    user: "1000:1000"
+    environment:
+      HOST: 0.0.0.0
+      PORT: 5555
+      DB_PATH: /app/data/world.sqlite
+      # Required in production: a wrong origin silently breaks login, so fail
+      # at startup instead of at first sign-in.
+      ALLOWED_ORIGINS: ${ALLOWED_ORIGINS:?set ALLOWED_ORIGINS to the public URL}
+      COOKIE_SECURE: ${COOKIE_SECURE:-true}
+    volumes:
+      - ./data:/app/data
+    restart: unless-stopped
+    labels:
+      com.centurylinklabs.watchtower.enable: "true"
+    # Healthcheck comes from the Dockerfile; no need to repeat it here.
