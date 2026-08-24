@@ -84,36 +84,12 @@ For a production-style local run, use Docker directly.
 
 ---
 
-## Deploying to a server
+## Deploying
 
-The server no longer builds anything. Every push to `main` publishes
-`ghcr.io/liukscot/world:latest` from GitHub Actions, and Watchtower on the
-server pulls it and restarts the container on its next poll.
+Push to `main` and the server picks it up: GitHub Actions builds the image,
+publishes it to `ghcr.io/liukscot/world:latest`, and Watchtower on the server
+pulls it. `docker-compose.prod.yml` is what runs there.
 
-First-time setup on the server:
-
-```bash
-curl -O https://raw.githubusercontent.com/LiukScot/world/main/docker-compose.prod.yml
-echo "ALLOWED_ORIGINS=https://your.public.url" > .env
-docker compose -f docker-compose.prod.yml up -d
-```
-
-A checkout is optional: keeping one means this compose file arrives with a
-`git pull` instead of being copied by hand, which is worth it if the server
-already pulls on a schedule.
-
-Watchtower itself is not part of this repo, and neither is the choice of which
-instance watches this container: that is host topology, configured on the
-server. This file only has to tag the image `:latest` for a poller to find it.
-
-Nothing else is needed after that. A nightly `git pull && docker compose up
---build` cron must not rebuild this app: that would overwrite the published
-image with a local build.
-
-To roll back, pin the image to a commit SHA in `docker-compose.prod.yml`
-(`ghcr.io/liukscot/world:<sha>`) and run `docker compose -f
-docker-compose.prod.yml up -d`. Watchtower leaves pinned tags alone until you
-point them back at `:latest`.
 ---
 
 ## Data & backup
