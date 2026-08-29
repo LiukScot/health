@@ -231,6 +231,20 @@ function App() {
         const el = getSidebar();
         if (el) el.style.transition = "none";  // disable CSS transition during drag
       }
+      /*
+       * Committed to the horizontal drag, so the page must stop scrolling
+       * under it: a swipe that both slides the drawer and scrolls the
+       * article behind it is two gestures from one finger. The opposite
+       * lock is the bail-out above — once the finger goes vertical,
+       * `tracking` is cleared and the drawer stays put for the rest of
+       * the gesture.
+       *
+       * cancelable guard: if the browser already started its own scroll
+       * (a slow diagonal that passed the scroll slop before ACTIVATE_DX),
+       * preventDefault is a no-op and warns. Nothing to do there — the
+       * scroll has begun and cannot be taken back.
+       */
+      if (e.cancelable) e.preventDefault();
       const el = getSidebar();
       if (!el) return;
       // Compute the live position. Open gesture starts at -width, close at 0.
@@ -281,11 +295,10 @@ function App() {
       dragging = false;
     };
 
-    // All listeners can be passive: vertical-scroll blocking is handled
-    // declaratively via `body { touch-action: pan-y }` in the mobile media
-    // query, so we never need preventDefault().
+    // touchmove is the one non-passive listener: it calls preventDefault
+    // to hold the page still for the length of a horizontal drag.
     window.addEventListener("touchstart", onTouchStart, { passive: true });
-    window.addEventListener("touchmove", onTouchMove, { passive: true });
+    window.addEventListener("touchmove", onTouchMove, { passive: false });
     window.addEventListener("touchend", onTouchEnd, { passive: true });
     window.addEventListener("touchcancel", onTouchEnd, { passive: true });
     return () => {
@@ -306,7 +319,14 @@ function App() {
   if (!auth.user) {
     return (
       <>
-        <LoginScreen loginForm={auth.loginForm} loginMutation={auth.loginMutation} />
+        <LoginScreen
+          loginForm={auth.loginForm}
+          loginMutation={auth.loginMutation}
+          registerForm={auth.registerForm}
+          registerMutation={auth.registerMutation}
+          realm={realm}
+          onRealmChange={(next) => goToNav(navItemsByRealm[next][0])}
+        />
         {toaster}
       </>
     );

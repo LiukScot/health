@@ -183,3 +183,28 @@ body {
     scroll-behavior: auto !important;
   }
 }
+
+/*
+ * iOS zooms the page in when you focus a form control whose text is under
+ * 16px, and never zooms back out. 16px is the browser's threshold, not a
+ * design choice, so the controls take it on touch devices and keep the
+ * compact sizes everywhere else.
+ *
+ * `pointer: coarse` rather than a width breakpoint: the zoom is a property
+ * of the input method, so a tablet held in landscape is wider than the
+ * mobile breakpoint and still zooms.
+ *
+ * Unlayered, for the same reason as the reduce-motion block above — the
+ * font sizes it overrides are Tailwind utilities (text-control, text-hint),
+ * and unlayered rules outrank every layer.
+ *
+ * The excluded types have no text to read: raising them would only change
+ * the box. Buttons never trigger the zoom, so they are not listed at all.
+ */
+@media (pointer: coarse) {
+  textarea,
+  select,
+  input:not([type="checkbox"], [type="radio"], [type="range"], [type="color"], [type="file"], [type="hidden"]) {
+    font-size: 16px;
+  }
+}

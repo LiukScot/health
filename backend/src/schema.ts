@@ -1,4 +1,4 @@
-export const SCHEMA_VERSION = 16;
+export const SCHEMA_VERSION = 18;
 
 export const METRIC_KINDS = ["scale", "counter", "tags", "text", "measure"] as const;
 export type MetricKind = (typeof METRIC_KINDS)[number];
@@ -41,7 +41,6 @@ export const BUILTIN_METRIC_TYPES: readonly BuiltinMetricType[] = [
   // CBT therapy fields (text)
   { key: "cbt_situation", label: "Situation", kind: "text", unit: null, min: null, max: null, step: null },
   { key: "cbt_thoughts", label: "Thoughts", kind: "text", unit: null, min: null, max: null, step: null },
-  { key: "cbt_helpful_reasoning", label: "Helpful reasoning", kind: "text", unit: null, min: null, max: null, step: null },
   { key: "cbt_main_unhelpful_thought", label: "Main unhelpful thought", kind: "text", unit: null, min: null, max: null, step: null },
   { key: "cbt_effect_of_believing", label: "Effect of believing", kind: "text", unit: null, min: null, max: null, step: null },
   { key: "cbt_evidence_for_against", label: "Evidence for & against", kind: "text", unit: null, min: null, max: null, step: null },
@@ -282,9 +281,9 @@ export const migrationStatements: string[] = [
     user_id INTEGER NOT NULL,
     entry_date TEXT NOT NULL,
     entry_time TEXT NOT NULL,
+    intensity INTEGER,
     situation TEXT NOT NULL DEFAULT '',
     thoughts TEXT NOT NULL DEFAULT '',
-    helpful_reasoning TEXT NOT NULL DEFAULT '',
     main_unhelpful_thought TEXT NOT NULL DEFAULT '',
     effect_of_believing TEXT NOT NULL DEFAULT '',
     evidence_for_against TEXT NOT NULL DEFAULT '',
@@ -302,6 +301,7 @@ export const migrationStatements: string[] = [
     user_id INTEGER NOT NULL,
     entry_date TEXT NOT NULL,
     entry_time TEXT NOT NULL,
+    intensity INTEGER,
     emotion_name TEXT NOT NULL DEFAULT '',
     allow_affirmation TEXT NOT NULL DEFAULT '',
     watch_emotion TEXT NOT NULL DEFAULT '',
@@ -348,7 +348,6 @@ export const migrationStatements: string[] = [
   `CREATE VIRTUAL TABLE IF NOT EXISTS cbt_fts USING fts5(
     situation,
     thoughts,
-    helpful_reasoning,
     main_unhelpful_thought,
     effect_of_believing,
     evidence_for_against,
@@ -361,18 +360,18 @@ export const migrationStatements: string[] = [
     tokenize='unicode61 remove_diacritics 2'
   )`,
   `CREATE TRIGGER IF NOT EXISTS cbt_fts_ai AFTER INSERT ON cbt_entries BEGIN
-    INSERT INTO cbt_fts(rowid, situation, thoughts, helpful_reasoning, main_unhelpful_thought, effect_of_believing, evidence_for_against, alternative_explanation, worst_best_scenario, friend_advice, productive_response)
-    VALUES (new.id, new.situation, new.thoughts, new.helpful_reasoning, new.main_unhelpful_thought, new.effect_of_believing, new.evidence_for_against, new.alternative_explanation, new.worst_best_scenario, new.friend_advice, new.productive_response);
+    INSERT INTO cbt_fts(rowid, situation, thoughts, main_unhelpful_thought, effect_of_believing, evidence_for_against, alternative_explanation, worst_best_scenario, friend_advice, productive_response)
+    VALUES (new.id, new.situation, new.thoughts, new.main_unhelpful_thought, new.effect_of_believing, new.evidence_for_against, new.alternative_explanation, new.worst_best_scenario, new.friend_advice, new.productive_response);
   END`,
   `CREATE TRIGGER IF NOT EXISTS cbt_fts_ad AFTER DELETE ON cbt_entries BEGIN
-    INSERT INTO cbt_fts(cbt_fts, rowid, situation, thoughts, helpful_reasoning, main_unhelpful_thought, effect_of_believing, evidence_for_against, alternative_explanation, worst_best_scenario, friend_advice, productive_response)
-    VALUES ('delete', old.id, old.situation, old.thoughts, old.helpful_reasoning, old.main_unhelpful_thought, old.effect_of_believing, old.evidence_for_against, old.alternative_explanation, old.worst_best_scenario, old.friend_advice, old.productive_response);
+    INSERT INTO cbt_fts(cbt_fts, rowid, situation, thoughts, main_unhelpful_thought, effect_of_believing, evidence_for_against, alternative_explanation, worst_best_scenario, friend_advice, productive_response)
+    VALUES ('delete', old.id, old.situation, old.thoughts, old.main_unhelpful_thought, old.effect_of_believing, old.evidence_for_against, old.alternative_explanation, old.worst_best_scenario, old.friend_advice, old.productive_response);
   END`,
   `CREATE TRIGGER IF NOT EXISTS cbt_fts_au AFTER UPDATE ON cbt_entries BEGIN
-    INSERT INTO cbt_fts(cbt_fts, rowid, situation, thoughts, helpful_reasoning, main_unhelpful_thought, effect_of_believing, evidence_for_against, alternative_explanation, worst_best_scenario, friend_advice, productive_response)
-    VALUES ('delete', old.id, old.situation, old.thoughts, old.helpful_reasoning, old.main_unhelpful_thought, old.effect_of_believing, old.evidence_for_against, old.alternative_explanation, old.worst_best_scenario, old.friend_advice, old.productive_response);
-    INSERT INTO cbt_fts(rowid, situation, thoughts, helpful_reasoning, main_unhelpful_thought, effect_of_believing, evidence_for_against, alternative_explanation, worst_best_scenario, friend_advice, productive_response)
-    VALUES (new.id, new.situation, new.thoughts, new.helpful_reasoning, new.main_unhelpful_thought, new.effect_of_believing, new.evidence_for_against, new.alternative_explanation, new.worst_best_scenario, new.friend_advice, new.productive_response);
+    INSERT INTO cbt_fts(cbt_fts, rowid, situation, thoughts, main_unhelpful_thought, effect_of_believing, evidence_for_against, alternative_explanation, worst_best_scenario, friend_advice, productive_response)
+    VALUES ('delete', old.id, old.situation, old.thoughts, old.main_unhelpful_thought, old.effect_of_believing, old.evidence_for_against, old.alternative_explanation, old.worst_best_scenario, old.friend_advice, old.productive_response);
+    INSERT INTO cbt_fts(rowid, situation, thoughts, main_unhelpful_thought, effect_of_believing, evidence_for_against, alternative_explanation, worst_best_scenario, friend_advice, productive_response)
+    VALUES (new.id, new.situation, new.thoughts, new.main_unhelpful_thought, new.effect_of_believing, new.evidence_for_against, new.alternative_explanation, new.worst_best_scenario, new.friend_advice, new.productive_response);
   END`,
 
   // ── FTS5: dbt_fts ──────────────────────────────────────────────────────

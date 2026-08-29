@@ -6,8 +6,8 @@ import {
 } from "./core";
 import { AnimatedEditingLabel } from "./shared";
 import { EmptyState, PAGE, PAGE_TITLE } from "./screen-helpers";
-import { FLAT_ACTIONS, STAGE, STAGES, STAGE_SPLIT, StageField, StageHead, StageProgress, StageRail } from "./staged";
-import { formatEntrySummaryDate } from "./screen-format";
+import { FLAT_ACTIONS, STAGE, STAGES, STAGE_SPLIT, StageField, StageHead, StageProgress, StageRail, StageScale } from "./staged";
+import { bandNine, formatEntrySummaryDate } from "./screen-format";
 import { Button } from "../components/ui/Button";
 import { DATE_TIME_INPUT } from "../components/ui/DateInput";
 import { FieldLine, FIELD_LINE_INPUT } from "../components/ui/FieldLine";
@@ -59,40 +59,74 @@ export function CbtSection({
   onViewChange: (next: EntryView) => void;
 }) {
   /*
-   * The ten prompts are a path: name what happened, examine the thought,
-   * look for another reading, decide what to do. They used to be cut in
-   * half by ceil(n/2) and poured into two columns, so the order existed
-   * only in this file. The groups below are that order, on screen.
+   * The prompts are the worksheet's own words, not a paraphrase of them:
+   * this is therapy content the reader brought with them, and an edit
+   * that tightens the wording changes the exercise. The four stages are
+   * its four headings, in its order.
    */
   const cbtStages: { title: string; fields: { key: keyof CbtFormValues; label: string; prompt: string; multiline?: boolean }[] }[] = [
     {
-      title: "What happened",
+      title: "Situation",
       fields: [
-        { key: "situation", label: "Situation", prompt: "What's the situation?" },
-        { key: "thoughts", label: "Thoughts", prompt: "What thoughts are running through your mind? How much do you believe each one?", multiline: true },
+        { key: "situation", label: "Situation", prompt: "What's the situation?", multiline: true },
       ],
     },
     {
-      title: "Examine the thought",
+      title: "Thoughts",
       fields: [
-        { key: "helpfulReasoning", label: "Helpful reasoning", prompt: "Any helpful reasoning to counter this thought pattern?", multiline: true },
+        {
+          key: "thoughts",
+          label: "Thoughts",
+          prompt: "What thoughts are running through your mind? How much do you believe each one? Go beyond simple thoughts and get to the underlying reasons. Ask: ok, why would this thought be bad? what would it mean?",
+          multiline: true,
+        },
+      ],
+    },
+    {
+      title: "Question your unhelpful thoughts",
+      fields: [
         { key: "mainUnhelpfulThought", label: "Main unhelpful thought", prompt: "The single thought you want to work on." },
-        { key: "effectOfBelieving", label: "Effect of believing it", prompt: "What would change if you didn't believe it?", multiline: true },
-        { key: "evidenceForAgainst", label: "Evidence for / against", prompt: "What supports or rejects this thought?", multiline: true },
+        {
+          key: "effectOfBelieving",
+          label: "1. Effect of believing it",
+          prompt: "What is the effect of believing this? What would you be able to do if you didn't believe it?",
+          multiline: true,
+        },
+        {
+          key: "evidenceForAgainst",
+          label: "2. Evidence",
+          prompt: "What evidence supports or rejects this thought?",
+          multiline: true,
+        },
+        {
+          key: "alternativeExplanation",
+          label: "3. Alternative explanation",
+          prompt: "Could there be an alternative explanation for the situation?",
+          multiline: true,
+        },
+        {
+          key: "worstBestScenario",
+          label: "4. Worst / best scenario",
+          prompt: "What's the worst that could happen from here? Would you survive it? How about the best scenario?",
+          multiline: true,
+        },
+        {
+          key: "friendAdvice",
+          label: "5. Advice to a friend",
+          prompt: "Imagine your friend was in this situation. What advice would you give them?",
+          multiline: true,
+        },
       ],
     },
     {
-      title: "Another angle",
+      title: "A more productive response",
       fields: [
-        { key: "alternativeExplanation", label: "Alternative explanation", prompt: "Could there be another way to read the situation?", multiline: true },
-        { key: "worstBestScenario", label: "Worst / best scenario", prompt: "What's the worst? Would you survive it? What's the best?", multiline: true },
-        { key: "friendAdvice", label: "Advice to a friend", prompt: "What would you tell a friend in this situation?", multiline: true },
-      ],
-    },
-    {
-      title: "What now",
-      fields: [
-        { key: "productiveResponse", label: "Productive response", prompt: "Take a breath. What are your next steps?", multiline: true },
+        {
+          key: "productiveResponse",
+          label: "Productive response",
+          prompt: "Take a deep breath and try to see the thoughts from an outside perspective. Is there a more productive and rational response to this situation? What are your next steps?",
+          multiline: true,
+        },
       ],
     },
   ];
@@ -106,6 +140,7 @@ export function CbtSection({
    * a value check to mistake for an answer.
    */
   const cbtValues = cbtForm.watch();
+  const intensity = cbtValues.intensity ?? null;
   const steps = cbtStages.map((stageGroup) => ({
     title: stageGroup.title,
     done: stageGroup.fields.every((f) => !!String(cbtValues[f.key] ?? "").trim()),
@@ -153,6 +188,16 @@ export function CbtSection({
                   )}
                 </StageField>
               ))}
+              {index === 0 ? (
+                <StageField label="Intensity" prompt="How strong is this, right now?">
+                  <StageScale
+                    label="Intensity"
+                    value={intensity}
+                    onChange={(next) => cbtForm.setValue("intensity", next, { shouldDirty: true })}
+                    ends={["mild", "moderate", "severe"]}
+                  />
+                </StageField>
+              ) : null}
             </section>
           ))}
 
@@ -192,12 +237,17 @@ export function CbtSection({
           <details key={entry.id} className={ENTRY_ROW}>
             <summary className={ENTRY_SUMMARY}>
               <span className={ENTRY_DATE}>{formatEntrySummaryDate(entry.entryDate, entry.entryTime)}</span>
-              <PainBadge variant="muted" sm>CBT</PainBadge>
+              {entry.intensity != null ? (
+                <PainBadge variant={bandNine(entry.intensity) || "muted"} sm>{entry.intensity}</PainBadge>
+              ) : (
+                <PainBadge variant="muted" sm>CBT</PainBadge>
+              )}
               <span className={ENTRY_PREVIEW}>{entry.situation || entry.mainUnhelpfulThought || entry.productiveResponse || "—"}</span>
               <span />
               <span className={ENTRY_CHEVRON} aria-hidden="true">▶</span>
             </summary>
             <div className={ENTRY_EXPANDED}>
+              <DetailGroup label="Intensity">{entry.intensity != null ? `${entry.intensity} / 9` : "—"}</DetailGroup>
               {cbtFields.map((f) => {
                 const v = entry[f.key as keyof CbtEntry] as unknown as string | null | undefined;
                 return <DetailGroup key={f.key} label={f.label}>{v || "—"}</DetailGroup>;

@@ -9,9 +9,28 @@ function isoDateRefine(val: string): boolean {
   return parsed.getUTCFullYear() === year && parsed.getUTCMonth() + 1 === month && parsed.getUTCDate() === day;
 }
 
+/*
+ * Emails are stored folded — user-cli has always done it on create, and now
+ * registration does too — so the lookup has to fold as well or an account
+ * created as "Me@Example.com" could never be signed into.
+ */
+const emailField = z.string().trim().email().max(254).transform((v) => v.toLowerCase());
+
 export const loginSchema = z.object({
-  email: z.string().email().max(254),
+  email: emailField,
   password: z.string().min(1).max(72)
+});
+
+/*
+ * The 72-byte cap is bcrypt's, kept so a password set here still verifies
+ * against a legacy hash. The 8-char floor matches change-password: a new
+ * account should not be allowed to start weaker than an existing one is
+ * allowed to become.
+ */
+export const registerSchema = z.object({
+  email: emailField,
+  password: z.string().min(8).max(72),
+  name: z.string().trim().max(120).optional().default("")
 });
 
 export const changePasswordSchema = z.object({
@@ -64,9 +83,9 @@ export const painSchema = z.object({
 export const cbtSchema = z.object({
   entryDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
   entryTime: z.string().regex(/^\d{2}:\d{2}$/),
+  intensity: z.number().int().min(1).max(9).nullable().optional(),
   situation: z.string().max(5000).optional().default(""),
   thoughts: z.string().max(5000).optional().default(""),
-  helpfulReasoning: z.string().max(5000).optional().default(""),
   mainUnhelpfulThought: z.string().max(5000).optional().default(""),
   effectOfBelieving: z.string().max(5000).optional().default(""),
   evidenceForAgainst: z.string().max(5000).optional().default(""),
@@ -79,6 +98,7 @@ export const cbtSchema = z.object({
 export const dbtSchema = z.object({
   entryDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
   entryTime: z.string().regex(/^\d{2}:\d{2}$/),
+  intensity: z.number().int().min(1).max(9).nullable().optional(),
   emotionName: z.string().max(200).optional().default(""),
   allowAffirmation: z.string().max(5000).optional().default(""),
   watchEmotion: z.string().max(5000).optional().default(""),

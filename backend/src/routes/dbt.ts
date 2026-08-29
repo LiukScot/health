@@ -44,6 +44,7 @@ dbt.get("/", (c) => {
       id: row.id,
       entryDate: row.entryDate,
       entryTime: row.entryTime,
+      intensity: row.intensity,
       emotionName: row.emotionName ?? "",
       allowAffirmation: row.allowAffirmation ?? "",
       watchEmotion: row.watchEmotion ?? "",
@@ -67,6 +68,7 @@ dbt.post("/", async (c) => {
       userId,
       entryDate: body.entryDate,
       entryTime: body.entryTime,
+      intensity: body.intensity ?? null,
       emotionName: body.emotionName ?? "",
       allowAffirmation: body.allowAffirmation ?? "",
       watchEmotion: body.watchEmotion ?? "",
@@ -92,6 +94,7 @@ dbt.put("/:id", async (c) => {
     .set({
       entryDate: body.entryDate,
       entryTime: body.entryTime,
+      intensity: body.intensity ?? null,
       emotionName: body.emotionName ?? "",
       allowAffirmation: body.allowAffirmation ?? "",
       watchEmotion: body.watchEmotion ?? "",

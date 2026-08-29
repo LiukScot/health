@@ -23,6 +23,15 @@ export const loginSchema = z.object({
   password: z.string().min(1),
 });
 
+// Mirrors backend/src/schemas.ts registerSchema field for field, including
+// the 72-byte bcrypt ceiling and the email fold. A looser copy here does not
+// let anything through — it just turns a message the form could have shown
+// into a generic 400 from the server.
+export const registerSchema = z.object({
+  email: z.string().trim().email().max(254).transform((v) => v.toLowerCase()),
+  password: z.string().min(8, "At least 8 characters").max(72, "At most 72 characters"),
+});
+
 export const changePasswordSchema = z
   .object({
     currentPassword: z.string().min(1),
@@ -90,13 +99,28 @@ export const memorableDaySchema = z.object({
 
 export const memorableDayListSchema = apiEnvelopeSchema(z.array(memorableDaySchema));
 
+/*
+ * Every field built on this is a whole-number scale — the nine-step metrics
+ * and the coffee count — and the backend says .int() for them, so this does
+ * too rather than leaving a half-step to be rejected server-side.
+ */
+const nullableNumberField = (min: number, max: number) =>
+  z.preprocess(
+    (value) => {
+      if (value === "" || value === null || value === undefined) return null;
+      if (typeof value === "number" && Number.isNaN(value)) return null;
+      return value;
+    },
+    z.number().int().min(min).max(max).nullable(),
+  );
+
 export const cbtEntrySchema = z.object({
   id: z.number(),
   entryDate: z.string(),
   entryTime: z.string(),
+  intensity: z.number().nullable(),
   situation: z.string(),
   thoughts: z.string(),
-  helpfulReasoning: z.string(),
   mainUnhelpfulThought: z.string(),
   effectOfBelieving: z.string(),
   evidenceForAgainst: z.string(),
@@ -112,6 +136,7 @@ export const dbtEntrySchema = z.object({
   id: z.number(),
   entryDate: z.string(),
   entryTime: z.string(),
+  intensity: z.number().nullable(),
   emotionName: z.string(),
   allowAffirmation: z.string(),
   watchEmotion: z.string(),
@@ -125,9 +150,9 @@ export const dbtEntrySchema = z.object({
 
 export const cbtFormSchema = z.object({
   dateTime: z.string().min(1),
+  intensity: nullableNumberField(1, 9),
   situation: z.string().default(""),
   thoughts: z.string().default(""),
-  helpfulReasoning: z.string().default(""),
   mainUnhelpfulThought: z.string().default(""),
   effectOfBelieving: z.string().default(""),
   evidenceForAgainst: z.string().default(""),
@@ -139,6 +164,7 @@ export const cbtFormSchema = z.object({
 
 export const dbtFormSchema = z.object({
   dateTime: z.string().min(1),
+  intensity: nullableNumberField(1, 9),
   emotionName: z.string().default(""),
   allowAffirmation: z.string().default(""),
   watchEmotion: z.string().default(""),
@@ -171,16 +197,6 @@ export const moodOptionsSchema = apiEnvelopeSchema(
     general_moods: z.array(z.string()),
   }),
 );
-
-const nullableNumberField = (min: number, max: number) =>
-  z.preprocess(
-    (value) => {
-      if (value === "" || value === null || value === undefined) return null;
-      if (typeof value === "number" && Number.isNaN(value)) return null;
-      return value;
-    },
-    z.number().min(min).max(max).nullable(),
-  );
 
 export const diaryFormSchema = z.object({
   dateTime: z.string().min(1),
