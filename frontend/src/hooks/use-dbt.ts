@@ -9,6 +9,7 @@ import type { DbtEntry, DbtFormValues } from "../app/core";
 
 const defaultValues: DbtFormValues = {
   dateTime: "",
+  intensity: null,
   emotionName: "",
   allowAffirmation: "",
   watchEmotion: "",
@@ -46,6 +47,7 @@ export function useDbt(enabled: boolean) {
       const payload = {
         entryDate: parts.entryDate,
         entryTime: parts.entryTime,
+        intensity: parsed.intensity,
         emotionName: parsed.emotionName,
         allowAffirmation: parsed.allowAffirmation,
         watchEmotion: parsed.watchEmotion,
@@ -95,6 +97,7 @@ export function useDbt(enabled: boolean) {
     setEditingDbt(entry);
     dbtForm.reset({
       dateTime: toLocalDateTimeValue(entry.entryDate, entry.entryTime),
+      intensity: entry.intensity,
       emotionName: entry.emotionName,
       allowAffirmation: entry.allowAffirmation,
       watchEmotion: entry.watchEmotion,

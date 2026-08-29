@@ -3,7 +3,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { apiEnvelopeSchema, apiFetch } from "../lib";
-import { loginSchema, changePasswordSchema, sessionDataSchema, useAuthStore } from "../app/core";
+import { loginSchema, registerSchema, changePasswordSchema, sessionDataSchema, useAuthStore } from "../app/core";
 import type { InlineMessage } from "../app/core";
 import { useState, useCallback, useEffect } from "react";
 
@@ -50,6 +50,28 @@ export function useAuth() {
     },
   });
 
+  const registerForm = useForm<z.infer<typeof registerSchema>>({ resolver: zodResolver(registerSchema) });
+
+  const registerMutation = useMutation({
+    mutationFn: async (values: z.infer<typeof registerSchema>) =>
+      apiFetch(
+        "/api/v1/auth/register",
+        { method: "POST", body: JSON.stringify(values) },
+        (raw) => apiEnvelopeSchema(z.object({ email: z.string(), name: z.string().nullable() })).parse(raw).data,
+      ),
+    // Registering signs you in, so the session lands the same way login does.
+    onSuccess: async () => {
+      const session = await queryClient.fetchQuery({
+        queryKey: ["session"],
+        queryFn: async () => apiFetch("/api/v1/auth/session", { method: "GET" }, (raw) => sessionDataSchema.parse(raw).data),
+      });
+      if (session.authenticated && session.user) {
+        setUser(session.user);
+      }
+      registerForm.reset();
+    },
+  });
+
   const logoutMutation = useMutation({
     mutationFn: async () =>
       apiFetch("/api/v1/auth/logout", { method: "POST" }, (raw) =>
@@ -90,6 +112,8 @@ export function useAuth() {
     user,
     loginForm,
     loginMutation,
+    registerForm,
+    registerMutation,
     logoutMutation,
     changePasswordForm,
     changePasswordMutation,

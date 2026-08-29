@@ -167,30 +167,98 @@ describe("GET /auth/session", () => {
 });
 
 describe("POST /auth/register", () => {
-  test("always returns 403 SIGNUP_DISABLED regardless of payload", async () => {
-    const ctx = createTestDb();
-    const app = createTestApp(ctx, "/auth", authRoute);
-
-    const res = await app.request("/auth/register", {
+  const post = (app: ReturnType<typeof createTestApp>, body: unknown) =>
+    app.request("/auth/register", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email: "new@example.com", password: "Password123!" }),
+      body: JSON.stringify(body),
     });
 
-    expect(res.status).toBe(403);
-    const body = await res.json();
-    expect(body.error.code).toBe("SIGNUP_DISABLED");
-  });
-
-  test("returns 403 even with no body", async () => {
+  test("creates the account and signs it in", async () => {
     const ctx = createTestDb();
     const app = createTestApp(ctx, "/auth", authRoute);
 
-    const res = await app.request("/auth/register", { method: "POST" });
+    const res = await post(app, { email: "new@example.com", password: "Password123!", name: "New" });
 
-    expect(res.status).toBe(403);
+    expect(res.status).toBe(201);
     const body = await res.json();
-    expect(body.error.code).toBe("SIGNUP_DISABLED");
+    expect(body.data).toEqual({ email: "new@example.com", name: "New" });
+    // The response carries a session, so the caller is logged in without
+    // posting the same credentials to /login straight after.
+    const cookie = extractSessionCookie(res.headers.get("set-cookie"));
+    const session = await (await app.request("/auth/session", { headers: { cookie } })).json();
+    expect(session.data.authenticated).toBe(true);
+    expect(session.data.user.email).toBe("new@example.com");
+  });
+
+  test("folds the email so it can be signed into as typed", async () => {
+    const ctx = createTestDb();
+    const app = createTestApp(ctx, "/auth", authRoute);
+
+    await post(app, { email: "  Mixed@Example.COM ", password: "Password123!" });
+
+    const login = await app.request("/auth/login", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email: "MIXED@example.com", password: "Password123!" }),
+    });
+    expect(login.status).toBe(200);
+  });
+
+  test("rejects an email that already has an account with 409", async () => {
+    const ctx = createTestDb();
+    const app = createTestApp(ctx, "/auth", authRoute);
+    await post(app, { email: "taken@example.com", password: "Password123!" });
+
+    const res = await post(app, { email: "Taken@example.com", password: "Different123!" });
+
+    expect(res.status).toBe(409);
+    expect((await res.json()).error.code).toBe("EMAIL_TAKEN");
+  });
+
+  test.each([
+    ["a password under 8 characters", { email: "short@example.com", password: "Pass1" }],
+    ["a malformed email", { email: "not-an-email", password: "Password123!" }],
+    ["no body at all", undefined],
+  ])("rejects %s with 400", async (_label, body) => {
+    const ctx = createTestDb();
+    const app = createTestApp(ctx, "/auth", authRoute);
+
+    const res = body
+      ? await post(app, body)
+      : await app.request("/auth/register", { method: "POST" });
+
+    expect(res.status).toBe(400);
+  });
+
+  /*
+   * The hash is awaited between the "is this taken?" check and the insert,
+   * so two requests for one address both pass the check and race to the
+   * UNIQUE index. Whichever loses must answer the same 409 the check gives,
+   * not a 500 about a constraint the caller cannot see.
+   */
+  test("answers 409, not 500, when two registrations race for one address", async () => {
+    const ctx = createTestDb();
+    const app = createTestApp(ctx, "/auth", authRoute);
+    const body = { email: "race@example.com", password: "Password123!" };
+
+    const statuses = (await Promise.all([post(app, body), post(app, body)]))
+      .map((res) => res.status)
+      .sort();
+
+    expect(statuses).toEqual([201, 409]);
+    const rows = ctx.db.select({ id: users.id }).from(users).where(eq(users.email, "race@example.com")).all();
+    expect(rows.length).toBe(1);
+  });
+
+  test("does not let a registration claim a name field it was not given", async () => {
+    const ctx = createTestDb();
+    const app = createTestApp(ctx, "/auth", authRoute);
+
+    const res = await post(app, { email: "noname@example.com", password: "Password123!" });
+
+    expect(res.status).toBe(201);
+    expect((await res.json()).data.name).toBeNull();
   });
 });
 

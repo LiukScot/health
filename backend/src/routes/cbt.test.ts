@@ -16,7 +16,6 @@ const validBody = {
   entryTime: "11:00",
   situation: "Got stuck",
   thoughts: "I cannot do this",
-  helpfulReasoning: "I can break it down",
   mainUnhelpfulThought: "I am useless",
   effectOfBelieving: "Paralysed",
   evidenceForAgainst: "Done it before",
@@ -24,6 +23,7 @@ const validBody = {
   worstBestScenario: "Worst: fail. Best: learn",
   friendAdvice: "Be kind to yourself",
   productiveResponse: "Take a break, retry",
+  intensity: 7,
 };
 
 describe("cbt route auth", () => {
@@ -192,6 +192,41 @@ describe("DELETE /cbt/:id", () => {
   test("returns 400 for non-numeric id (PR #82 regression)", async () => {
     const { app, cookie } = await setup();
     const res = await app.request("/cbt/abc", { method: "DELETE", headers: { cookie } });
+    expect(res.status).toBe(400);
+  });
+});
+
+describe("cbt intensity", () => {
+  test("round-trips the 1-9 value", async () => {
+    const { app, cookie } = await setup();
+    await app.request("/cbt", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", cookie },
+      body: JSON.stringify(validBody),
+    });
+    const list = await (await app.request("/cbt", { headers: { cookie } })).json();
+    expect(list.data[0].intensity).toBe(7);
+  });
+
+  test("defaults to null when omitted", async () => {
+    const { app, cookie } = await setup();
+    const { intensity, ...withoutIntensity } = validBody;
+    await app.request("/cbt", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", cookie },
+      body: JSON.stringify(withoutIntensity),
+    });
+    const list = await (await app.request("/cbt", { headers: { cookie } })).json();
+    expect(list.data[0].intensity).toBeNull();
+  });
+
+  test.each([0, 10, 4.5])("rejects out-of-range intensity %p with 400", async (intensity) => {
+    const { app, cookie } = await setup();
+    const res = await app.request("/cbt", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", cookie },
+      body: JSON.stringify({ ...validBody, intensity }),
+    });
     expect(res.status).toBe(400);
   });
 });

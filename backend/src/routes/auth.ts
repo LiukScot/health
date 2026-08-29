@@ -4,7 +4,7 @@ import type { DrizzleDB } from "../db/index.ts";
 import { users } from "../db/index.ts";
 import type { SQLiteDB } from "../db.ts";
 import { parseJson, buildSessionCookie, clearSessionCookie } from "../helpers.ts";
-import { loginSchema, changePasswordSchema } from "../schemas.ts";
+import { loginSchema, registerSchema, changePasswordSchema } from "../schemas.ts";
 import { getSession, createSession, deleteSession, requireAuth } from "../middleware/auth.ts";
 
 async function verifyPassword(password: string, storedHash: string): Promise<{ ok: boolean; rehash?: string }> {
@@ -18,12 +18,62 @@ async function verifyPassword(password: string, storedHash: string): Promise<{ o
   return { ok };
 }
 
+function isUniqueEmailViolation(error: unknown): boolean {
+  return error instanceof Error && /UNIQUE constraint failed:\s*users\.email/i.test(error.message);
+}
+
 type Env = { Variables: { db: DrizzleDB; rawDb: SQLiteDB; userId: number; userEmail: string; sessionSid: string } };
 
 const auth = new Hono<Env>();
 
-auth.post("/register", (c) => {
-  return c.json({ error: { code: "SIGNUP_DISABLED", message: "Signup is disabled" } }, 403);
+/*
+ * Open registration: this instance is not reachable from the internet, so
+ * anyone who can hit this endpoint is already on the network. Move it onto a
+ * public address and this becomes an open door — gate it before you do.
+ *
+ * Signing in is part of registering. Making the caller post the same
+ * credentials twice buys nothing: the account was just created here, so the
+ * verification step would only be checking a password against a hash written
+ * one line earlier.
+ */
+auth.post("/register", async (c) => {
+  const db = c.get("db");
+  const body = await parseJson(c, registerSchema);
+
+  // One answer, reached two ways — the lookup below and the constraint that
+  // catches what the lookup misses have to agree, so they read from here.
+  const emailTaken = () =>
+    c.json({ error: { code: "EMAIL_TAKEN", message: "That email already has an account" } }, 409);
+
+  const existing = db.select({ id: users.id }).from(users).where(eq(users.email, body.email)).limit(1).get();
+  if (existing) {
+    return emailTaken();
+  }
+
+  const passwordHash = await Bun.password.hash(body.password, { algorithm: "argon2id" });
+  let created;
+  try {
+    created = db
+      .insert(users)
+      .values({ email: body.email, passwordHash, name: body.name || null })
+      .returning({ id: users.id, email: users.email, name: users.name })
+      .get();
+  } catch (error) {
+    /*
+     * Hashing is awaited above, so two requests for one address can both
+     * clear the lookup and race to the UNIQUE index. The loser gets the
+     * answer the lookup would have given, not a 500 about a constraint the
+     * caller cannot see. Anything else is not ours to swallow.
+     */
+    if (isUniqueEmailViolation(error)) {
+      return emailTaken();
+    }
+    throw error;
+  }
+
+  const sid = createSession(db, created.id, created.email);
+  c.header("set-cookie", buildSessionCookie(sid));
+  return c.json({ data: { email: created.email, name: created.name ?? null } }, 201);
 });
 
 auth.post("/login", async (c) => {

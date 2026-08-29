@@ -21,6 +21,7 @@ const validBody = {
   bodyFeeling: "tightness",
   presentMoment: "I am safe now",
   emotionReturns: "noticed it pass",
+  intensity: 4,
 };
 
 describe("dbt route auth", () => {
@@ -171,6 +172,41 @@ describe("DELETE /dbt/:id", () => {
   test("returns 400 for non-numeric id (PR #82 regression)", async () => {
     const { app, cookie } = await setup();
     const res = await app.request("/dbt/abc", { method: "DELETE", headers: { cookie } });
+    expect(res.status).toBe(400);
+  });
+});
+
+describe("dbt intensity", () => {
+  test("round-trips the 1-9 value", async () => {
+    const { app, cookie } = await setup();
+    await app.request("/dbt", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", cookie },
+      body: JSON.stringify(validBody),
+    });
+    const list = await (await app.request("/dbt", { headers: { cookie } })).json();
+    expect(list.data[0].intensity).toBe(4);
+  });
+
+  test("defaults to null when omitted", async () => {
+    const { app, cookie } = await setup();
+    const { intensity, ...withoutIntensity } = validBody;
+    await app.request("/dbt", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", cookie },
+      body: JSON.stringify(withoutIntensity),
+    });
+    const list = await (await app.request("/dbt", { headers: { cookie } })).json();
+    expect(list.data[0].intensity).toBeNull();
+  });
+
+  test.each([0, 10, 4.5])("rejects out-of-range intensity %p with 400", async (intensity) => {
+    const { app, cookie } = await setup();
+    const res = await app.request("/dbt", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", cookie },
+      body: JSON.stringify({ ...validBody, intensity }),
+    });
     expect(res.status).toBe(400);
   });
 });

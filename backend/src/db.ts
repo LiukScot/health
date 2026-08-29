@@ -27,6 +27,8 @@ const ALLOWED_TABLE_NAMES = new Set([
   "pain_options",
   "monthly_movements",
   "memorable_days",
+  "cbt_entries",
+  "dbt_entries",
 ]);
 
 function columnExists(db: SQLiteDB, tableName: string, columnName: string): boolean {
@@ -85,6 +87,40 @@ function ensureMovementColumns(db: SQLiteDB): void {
   }
 }
 
+// Nullable on purpose: an entry written before the scale existed has no
+// intensity, and 0 or 1 would both claim it does.
+function ensureTherapyIntensityColumns(db: SQLiteDB): void {
+  for (const table of ["cbt_entries", "dbt_entries"] as const) {
+    if (!columnExists(db, table, "intensity")) {
+      db.exec(`ALTER TABLE ${table} ADD COLUMN intensity INTEGER`);
+    }
+  }
+}
+
+/*
+ * The "helpful reasoning" prompt was dropped from the CBT worksheet, so its
+ * column goes with it. Runs *before* the create statements: the FTS index
+ * covers that column, and `CREATE ... IF NOT EXISTS` will not reshape an
+ * index that already exists. Dropping it here lets the create statements
+ * rebuild it without the column, and backfillFtsTables refills it.
+ */
+function dropCbtHelpfulReasoning(db: SQLiteDB): void {
+  if (!columnExists(db, "cbt_entries", "helpful_reasoning")) {
+    return;
+  }
+  for (const trigger of ["cbt_fts_ai", "cbt_fts_ad", "cbt_fts_au"]) {
+    db.exec(`DROP TRIGGER IF EXISTS ${trigger}`);
+  }
+  db.exec(`DROP TABLE IF EXISTS cbt_fts`);
+  db.exec(`ALTER TABLE cbt_entries DROP COLUMN helpful_reasoning`);
+  // metric_types enumerates the fields a custom page can pull in, so a row
+  // pointing at a dropped column would offer a field that cannot be read.
+  // The table postdates cbt_entries, so an old enough database lacks it.
+  if (tableExists(db, "metric_types")) {
+    db.exec(`DELETE FROM metric_types WHERE key = 'cbt_helpful_reasoning'`);
+  }
+}
+
 function backfillPainColumnsFromLegacyTags(db: SQLiteDB): void {
   if (!tableExists(db, "pain_entry_tags")) {
     return;
@@ -120,45 +156,28 @@ function dropLegacyPainTables(db: SQLiteDB): void {
   db.exec("DROP TABLE IF EXISTS pain_tag_catalog");
 }
 
-// Backfills FTS5 virtual tables with rows from their source tables.
-// Idempotent: only runs if the FTS table is empty (i.e. just created by the migration).
-// On a populated DB this is a no-op because the triggers keep FTS in sync going forward.
+/*
+ * Repopulates the FTS5 indexes from their source tables.
+ *
+ * These are external-content indexes, so `SELECT count(*) FROM cbt_fts`
+ * reads through to cbt_entries and answers with the number of *entries* —
+ * never the number of indexed rows. The old guard asked exactly that
+ * question and so skipped the backfill on precisely the databases that
+ * needed one: any with rows already in them.
+ *
+ * FTS5's own 'rebuild' is the operation this was hand-rolling. It reads the
+ * content table the index is declared against, so it cannot drift from the
+ * schema the way a written-out column list can — which is what made the
+ * dropped helpful_reasoning column a problem here in the first place.
+ *
+ * ponytail: unconditional, so it re-indexes on every migration run rather
+ * than detecting staleness. Reading the index's own row count means querying
+ * cbt_fts_docsize, an FTS5 internal. At this size the rebuild is
+ * milliseconds; revisit if these tables ever get large.
+ */
 function backfillFtsTables(db: SQLiteDB): void {
-  type CountRow = { c: number };
-
-  const isEmpty = (ftsTable: string): boolean => {
-    const row = db.query(`SELECT count(*) AS c FROM ${ftsTable}`).get() as CountRow | null;
-    return (row?.c ?? 0) === 0;
-  };
-
-  if (isEmpty("diary_fts")) {
-    db.exec(
-      `INSERT INTO diary_fts(rowid, description, reflection)
-       SELECT id, COALESCE(description, ''), COALESCE(reflection, '') FROM diary_entries`
-    );
-  }
-
-  if (isEmpty("cbt_fts")) {
-    db.exec(
-      `INSERT INTO cbt_fts(rowid, situation, thoughts, helpful_reasoning, main_unhelpful_thought, effect_of_believing, evidence_for_against, alternative_explanation, worst_best_scenario, friend_advice, productive_response)
-       SELECT id, situation, thoughts, helpful_reasoning, main_unhelpful_thought, effect_of_believing, evidence_for_against, alternative_explanation, worst_best_scenario, friend_advice, productive_response
-       FROM cbt_entries`
-    );
-  }
-
-  if (isEmpty("dbt_fts")) {
-    db.exec(
-      `INSERT INTO dbt_fts(rowid, emotion_name, allow_affirmation, watch_emotion, body_location, body_feeling, present_moment, emotion_returns)
-       SELECT id, emotion_name, allow_affirmation, watch_emotion, body_location, body_feeling, present_moment, emotion_returns
-       FROM dbt_entries`
-    );
-  }
-
-  if (isEmpty("pain_fts")) {
-    db.exec(
-      `INSERT INTO pain_fts(rowid, note, symptoms)
-       SELECT id, COALESCE(note, ''), COALESCE(symptoms, '') FROM pain_entries`
-    );
+  for (const ftsTable of ["diary_fts", "cbt_fts", "dbt_fts", "pain_fts"]) {
+    db.exec(`INSERT INTO ${ftsTable}(${ftsTable}) VALUES('rebuild')`);
   }
 }
 
@@ -175,6 +194,8 @@ export function openDb(dbPath: string, journalMode = "WAL"): SQLiteDB {
 
 export function runMigrations(db: SQLiteDB): void {
   const tx = db.transaction(() => {
+    dropCbtHelpfulReasoning(db);
+
     for (const stmt of migrationStatements) {
       db.exec(stmt);
     }
@@ -184,6 +205,7 @@ export function runMigrations(db: SQLiteDB): void {
     ensureUserPreferenceColumns(db);
     ensurePainOptionColumns(db);
     ensureMovementColumns(db);
+    ensureTherapyIntensityColumns(db);
     backfillPainColumnsFromLegacyTags(db);
     dropLegacyPainTables(db);
     dropRemovedColumns(db);

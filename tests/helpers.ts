@@ -15,10 +15,23 @@ export async function loginUi(page: Page, password = e2eUser.password) {
   await page.getByLabel("Email").fill(e2eUser.email);
   await page.getByLabel("Password").fill(password);
   await page.getByRole("button", { name: "Sign in" }).click();
-  // The realm switcher only exists once signed in, and unlike a named heading
-  // it does not assume which realm the app restores — that is remembered in
-  // localStorage and survives a logout, the same way the theme does.
-  await expect(page.getByRole("group", { name: "Switch app" })).toBeVisible();
+  /*
+   * Wait for the signed-in title, which only the shell sets: logged out it
+   * is "Sign in - World" and before React mounts it is "World", so a realm
+   * name after the dash cannot appear until the session exists.
+   *
+   * Two nearer-looking signals are both wrong. The realm switcher is on the
+   * login screen too now, so it does not separate the two states. And the
+   * absence of the "Sign in" button is satisfied the instant it is clicked:
+   * the button relabels itself to "Signing in...", which does not contain
+   * the substring "Sign in", so the count drops to zero while the request
+   * is still in flight and every later step races the session.
+   *
+   * A heading would not work either: which realm the app restores is
+   * remembered in localStorage and survives a logout, the same way the
+   * theme does — hence the alternation rather than one name.
+   */
+  await expect(page).toHaveTitle(/ - (Health|Money|Settings)$/);
 }
 
 export async function loginApi(request: APIRequestContext, password = e2eUser.password) {

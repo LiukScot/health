@@ -92,6 +92,44 @@ type SidebarProps = {
   mobileOpen: boolean;
 };
 
+/*
+ * The realm tiles. Lives here because the icons do, and is shared with the
+ * login screen: picking a realm before signing in is the same choice as
+ * switching once you are in, and the accent + stored realm follow either
+ * way — so after login you land where you pointed.
+ */
+export function RealmSwitcher({
+  realm,
+  onChange,
+  className = "",
+  options = realms,
+}: {
+  realm: Realm;
+  onChange: (next: Realm) => void;
+  className?: string;
+  /** Narrows the tiles. The login screen drops Settings: it is somewhere you
+      go to change something, not somewhere to open the app into. */
+  options?: readonly Realm[];
+}) {
+  return (
+    <div className={`flex gap-2 ${className}`} role="group" aria-label="Switch app">
+      {options.map((id) => (
+        <button
+          key={id}
+          type="button"
+          className={`${REALM_TILE} ${id === realm ? REALM_TILE_ACTIVE : REALM_TILE_IDLE}`}
+          onClick={() => onChange(id)}
+          aria-pressed={id === realm}
+          aria-label={realmLabels[id]}
+          title={realmLabels[id]}
+        >
+          {realmIcons[id]}
+        </button>
+      ))}
+    </div>
+  );
+}
+
 export function Sidebar({ nav, onNav, realm, onRealmChange, collapsed, onToggle, onCloseMobile, mobileOpen }: SidebarProps) {
   const items = navItemsByRealm[realm];
 
@@ -131,25 +169,11 @@ export function Sidebar({ nav, onNav, realm, onRealmChange, collapsed, onToggle,
         ))}
       </nav>
 
-      <div
-        className={`flex-shrink-0 flex gap-2 pt-5 mt-2 border-t border-border ${collapsed ? "mobile:flex-col mobile:items-center" : ""}`}
-        role="group"
-        aria-label="Switch app"
-      >
-        {realms.map((id) => (
-          <button
-            key={id}
-            type="button"
-            className={`${REALM_TILE} ${id === realm ? REALM_TILE_ACTIVE : REALM_TILE_IDLE}`}
-            onClick={() => onRealmChange(id)}
-            aria-pressed={id === realm}
-            aria-label={realmLabels[id]}
-            title={realmLabels[id]}
-          >
-            {realmIcons[id]}
-          </button>
-        ))}
-      </div>
+      <RealmSwitcher
+        realm={realm}
+        onChange={onRealmChange}
+        className={`flex-shrink-0 pt-5 mt-2 border-t border-border ${collapsed ? "mobile:flex-col mobile:items-center" : ""}`}
+      />
     </aside>
   );
 }

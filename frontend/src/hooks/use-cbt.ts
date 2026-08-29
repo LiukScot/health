@@ -9,9 +9,9 @@ import type { CbtEntry, CbtFormValues } from "../app/core";
 
 const defaultValues: CbtFormValues = {
   dateTime: "",
+  intensity: null,
   situation: "",
   thoughts: "",
-  helpfulReasoning: "",
   mainUnhelpfulThought: "",
   effectOfBelieving: "",
   evidenceForAgainst: "",
@@ -49,9 +49,9 @@ export function useCbt(enabled: boolean) {
       const payload = {
         entryDate: parts.entryDate,
         entryTime: parts.entryTime,
+        intensity: parsed.intensity,
         situation: parsed.situation,
         thoughts: parsed.thoughts,
-        helpfulReasoning: parsed.helpfulReasoning,
         mainUnhelpfulThought: parsed.mainUnhelpfulThought,
         effectOfBelieving: parsed.effectOfBelieving,
         evidenceForAgainst: parsed.evidenceForAgainst,
@@ -101,9 +101,9 @@ export function useCbt(enabled: boolean) {
     setEditingCbt(entry);
     cbtForm.reset({
       dateTime: toLocalDateTimeValue(entry.entryDate, entry.entryTime),
+      intensity: entry.intensity,
       situation: entry.situation,
       thoughts: entry.thoughts,
-      helpfulReasoning: entry.helpfulReasoning,
       mainUnhelpfulThought: entry.mainUnhelpfulThought,
       effectOfBelieving: entry.effectOfBelieving,
       evidenceForAgainst: entry.evidenceForAgainst,
